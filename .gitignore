@@ -1,4 +1,6 @@
+# our stuff
 .svn
+student-distrib/bootimg
 
 # Object files
 *.o
