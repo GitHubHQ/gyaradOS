@@ -1,6 +1,6 @@
 /* keyboard.c - Functions to interact with the keyboard
  */
-
+#include "keyboard.h"
 #include "lib.h"
 
 /**
@@ -9,4 +9,3 @@
  */
 unsigned char kbrd_read_scan_code(void) {
 	return inb(KEYBOARD_D_PORT);
-}
