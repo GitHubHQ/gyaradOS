@@ -1,5 +1,4 @@
-#include "x86_desc.h"
-#include "lib.h"
+#include "idt.h"
 
 // 0 - Division by zero exception
 void divide_by_zero_except() {
@@ -126,13 +125,42 @@ void machine_chk_except() {
     printf("EXCEPTION: Machine check!\n");
 }
 
+// generic interrupt
+void generic_interrupt() {
+    cli();
+    printf("Generic interrupt recieved!\n");
+    sti();
+}
+
 void init_idt() {
     lidt(idt_desc_ptr);
 
     int i = 0;
     /// initialize the first 32 vectors as exceptions
-    for(i = 0; i < 32; i++) {
-        // TODO initialize idt properties here
+    for(i = 0; i < NUM_EXCEPTIONS; i++) {
+        // initialize idt properties here
+
+        // present in memory
+        idt[i].present = 1;
+
+        // set device priveledge level to be lower
+        idt[i].dpl = 0;
+
+        // select the proper segment
+        idt[i].seg_selector = KERNEL_CS;
+
+        // exception
+        idt[i].size = 1;
+
+        // set up reserved as exception
+        idt[i].reserved4 = 0;
+        idt[i].reserved3 = 1;
+        idt[i].reserved2 = 1;
+        idt[i].reserved1 = 1;
+        idt[i].reserved0 = 0;
+
+        // idt[i].offset_15_00;
+        // idt[i].offset_31_16;
 
         // assign the proper idt entry with exception
         switch(i) {
@@ -195,14 +223,38 @@ void init_idt() {
                 break;
             // 19-31 - Reserved
             default:
+                // what to do?
                 break;
 
         }
     }
 
     // initialize the rest of the vectors as interrupts
-    for(i = 32; i < NUM_VEC; i++) {
-        // TODO initialize idt properties here
+    for(i = NUM_EXCEPTIONS; i < NUM_VEC; i++) {
+        // initialize idt properties here
 
+        // present in memory
+        idt[i].present = 1;
+
+        // set device priveledge level to be lower
+        idt[i].dpl = 0;
+
+        // select the proper segment
+        idt[i].seg_selector = KERNEL_CS;
+
+        // exception
+        idt[i].size = 1;
+
+        // set up reserved as exception
+        idt[i].reserved4 = 0;
+        idt[i].reserved3 = 0;
+        idt[i].reserved2 = 1;
+        idt[i].reserved1 = 1;
+        idt[i].reserved0 = 0;
+
+        // idt[i].offset_15_00;
+        // idt[i].offset_31_16;
+
+        SET_IDT_ENTRY(idt[i], generic_interrupt);
     }
 }
