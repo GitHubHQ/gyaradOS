@@ -14,6 +14,26 @@
 #define MASTER_8259_PORT_2	0x21
 #define SLAVE_8259_PORT_2	0xA1
 
+/* IRQ numbers master */
+#define IRQ_SYSTEM_TIMER  0
+#define IRQ_KEYBOARD_CTRL 1
+#define IRQ_CAS_SIG		  2
+#define IRQ_SERIAL_PRT_2  3
+#define IRQ_SERIAL_PRT_1  4
+#define IRQ_PARLL_PRT_SND 5
+#define IRQ_FLOPPY_DISK   6
+#define IRQ_PARLL_PRT_1   7
+
+/* IRQ numbers slave */
+#define IRQ_RTC 		  8
+#define IRQ_ADV_CFG_PWR   9
+#define IRQ_OPEN_PERPH    10
+#define IRQ_OPEN_PERPH_2  11
+#define IRQ_MOUSE_PS2     12
+#define IRQ_CPU_COPROC    13
+#define IRQ_PRIM_ATA_CHN  14
+#define IRQ_SCND_ATA_CHN  15
+
 /* Initialization control words to init each PIC.
  * See the Intel manuals for details on the meaning
  * of each word */
