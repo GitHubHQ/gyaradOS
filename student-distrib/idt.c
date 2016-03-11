@@ -125,6 +125,14 @@ void machine_chk_except() {
     printf("EXCEPTION: Machine check!\n");
 }
 
+// keyboard interrupt
+void keyboard_interrupt() {
+    cli();
+    printf("%c", kbrd_read_scan_code());
+    send_eoi(1);
+    sti();
+}
+
 // generic interrupt
 void generic_interrupt() {
     cli();
@@ -221,9 +229,8 @@ void init_idt() {
             case 18:
                 SET_IDT_ENTRY(idt[i], machine_chk_except);
                 break;
-            // 19-31 - Reserved
             default:
-                // what to do?
+                // reserved, don't set the entry
                 break;
 
         }
@@ -255,6 +262,10 @@ void init_idt() {
         // idt[i].offset_15_00;
         // idt[i].offset_31_16;
 
-        SET_IDT_ENTRY(idt[i], generic_interrupt);
+        if(i == KEYBOARD_IDT) {
+            SET_IDT_ENTRY(idt[i], keyboard_interrupt);
+        } else {
+            SET_IDT_ENTRY(idt[i], generic_interrupt);
+        }
     }
 }

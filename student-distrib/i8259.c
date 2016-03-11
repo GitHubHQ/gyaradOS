@@ -89,4 +89,3 @@ void send_eoi(uint32_t irq_num){
 		outb(MASTER_8259_PORT, END_OF_INTERRUPT);
 	}
 }
-

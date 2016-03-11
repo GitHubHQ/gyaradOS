@@ -1,10 +1,13 @@
 #ifndef _IDT_H
 #define _IDT_H
 
-#include "x86_desc.h"
+#include "keyboard.h"
+#include "i8259.h"
 #include "lib.h"
+#include "x86_desc.h"
 
-#define NUM_EXCEPTIONS 32
+#define NUM_EXCEPTIONS 0x20
+#define KEYBOARD_IDT   0x21
 
 // 0 - Division by zero exception
 void divide_by_zero_except();
@@ -65,3 +68,5 @@ void machine_chk_except();
 
 // initialize the idt
 void init_idt();
+
+#endif /* _IDT_H */
