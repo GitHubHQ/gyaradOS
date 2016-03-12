@@ -137,6 +137,7 @@ void keyboard_interrupt() {
 void generic_interrupt() {
     cli();
     printf("Generic interrupt recieved!\n");
+    send_eoi(1);
     sti();
 }
 
@@ -232,7 +233,6 @@ void init_idt() {
             default:
                 // reserved, don't set the entry
                 break;
-
         }
     }
 
