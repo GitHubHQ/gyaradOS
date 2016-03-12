@@ -7,7 +7,9 @@
 #include "x86_desc.h"
 
 #define NUM_EXCEPTIONS 0x20
+
 #define KEYBOARD_IDT   0x21
+#define RTC_IDT        0x28
 
 // 0 - Division by zero exception
 void divide_by_zero_except();
@@ -65,6 +67,15 @@ void align_except();
 
 // 18 - Machine check exception
 void machine_chk_except();
+
+// rtc interrupt
+void rtc_interrupt();
+
+// keyboard interrupt
+void keyboard_interrupt();
+
+// generic interrupt
+void generic_interrupt();
 
 // initialize the idt
 void init_idt();

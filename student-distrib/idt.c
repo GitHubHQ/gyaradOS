@@ -127,17 +127,34 @@ void machine_chk_except() {
 
 // keyboard interrupt
 void keyboard_interrupt() {
-    cli();
+    unsigned long flags;
+
+    cli_and_save(flags);
     printf("%c", kbrd_read_scan_code());
     send_eoi(1);
+    restore_flags(flags);
+    sti();
+}
+
+// rtc interrupt
+void rtc_interrupt() {
+    unsigned long flags;
+
+    cli_and_save(flags);
+    printf("RTC Interrupt!");
+    send_eoi(1);
+    restore_flags(flags);
     sti();
 }
 
 // generic interrupt
 void generic_interrupt() {
-    cli();
+    unsigned long flags;
+
+    cli_and_save(flags);
     printf("Generic interrupt recieved!\n");
     send_eoi(1);
+    restore_flags(flags);
     sti();
 }
 
@@ -262,10 +279,16 @@ void init_idt() {
         // idt[i].offset_15_00;
         // idt[i].offset_31_16;
 
-        if(i == KEYBOARD_IDT) {
-            SET_IDT_ENTRY(idt[i], keyboard_interrupt);
-        } else {
-            SET_IDT_ENTRY(idt[i], generic_interrupt);
+        switch(i) {
+            case KEYBOARD_IDT:
+                SET_IDT_ENTRY(idt[i], keyboard_interrupt);
+                break;
+            case RTC_IDT:
+                SET_IDT_ENTRY(idt[i], rtc_interrupt);
+                break;
+            default:
+                SET_IDT_ENTRY(idt[i], generic_interrupt);
+                break;
         }
     }
 }
