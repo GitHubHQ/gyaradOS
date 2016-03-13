@@ -130,7 +130,7 @@ void keyboard_interrupt() {
     unsigned long flags;
 
     cli_and_save(flags);
-    printf("%c", kbrd_read_scan_code());
+    kbrd_print_keypress();
     send_eoi(1);
     restore_flags(flags);
     sti();
