@@ -2,7 +2,7 @@
 #include "paging.h"
 
 /* The page directory */
-uint32_t pageDirectory[PAGE_DIRECTORY_SIZE] __attribute__((aligned(PAGE_DIRECTORY_ALIGN)));
+uint32_t pageDirectory[PAGE_DIRECTORY_SIZE] __attribute__((aligned(PAGE_SIZE)));
 
 uint32_t pageTable1[PAGE_TABLE_SIZE] __attribute__((aligned(PAGE_SIZE)));
 
@@ -13,19 +13,25 @@ void init_paging(){
 
 	//disabling the 4kb pages in the first 4MB of the PD
 	for(i = 0; i < PAGE_TABLE_SIZE; i++){
-		pageTable1[i] = pageAddress | 2; 
-		pageAddress += 4096; //4kb = 4096
-	}
-	pageTable1[0xB8] |= 3; //enabing the present bit for the video memory at physical location 0xB8000
+		pageTable1[i] = pageAddress & SET_DEFAULT_MASK; 
+		pageAddress += PAGE_SIZE;
+    }
+   
+    //enabling the present bit for the video memory at physical location 0xB8000
+	pageTable1[VIDEO_PHYS_ADDR] |= SET_VIDEO_MASK; 
+    
+    //enabling bits for R/W and Present (0x3)
+	pageDirectory[0] = (unsigned int)pageTable1 | SET_VIDEO_MASK;
 
-	pageDirectory[0] = (unsigned int)pageTable1 | 3;
-	pageDirectory[1] = KERNEL_PHYS_ADDR | 131; //enabling bits PS, R/W, Present (10000011)
+	//enabling bits PS, R/W, Present (10000011)
+    pageDirectory[1] = KERNEL_PHYS_ADDR | SET_KERNEL_MASK; 
 
 	for(i = 2; i < PAGE_DIRECTORY_SIZE; i++){
-		pageDirectory[i] |= 2; //setting the rest of the pages to not be present (10)
+        //setting the rest of the pages to not be present (10)
+		pageDirectory[i] |= 2; 
 	}
 
-	//Enabing paging 
+	//Enabling paging 
 	asm volatile (
 		"mov %%eax, %%cr3 				\n" //moving the address of PD to cr3
 		"mov %%cr4, %%eax 				\n"
