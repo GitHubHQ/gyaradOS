@@ -1,11 +1,6 @@
 #include "types.h"
 #include "paging.h"
 
-/* The page directory */
-uint32_t pageDirectory[PAGE_DIRECTORY_SIZE] __attribute__((aligned(PAGE_SIZE)));
-
-uint32_t pageTable1[PAGE_TABLE_SIZE] __attribute__((aligned(PAGE_SIZE)));
-
 void init_paging(){
 
 	uint32_t pageAddress = 0;
@@ -18,17 +13,17 @@ void init_paging(){
     }
    
     //enabling the present bit for the video memory at physical location 0xB8000
-	pageTable1[VIDEO_PHYS_ADDR] |= SET_VIDEO_MASK; 
+	pageTable1[VIDEO_PHYS_ADDR] |= SET_PRESENT; 
     
     //enabling bits for R/W and Present (0x3)
-	pageDirectory[0] = (unsigned int)pageTable1 | SET_VIDEO_MASK;
+	pageDirectory[0] = (unsigned int)pageTable1 | SET_PRESENT;
 
 	//enabling bits PS, R/W, Present (10000011)
-    pageDirectory[1] = KERNEL_PHYS_ADDR | SET_KERNEL_MASK; 
+    pageDirectory[1] = KERNEL_PHYS_ADDR | SET_4MB_PRESENT; 
 
 	for(i = 2; i < PAGE_DIRECTORY_SIZE; i++){
         //setting the rest of the pages to not be present (10)
-		pageDirectory[i] |= 2; 
+		pageDirectory[i] |= SET_OFF; 
 	}
 
 	//Enabling paging 
