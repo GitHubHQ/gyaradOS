@@ -489,7 +489,7 @@ void init_idt() {
         idt[i].seg_selector = KERNEL_CS;
 
         // set this as interrupts
-        idt[i].size = 1;
+        idt[i].size = 0;
 
         // set up reserved as exception
         idt[i].reserved4 = 0;
