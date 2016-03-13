@@ -8,7 +8,7 @@
 #define PAGE_TABLE_SIZE         1024
 #define PAGE_SIZE               4096
 
-#define KERNEL_START_ADDR       0x400000
+#define KERNEL_PHYS_ADDR       0x400000
 
 /* initialize paging */
 void init_paging();
