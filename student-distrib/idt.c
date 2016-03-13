@@ -343,7 +343,7 @@ void machine_chk_except() {
 void keyboard_interrupt() {
     cli();
     handle_keypress();
-    send_eoi(1);
+    i8259_ioctl(I8259_SEND_EOI, IRQ_KEYBOARD_CTRL);
     sti();
 }
 
@@ -358,8 +358,8 @@ void keyboard_interrupt() {
 void rtc_interrupt() {
     cli();
     printf("RTC Interrupt!\n");
-    send_eoi(IRQ_RTC);
-    rtc_special_eoi();
+    i8259_ioctl(I8259_SEND_EOI, IRQ_RTC);
+    rtc_ioctl(RTC_EOI, 0);
     sti();
 }
 
@@ -373,8 +373,8 @@ void rtc_interrupt() {
  */
 void generic_interrupt() {
     cli();
-    printf("\nGeneric interrupt recieved!\n");
-    send_eoi(1);
+    printf("Generic interrupt recieved!\n");
+    i8259_ioctl(I8259_SEND_EOI, IRQ_SYSTEM_TIMER);
     sti();
 }
 

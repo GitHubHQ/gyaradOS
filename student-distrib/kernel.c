@@ -154,18 +154,18 @@ entry (unsigned long magic, unsigned long addr)
 	}
 
 	/* Init the PIC */
-	i8259_init();
+	i8259_ioctl(I8259_INIT, 0);
 
 	/* Initialize devices, memory, filesystem, enable device interrupts on the
 	 * PIC, any other initialization stuff... */
 	printf("Enabling keyboard interrupts ... [ OK ]\n");
-	enable_irq(IRQ_KEYBOARD_CTRL);
+	i8259_ioctl(I8259_ENABLE_IRQ, IRQ_KEYBOARD_CTRL);
 	//printf("Initalizing RTC              ... [ OK ]\n");
-	//rtc_init();
+	//rtc_ioctl(RTC_INIT, 0);
 	printf("Enabling Slave PIC interrupts... [ OK ]\n");
-	enable_irq(IRQ_CAS_SIG);
+	i8259_ioctl(I8259_ENABLE_IRQ, IRQ_CAS_SIG);
 	//printf("Enabling RTC interrupts      ... [ OK ]\n");
-	//enable_irq(IRQ_RTC);
+	//i8259_ioctl(I8259_ENABLE_IRQ, IRQ_RTC);
 
 	/* Enable interrupts */
 	/* Do not enable the following until after you have set up your
