@@ -18,17 +18,21 @@ void i8259_init(void) {
 	outb(ICW1, MASTER_8259_PORT);
 	outb(ICW1, SLAVE_8259_PORT);
 
-	// Set Master offset in the IDT
+	// Set Master and slave offset in the IDT
 	outb(ICW2_MASTER, MASTER_8259_PORT_2);
 	outb(ICW2_SLAVE, SLAVE_8259_PORT_2);
 
-	// Set Slave offset
+	// Set Master and slave cascade identies
 	outb(ICW3_MASTER, MASTER_8259_PORT_2);
 	outb(ICW3_SLAVE, SLAVE_8259_PORT_2);
 
 	// Define as master and slave
 	outb(ICW4_MASTER, MASTER_8259_PORT_2);
 	outb(ICW4_SLAVE, SLAVE_8259_PORT_2);
+
+	// Mask all interrupts
+	outb(MASTER_ALL_MASK, MASTER_8259_PORT_2);
+	outb(SLAVE_ALL_MASK, SLAVE_8259_PORT_2);
 }
 
 /**
@@ -37,18 +41,19 @@ void i8259_init(void) {
  */
 void enable_irq(uint32_t irq_num) {
 	// Find which bit to unmask
-	unsigned int mask = ~(1 << irq_num);
+	unsigned int mask;
 	unsigned long flags;
 
 	// Disable interrupts
 	cli_and_save(flags);
 	// Save mask and write to port
-	if(irq_num & 8) {
-		slave_mask &= mask;
-		outb(slave_mask, SLAVE_8259_PORT_2);
+	if(irq_num >= 8) {
+		irq_num -= 8;
+		mask = ~(1 << irq_num);
+		outb(inb(SLAVE_8259_PORT_2) & mask, SLAVE_8259_PORT_2);
 	} else {
-		master_mask &= mask;
-		outb(master_mask, MASTER_8259_PORT_2);
+		mask = ~(1 << irq_num);
+		outb(inb(MASTER_8259_PORT_2) & mask, MASTER_8259_PORT_2);
 	}
 	restore_flags(flags);
 	sti();
@@ -60,18 +65,19 @@ void enable_irq(uint32_t irq_num) {
  */
 void disable_irq(uint32_t irq_num){
 	// Find which bit to mask
-	unsigned int mask = 1 << irq_num;
+	unsigned int mask;
 	unsigned long flags;
 
 	// Disable interrupts
 	cli_and_save(flags);
 	// Save mask and write to port
-	if(irq_num & 8) {
-		slave_mask &= mask;
-		outb(slave_mask, SLAVE_8259_PORT_2);
+	if(irq_num >= 8) {
+		irq_num -= 8;
+		mask = (1 << irq_num);
+		outb(inb(SLAVE_8259_PORT_2) | mask, SLAVE_8259_PORT_2);
 	} else {
-		master_mask &= mask;
-		outb(master_mask, MASTER_8259_PORT_2);
+		mask = (1 << irq_num);
+		outb(inb(MASTER_8259_PORT_2) | mask, MASTER_8259_PORT_2);
 	}
 	restore_flags(flags);
 	sti();

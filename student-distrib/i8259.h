@@ -33,6 +33,9 @@
  * to declare the interrupt finished */
 #define EOI             0x60
 
+#define MASTER_ALL_MASK 0xFF
+#define SLAVE_ALL_MASK  0xFF
+
 /* IRQ numbers master */
 #define IRQ_SYSTEM_TIMER  0
 #define IRQ_KEYBOARD_CTRL 1

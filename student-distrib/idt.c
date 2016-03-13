@@ -130,8 +130,8 @@ void keyboard_interrupt() {
     unsigned long flags;
 
     cli_and_save(flags);
-    printf("%c", kbrd_read_scan_code());
-    send_eoi(1);
+    printf("%d", kbrd_read_scan_code());
+    send_eoi(IRQ_KEYBOARD_CTRL);
     restore_flags(flags);
     sti();
 }
@@ -141,8 +141,9 @@ void rtc_interrupt() {
     unsigned long flags;
 
     cli_and_save(flags);
-    printf("RTC Interrupt!");
-    send_eoi(1);
+    printf("RTC Interrupt!\n");
+    send_eoi(IRQ_RTC);
+    rtc_special_eoi();
     restore_flags(flags);
     sti();
 }

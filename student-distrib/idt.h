@@ -1,6 +1,7 @@
 #ifndef _IDT_H
 #define _IDT_H
 
+#include "rtc.h"
 #include "keyboard.h"
 #include "i8259.h"
 #include "lib.h"

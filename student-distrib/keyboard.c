@@ -1,6 +1,4 @@
 
-/* keyboard.c - Functions to interact with the keyboard
- */
 #include "keyboard.h"
 
 /**
