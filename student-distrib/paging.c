@@ -3,7 +3,8 @@
 
 void init_paging(){
 
-	uint32_t pageDirectory[1024]__attribute__((aligned(4096)));
+    /* The page directory */
+	uint32_t pageDirectory[PAGE_DIRECTORY_SIZE]__attribute__((aligned(PAGE_DIRECTORY_ALIGN)));
 
 	asm volatile (
 		"mov %%cr3, %%eax 				\n"
@@ -16,4 +17,5 @@ void init_paging(){
 		:								
 		: "r"(pageDirectory)			
 		: "eax");						
+
 }
