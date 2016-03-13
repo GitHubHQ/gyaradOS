@@ -342,7 +342,7 @@ void machine_chk_except() {
  */
 void keyboard_interrupt() {
     cli();
-    kbrd_print_keypress();
+    handle_keypress();
     send_eoi(1);
     sti();
 }
@@ -489,7 +489,7 @@ void init_idt() {
         idt[i].seg_selector = KERNEL_CS;
 
         // set this as interrupts
-        idt[i].size = 0;
+        idt[i].size = 1;
 
         // set up reserved as exception
         idt[i].reserved4 = 0;
