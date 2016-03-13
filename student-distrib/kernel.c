@@ -176,7 +176,9 @@ entry (unsigned long magic, unsigned long addr)
 	sti();
 
 	/* Enable paging */
+	printf("Enabling Paging              ... [ OK ]\n");
 	init_paging();
+
 	/* Execute the first program (`shell') ... */
 
 	/* Spin (nicely, so we don't chew up cycles) */
