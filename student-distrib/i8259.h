@@ -56,15 +56,13 @@
 #define IRQ_PRIM_ATA_CHN  14
 #define IRQ_SCND_ATA_CHN  15
 
-/* Externally-visible functions */
+/* ioctl function cases */
+#define I8259_INIT        100
+#define I8259_ENABLE_IRQ  200
+#define I8259_DISABLE_IRQ 300
+#define I8259_SEND_EOI    400
 
-/* Initialize both PICs */
-void i8259_init(void);
-/* Enable (unmask) the specified IRQ */
-void enable_irq(uint32_t irq_num);
-/* Disable (mask) the specified IRQ */
-void disable_irq(uint32_t irq_num);
-/* Send end-of-interrupt signal for the specified IRQ */
-void send_eoi(uint32_t irq_num);
+/* Externally-visible functions */
+int i8259_ioctl(int cmd, uint32_t arg);
 
 #endif /* _I8259_H */
