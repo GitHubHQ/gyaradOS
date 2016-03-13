@@ -1,54 +1,118 @@
 #include "idt.h"
 
-// 0 - Division by zero exception
+/*
+ * divide_by_zero_except()
+ *
+ * Description: Prints the division by zero exception when detected and spins infinitely
+ * Inputs: none
+ * Outputs: none
+ * Returns: none
+ */
 void divide_by_zero_except() {
-    printf("EXCEPTION: Divide by zero!\n");
+    printf("\nEXCEPTION: Divide by zero!\n");
     while(1);
 }
 
-// 1 - Debug exception
+/*
+ * debug_except()
+ *
+ * Description: Prints the debug exception when detected and spins infinitely
+ * Inputs: none
+ * Outputs: none
+ * Returns: none
+ */
 void debug_except() {
-    printf("EXCEPTION: Debug!\n");
+    printf("\nEXCEPTION: Debug!\n");
     while(1);
 }
 
-// 2 - Non maskable interrupt
+/*
+ * nmi_except()
+ *
+ * Description: Prints the NMI exception when detected and spins infinitely
+ * Inputs: none
+ * Outputs: none
+ * Returns: none
+ */
 void nmi_except() {
-    printf("EXCEPTION: Non-maskable interrupt!\n");
+    printf("\nEXCEPTION: Non-maskable interrupt!\n");
     while(1);
 }
 
-// 3 - Breakpoint exception
+/*
+ * breakpoint_except()
+ *
+ * Description: Prints the breakpoint exception when detected and spins infinitely
+ * Inputs: none
+ * Outputs: none
+ * Returns: none
+ */
 void breakpoint_except() {
-    printf("EXCEPTION: Breakpoint!\n");
+    printf("\nEXCEPTION: Breakpoint!\n");
     while(1);
 }
 
-// 4 - 'Into detected overflow'
+/*
+ * overflow_except()
+ *
+ * Description: Prints the overflow exception when detected and spins infinitely
+ * Inputs: none
+ * Outputs: none
+ * Returns: none
+ */
 void overflow_except() {
-    printf("EXCEPTION: Into detected overflow!\n");
+    printf("\nEXCEPTION: Into detected overflow!\n");
     while(1);
 }
 
-// 5 - Out of bounds exception
+/*
+ * oob_except()
+ *
+ * Description: Prints the out of bounds exception when detected and spins infinitely
+ * Inputs: none
+ * Outputs: none
+ * Returns: none
+ */
 void oob_except() {
-    printf("EXCEPTION: Out of bounds!\n");
+    printf("\nEXCEPTION: Out of bounds!\n");
     while(1);
 }
 
-// 6 - Invalid opcode exception
+/*
+ * opcode_except()
+ *
+ * Description: Prints the opcode exception when detected and spins infinitely
+ * Inputs: none
+ * Outputs: none
+ * Returns: none
+ */
 void opcode_except() {
-    printf("EXCEPTION: Invalid opcode!\n");
+    printf("\nEXCEPTION: Invalid opcode!\n");
     while(1);
 }
 
-// 7 - No coprocessor exception
+/*
+ * no_coproc_except()
+ *
+ * Description: Prints the no coprocessor exception when detected and spins infinitely
+ * Inputs: none
+ * Outputs: none
+ * Returns: none
+ */
 void no_coproc_except() {
-    printf("EXCEPTION: No coprocessor!\n");
+    printf("\nEXCEPTION: No coprocessor!\n");
     while(1);
 }
 
-// 8 - Double fault (pushes an error code)
+/*
+ * double_fault_except()
+ *
+ * Description: Prints the double fault exception when detected along with relevant error
+ *              code data, and then spins infinitely
+ * Inputs: none
+ * Outputs: none
+ * Returns: none
+ */
 void double_fault_except() {
     uint32_t saved_eip;
     asm("\t movl 4(%%esp),%0" : "=r"(saved_eip));
@@ -56,19 +120,40 @@ void double_fault_except() {
     uint32_t saved_cs;
     asm("\t movl 8(%%esp),%0" : "=r"(saved_cs));
 
-    printf("EXCEPTION: Double fault!\n");
+    uint32_t prev_stack;
+    asm("\t popl %0" : "=r"(prev_stack));
+
+    printf("\nEXCEPTION: Double fault!\n");
     printf("Faulty instruction at: %x\n", saved_eip);
     printf("Code segment: %d\n", saved_cs);
+    printf("Error code: %d", prev_stack);
+
     while(1);
 }
 
-// 9 - Coprocessor segment overrun
+/*
+ * coproc_seg_overrun_except()
+ *
+ * Description: Prints the coprocessor segment overrun exception when detected along with
+ *              relevant error code data, and then spins infinitely
+ * Inputs: none
+ * Outputs: none
+ * Returns: none
+ */
 void coproc_seg_overrun_except() {
-    printf("EXCEPTION: Coprocessor segment overrun!\n");
+    printf("\nEXCEPTION: Coprocessor segment overrun!\n");
     while(1);
 }
 
-// 10 - Bad TSS (pushes an error code)
+/*
+ * tss_except()
+ *
+ * Description: Prints the tss exception when detected along with relevant error code data,
+ *              and then spins infinitely
+ * Inputs: none
+ * Outputs: none
+ * Returns: none
+ */
 void tss_except() {
     uint32_t saved_eip;
     asm("\t movl 4(%%esp),%0" : "=r"(saved_eip));
@@ -76,13 +161,26 @@ void tss_except() {
     uint32_t saved_cs;
     asm("\t movl 8(%%esp),%0" : "=r"(saved_cs));
 
-    printf("EXCEPTION: Bad TSS!\n");
+    uint32_t prev_stack;
+    asm("\t popl %0" : "=r"(prev_stack));
+
+    printf("\nEXCEPTION: Bad TSS!\n");
     printf("Faulty instruction at: %x\n", saved_eip);
     printf("Code segment: %d\n", saved_cs);
+    printf("Error code: %d", prev_stack);
+
     while(1);
 }
 
-// 11 - Segment not present (pushes an error code)
+/*
+ * segment_exept()
+ *
+ * Description: Prints the segment not present exception when detected along with
+ *              relevant error code data, and then spins infinitely
+ * Inputs: none
+ * Outputs: none
+ * Returns: none
+ */
 void segment_exept() {
     uint32_t saved_eip;
     asm("\t movl 4(%%esp),%0" : "=r"(saved_eip));
@@ -90,13 +188,26 @@ void segment_exept() {
     uint32_t saved_cs;
     asm("\t movl 8(%%esp),%0" : "=r"(saved_cs));
 
-    printf("EXCEPTION: Segment not present!\n");
+    uint32_t prev_stack;
+    asm("\t popl %0" : "=r"(prev_stack));
+
+    printf("\nEXCEPTION: Segment not present!\n");
     printf("Faulty instruction at: %x\n", saved_eip);
     printf("Code segment: %d\n", saved_cs);
+    printf("Error code: %d", prev_stack);
+
     while(1);
 }
 
-// 12 - Stack fault (pushes an error code)
+/*
+ * stack_except()
+ *
+ * Description: Prints the stack fault exception when detected along with
+ *              relevant error code data, and then spins infinitely
+ * Inputs: none
+ * Outputs: none
+ * Returns: none
+ */
 void stack_except() {
     uint32_t saved_eip;
     asm("\t movl 4(%%esp),%0" : "=r"(saved_eip));
@@ -104,11 +215,26 @@ void stack_except() {
     uint32_t saved_cs;
     asm("\t movl 8(%%esp),%0" : "=r"(saved_cs));
 
-    printf("EXCEPTION: Stack fault!\n");
+    uint32_t prev_stack;
+    asm("\t popl %0" : "=r"(prev_stack));
+
+    printf("\nEXCEPTION: Stack fault!\n");
+    printf("Faulty instruction at: %x\n", saved_eip);
+    printf("Code segment: %d\n", saved_cs);
+    printf("Error code: %d", prev_stack);
+
     while(1);
 }
 
-// 13 - General protection fault (pushes an error code)
+/*
+ * general_protec_except()
+ *
+ * Description: Prints the general protection exception when detected along with
+ *              relevant error code data, and then spins infinitely
+ * Inputs: none
+ * Outputs: none
+ * Returns: none
+ */
 void general_protec_except() {
     uint32_t saved_eip;
     asm("\t movl 4(%%esp),%0" : "=r"(saved_eip));
@@ -116,14 +242,26 @@ void general_protec_except() {
     uint32_t saved_cs;
     asm("\t movl 8(%%esp),%0" : "=r"(saved_cs));
 
+    uint32_t prev_stack;
+    asm("\t popl %0" : "=r"(prev_stack));
+
     printf("\nEXCEPTION: General protection fault!\n");
     printf("Faulty instruction at: %x\n", saved_eip);
     printf("Code segment: %d\n", saved_cs);
+    printf("Error code: %d", prev_stack);
     
     while(1);
 }
 
-// 14 - Page fault (pushes an error code)
+/*
+ * page_fault_except()
+ *
+ * Description: Prints the page fault exception when detected along with
+ *              relevant error code data, and then spins infinitely
+ * Inputs: none
+ * Outputs: none
+ * Returns: none
+ */
 void page_fault_except() {
     uint32_t saved_eip;
     asm("\t movl 4(%%esp),%0" : "=r"(saved_eip));
@@ -131,37 +269,77 @@ void page_fault_except() {
     uint32_t saved_cs;
     asm("\t movl 8(%%esp),%0" : "=r"(saved_cs));
 
-    printf("EXCEPTION: Page fault!\n");
+    uint32_t prev_stack;
+    asm("\t popl %0" : "=r"(prev_stack));
+
+    printf("\nEXCEPTION: Page fault!\n");
     printf("Faulty instruction at: %x\n", saved_eip);
     printf("Code segment: %d\n", saved_cs);
+    printf("Error code: %d", prev_stack);
     while(1);
 }
 
-// 15 - Unknown interrupt exception
+/*
+ * unknown_interr_except()
+ *
+ * Description: Prints the unknown interrupt exception when detected and spins infinitely
+ * Inputs: none
+ * Outputs: none
+ * Returns: none
+ */
 void unknown_interr_except() {
-    printf("EXCEPTION: Unknown interrupt!\n");
+    printf("\nEXCEPTION: Unknown interrupt!\n");
     while(1);
 }
 
-// 16 - Coprocessor fault
+/*
+ * coproc_except()
+ *
+ * Description: Prints the coprocessor fault exception when detected and spins infinitely
+ * Inputs: none
+ * Outputs: none
+ * Returns: none
+ */
 void coproc_except() {
-    printf("EXCEPTION: Coprocessor fault!\n");
+    printf("\nEXCEPTION: Coprocessor fault!\n");
     while(1);
 }
 
-// 17 - Alignment check exception
+/*
+ * align_except()
+ *
+ * Description: Prints the alignment check exception when detected and spins infinitely
+ * Inputs: none
+ * Outputs: none
+ * Returns: none
+ */
 void align_except() {
-    printf("EXCEPTION: Alignment check!\n");
+    printf("\nEXCEPTION: Alignment check!\n");
     while(1);
 }
 
-// 18 - Machine check exception
+/*
+ * machine_chk_except()
+ *
+ * Description: Prints the machine check exception when detected and spins infinitely
+ * Inputs: none
+ * Outputs: none
+ * Returns: none
+ */
 void machine_chk_except() {
-    printf("EXCEPTION: Machine check!\n");
+    printf("\nEXCEPTION: Machine check!\n");
     while(1);
 }
 
-// keyboard interrupt
+/*
+ * keyboard_interrupt()
+ *
+ * Description: Handles the keyboard interrupt by printing the appropriate 
+ *              keycode to console and then sending the eoi signal
+ * Inputs: none
+ * Outputs: none
+ * Returns: none
+ */
 void keyboard_interrupt() {
     cli();
     kbrd_print_keypress();
@@ -169,7 +347,14 @@ void keyboard_interrupt() {
     sti();
 }
 
-// rtc interrupt
+/*
+ * rtc_interrupt()
+ *
+ * Description: Handles the rtc interrupt by printing that fact and then sending the eoi signal
+ * Inputs: none
+ * Outputs: none
+ * Returns: none
+ */
 void rtc_interrupt() {
     cli();
     printf("RTC Interrupt!\n");
@@ -178,7 +363,14 @@ void rtc_interrupt() {
     sti();
 }
 
-// generic interrupt
+/*
+ * generic_interrupt()
+ *
+ * Description: Handles any other generic interrupts that don't currently have specific handlers
+ * Inputs: none
+ * Outputs: none
+ * Returns: none
+ */
 void generic_interrupt() {
     cli();
     printf("Generic interrupt recieved!\n");
@@ -186,8 +378,14 @@ void generic_interrupt() {
     sti();
 }
 
+/* init_idt()
+ *
+ * Description: Initializes the interrupt descriptor table with both exceptions and interrupts.
+ * Inputs: none
+ * Outputs: none
+ * Returns: none
+ */
 void init_idt() {
-    cli();
     lidt(idt_desc_ptr);
 
     int i = 0;
@@ -197,13 +395,13 @@ void init_idt() {
         // present in memory
         idt[i].present = 1;
 
-        // set device priveledge level to be lower
+        // set device priveledge level to be kernel
         idt[i].dpl = 0;
 
         // select the proper segment
         idt[i].seg_selector = KERNEL_CS;
 
-        // exception
+        // set this as an exception
         idt[i].size = 1;
 
         // set up reserved as exception
@@ -284,14 +482,14 @@ void init_idt() {
         // present in memory
         idt[i].present = 1;
 
-        // set device priveledge level to be lower
+        // set device privilege level to be kernel
         idt[i].dpl = 0;
 
         // select the proper segment
         idt[i].seg_selector = KERNEL_CS;
 
-        // exception
-        idt[i].size = 1;
+        // set this as interrupts
+        idt[i].size = 0;
 
         // set up reserved as exception
         idt[i].reserved4 = 0;
@@ -312,6 +510,4 @@ void init_idt() {
                 break;
         }
     }
-
-    sti();
 }
