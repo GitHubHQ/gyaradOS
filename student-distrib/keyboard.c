@@ -155,6 +155,7 @@ void kbrd_print_keypress() {
         case KEY_MAKE_R_SHIFT:
             break;
         case KEY_MAKE_ENTER:
+            printf("\n");
             break;
         case KEY_MAKE_ESC:
             break;
@@ -212,6 +213,6 @@ void kbrd_print_keypress() {
     }
 
     if(key_pressed) {
-        printf("%c\n", key_pressed);
+        printf("%c", key_pressed);
     }
 }

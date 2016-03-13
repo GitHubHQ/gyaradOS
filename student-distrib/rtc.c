@@ -25,8 +25,7 @@ void rtc_special_eoi() {
 }
 
 int rtc_set_frequency(int rate) {
-	if (rate > 15 || rate < 0)
-	{
+	if (rate > 15 || rate < 0) {
 		return -1;
 	}
 

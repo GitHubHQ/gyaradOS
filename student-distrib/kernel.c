@@ -172,7 +172,7 @@ entry (unsigned long magic, unsigned long addr)
 	 * IDT correctly otherwise QEMU will triple fault and simple close
 	 * without showing you any output */
 	printf("Enabling Interrupts          ... [ OK ]\n");
-	printf("RTDC                         ... [ FEI]");
+	printf("RTDC                         ... [ FEI]\n");
 	sti();
 
 	/* Enable paging */
@@ -182,4 +182,3 @@ entry (unsigned long magic, unsigned long addr)
 	/* Spin (nicely, so we don't chew up cycles) */
 	asm volatile(".1: hlt; jmp .1;");
 }
-
