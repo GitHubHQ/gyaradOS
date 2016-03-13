@@ -561,7 +561,6 @@ strncpy(int8_t* dest, const int8_t* src, uint32_t n)
 void
 test_interrupts(void)
 {
-	printf("interrupt!\n");
 	int32_t i;
 	for (i=0; i < NUM_ROWS*NUM_COLS; i++) {
 		video_mem[i<<1]++;

@@ -50,9 +50,15 @@ void no_coproc_except() {
 
 // 8 - Double fault (pushes an error code)
 void double_fault_except() {
-    // TODO push error code
+    uint32_t saved_eip;
+    asm("\t movl 4(%%esp),%0" : "=r"(saved_eip));
+
+    uint32_t saved_cs;
+    asm("\t movl 8(%%esp),%0" : "=r"(saved_cs));
 
     printf("EXCEPTION: Double fault!\n");
+    printf("Faulty instruction at: %x\n", saved_eip);
+    printf("Code segment: %d\n", saved_cs);
     while(1);
 }
 
@@ -64,23 +70,39 @@ void coproc_seg_overrun_except() {
 
 // 10 - Bad TSS (pushes an error code)
 void tss_except() {
-    // TODO push error code
+    uint32_t saved_eip;
+    asm("\t movl 4(%%esp),%0" : "=r"(saved_eip));
+
+    uint32_t saved_cs;
+    asm("\t movl 8(%%esp),%0" : "=r"(saved_cs));
 
     printf("EXCEPTION: Bad TSS!\n");
+    printf("Faulty instruction at: %x\n", saved_eip);
+    printf("Code segment: %d\n", saved_cs);
     while(1);
 }
 
 // 11 - Segment not present (pushes an error code)
 void segment_exept() {
-    // TODO push error code
+    uint32_t saved_eip;
+    asm("\t movl 4(%%esp),%0" : "=r"(saved_eip));
+
+    uint32_t saved_cs;
+    asm("\t movl 8(%%esp),%0" : "=r"(saved_cs));
 
     printf("EXCEPTION: Segment not present!\n");
+    printf("Faulty instruction at: %x\n", saved_eip);
+    printf("Code segment: %d\n", saved_cs);
     while(1);
 }
 
 // 12 - Stack fault (pushes an error code)
 void stack_except() {
-    // TODO push error code
+    uint32_t saved_eip;
+    asm("\t movl 4(%%esp),%0" : "=r"(saved_eip));
+
+    uint32_t saved_cs;
+    asm("\t movl 8(%%esp),%0" : "=r"(saved_cs));
 
     printf("EXCEPTION: Stack fault!\n");
     while(1);
@@ -88,17 +110,30 @@ void stack_except() {
 
 // 13 - General protection fault (pushes an error code)
 void general_protec_except() {
-    // TODO push error code
+    uint32_t saved_eip;
+    asm("\t movl 4(%%esp),%0" : "=r"(saved_eip));
 
-    printf("EXCEPTION: General protection fault!\n");
+    uint32_t saved_cs;
+    asm("\t movl 8(%%esp),%0" : "=r"(saved_cs));
+
+    printf("\nEXCEPTION: General protection fault!\n");
+    printf("Faulty instruction at: %x\n", saved_eip);
+    printf("Code segment: %d\n", saved_cs);
+    
     while(1);
 }
 
 // 14 - Page fault (pushes an error code)
 void page_fault_except() {
-    // TODO push error code
+    uint32_t saved_eip;
+    asm("\t movl 4(%%esp),%0" : "=r"(saved_eip));
+
+    uint32_t saved_cs;
+    asm("\t movl 8(%%esp),%0" : "=r"(saved_cs));
 
     printf("EXCEPTION: Page fault!\n");
+    printf("Faulty instruction at: %x\n", saved_eip);
+    printf("Code segment: %d\n", saved_cs);
     while(1);
 }
 
@@ -123,50 +158,42 @@ void align_except() {
 // 18 - Machine check exception
 void machine_chk_except() {
     printf("EXCEPTION: Machine check!\n");
+    while(1);
 }
 
 // keyboard interrupt
 void keyboard_interrupt() {
-    unsigned long flags;
-
-    cli_and_save(flags);
+    cli();
     kbrd_print_keypress();
     send_eoi(1);
-    restore_flags(flags);
     sti();
 }
 
 // rtc interrupt
 void rtc_interrupt() {
-    unsigned long flags;
-
-    cli_and_save(flags);
+    cli();
     printf("RTC Interrupt!\n");
     send_eoi(IRQ_RTC);
     rtc_special_eoi();
-    restore_flags(flags);
     sti();
 }
 
 // generic interrupt
 void generic_interrupt() {
-    unsigned long flags;
-
-    cli_and_save(flags);
+    cli();
     printf("Generic interrupt recieved!\n");
     send_eoi(1);
-    restore_flags(flags);
     sti();
 }
 
 void init_idt() {
+    cli();
     lidt(idt_desc_ptr);
 
     int i = 0;
     /// initialize the first 32 vectors as exceptions
     for(i = 0; i < NUM_EXCEPTIONS; i++) {
         // initialize idt properties here
-
         // present in memory
         idt[i].present = 1;
 
@@ -185,9 +212,6 @@ void init_idt() {
         idt[i].reserved2 = 1;
         idt[i].reserved1 = 1;
         idt[i].reserved0 = 0;
-
-        // idt[i].offset_15_00;
-        // idt[i].offset_31_16;
 
         // assign the proper idt entry with exception
         switch(i) {
@@ -257,7 +281,6 @@ void init_idt() {
     // initialize the rest of the vectors as interrupts
     for(i = NUM_EXCEPTIONS; i < NUM_VEC; i++) {
         // initialize idt properties here
-
         // present in memory
         idt[i].present = 1;
 
@@ -277,9 +300,6 @@ void init_idt() {
         idt[i].reserved1 = 1;
         idt[i].reserved0 = 0;
 
-        // idt[i].offset_15_00;
-        // idt[i].offset_31_16;
-
         switch(i) {
             case KEYBOARD_IDT:
                 SET_IDT_ENTRY(idt[i], keyboard_interrupt);
@@ -292,4 +312,6 @@ void init_idt() {
                 break;
         }
     }
+
+    sti();
 }
