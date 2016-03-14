@@ -36,28 +36,26 @@ int special_key = 0;
  * Returns: None
  */
 void handle_keypress() {
+    // block interrupts
     cli();
 
+    // get scan code
     uint8_t key_code = inb(KEYBOARD_D_PORT);
-    if(key_code == SPECIAL_KEY) {
-        special_key = 1;
-    } else if (special_key) {
-        // read and match to key code from special table
-    } else {
-        if(key_code > MAX_SCANCODE) {
-            // break key prolly
-            // handle that here
-            i8259_ioctl(I8259_SEND_EOI, IRQ_KEYBOARD_CTRL);
-            sti();
-            return;
-        }
 
-        uint8_t key_ascii = code_to_ascii[key_code];
-        if(key_ascii != ASCII_PLACEHOLDER) {
-            printf("%c", code_to_ascii[key_code]);
-        }
+    // if its a break key, ignore
+    if(key_code > MAX_SCANCODE) {
+        i8259_ioctl(I8259_SEND_EOI, IRQ_KEYBOARD_CTRL);
+        sti();
+        return;
     }
 
+    // if its a key that we want, convert it to ascii and print it
+    uint8_t key_ascii = code_to_ascii[key_code];
+    if(key_ascii != ASCII_PLACEHOLDER) {
+        printf("%c", code_to_ascii[key_code]);
+    }
+
+    // send eoi and allow interrupts again
     i8259_ioctl(I8259_SEND_EOI, IRQ_KEYBOARD_CTRL);
     sti();
 }
