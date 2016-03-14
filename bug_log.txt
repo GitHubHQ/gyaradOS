@@ -1,0 +1,27 @@
+Gyarados ECE 391 Bug Log
+
+Checkpoint 1:
+1. Date: 3/11/16:
+    a. Problem: Multiple IRQs being enabled could not be handled, thus only one device could be enabled at once.
+    b. Solution: Grab the current IRQ mask from the PIC and ‘AND’ the new IRQ to the current PIC Mask. The same had to be done for disabling a IRQ, but instead of ‘AND’ing, a ‘OR’ operation had to be done.
+    c. Time to fix: 1.5 hours
+2. Date: 3/11/15:
+    a. Problem: RTC would only generate one interrupt, even after the PIC EOI had be sent correctly.
+    b. Solution: The RTC does not generate interrupts forever, instead the RTC register C must be read so that the RTC thinks that data was grabbed. This allows for the RTC to continue to generate interrupts. It must be noted that this “Special EOI” must be called for every RTC interrupt.
+    c. Time to fix: 1 hour
+3. Date: 3/12/16:
+    a. Problem: After receiving multiple interrupts of characters, the OS would get a General Protection Fault. However, single, slow, keystrokes did not cause any issues.
+    b. Solution: Our IDT was not being set up with the correct vectors for the general interrupt case, and we missed a few exceptions, causing the table to be incorrect. We fixed those mistakes.
+    c. Time to fix: 2 hours
+4. Date: 3/13/16:
+    a. Problem: After receiving multiple interrupts of characters, the OS would call “entry” again from kernel.c, and would cause “Invalid magic number: 0xFF” to be printed. Was especially tricky since everything worked fine until a few seconds after the multiple interrupts.
+    b. Solution: Our error details that we were printing in the BSOD was causing the stack to become messed up, which made it pop all the way back to the entry function and execute it again. Removed the faulty debug lines.
+    c. Time to fix: 3 hours
+5. Date:3/11/16
+    a. Problem: Enabling the paging caused kernel to crash
+    b. Solution: Immediate values did not have the “$” symbol and arguments had to be flipped. 
+    c. Time to fix: 2 hours 
+6. Date: 2/18/96
+    a. Problem: I’m not Fei
+    b. Solution: RTDC
+    c. Time to fix: 20+ years
