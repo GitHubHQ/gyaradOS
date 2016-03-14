@@ -263,16 +263,16 @@ void rtc_interrupt() {
 }
 
 /*
- * generic_interrupt()
+ * general_interrupt()
  *
- * Description: Handles any other generic interrupts that don't currently have specific handlers
+ * Description: Handles any other general interrupts that don't currently have specific handlers
  * Inputs: none
  * Outputs: none
  * Returns: none
  */
-void generic_interrupt() {
+void general_interrupt() {
     cli();
-    printf("Generic interrupt recieved!\n");
+    printf("General interrupt recieved!\n");
     i8259_ioctl(I8259_SEND_EOI, IRQ_SYSTEM_TIMER);
     sti();
 }
@@ -359,7 +359,7 @@ void init_idt() {
         } else if(i == RTC_IDT) {
             SET_IDT_ENTRY(idt[RTC_IDT], rtc_irq);
         } else {
-            SET_IDT_ENTRY(idt[i], generic_interrupt);
+            SET_IDT_ENTRY(idt[i], general_irq);
         }
     }
 }
