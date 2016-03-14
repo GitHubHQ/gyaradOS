@@ -2,7 +2,13 @@
 #include "paging.h"
 #include "lib.h"
 
-
+/* void init_paging()
+ * Description: initialize video memory page in 0-4mb range, and kernel memory
+ * from 4-8mb
+ * Inputs: none
+ * Ooutputs: none
+ * side effects: none
+ */
 void init_paging(){
 
 	uint32_t pageAddress = 0;
@@ -48,7 +54,13 @@ void init_paging(){
 
 
 
-/* This function is solely for testing purposes */
+/* void test_paging()
+ * Description: Test access to different pages in memory. Purely for testing
+ * purposes.
+ * Inputs: none
+ * Ooutputs: none
+ * side effects: none
+ */
 void test_paging(){
 
     // test for access at 0x400000
