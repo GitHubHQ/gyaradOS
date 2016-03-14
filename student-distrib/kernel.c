@@ -160,12 +160,13 @@ entry (unsigned long magic, unsigned long addr)
 	 * PIC, any other initialization stuff... */
 	printf("Enabling keyboard interrupts ... [ OK ]\n");
 	i8259_ioctl(I8259_ENABLE_IRQ, IRQ_KEYBOARD_CTRL);
-	//printf("Initalizing RTC              ... [ OK ]\n");
-	//rtc_ioctl(RTC_INIT, 0);
+	printf("Initalizing RTC              ... [ OK ]\n");
+	rtc_ioctl(RTC_INIT, RTC_SILENT);
 	printf("Enabling Slave PIC interrupts... [ OK ]\n");
 	i8259_ioctl(I8259_ENABLE_IRQ, IRQ_CAS_SIG);
-	//printf("Enabling RTC interrupts      ... [ OK ]\n");
-	//i8259_ioctl(I8259_ENABLE_IRQ, IRQ_RTC);
+	printf("Enabling RTC interrupts      ... [ OK ]\n");
+	i8259_ioctl(I8259_ENABLE_IRQ, IRQ_RTC);
+	//rtc_ioctl(RTC_SET_FREQ, 15); // Setting RTC to slowest frequency
 
 	/* Enable interrupts */
 	/* Do not enable the following until after you have set up your

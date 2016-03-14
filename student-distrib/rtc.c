@@ -2,17 +2,20 @@
  */
 #include "rtc.h"
 
+int init_mode;
+
 /**
  * Initalizes the RTC to default interrupt values (1024 Hz)
  */
-void rtc_init() {
+void rtc_init(int mode) {
 	// Disable interrupts
 	cli();
+	init_mode = mode;
 	// Select register B
 	outb(RTC_NMI_INIT_VAL, RTC_REG_NUM_PORT);
 	// Read current value of register B
 	char previous = inb(RTC_RW_CMOS_PORT);
-	// Set index 
+	// Set index
 	outb(RTC_NMI_INIT_VAL, RTC_REG_NUM_PORT);
 	// Enable bit 6 of register B, enabling interrupts from RTC
 	outb(previous | RTC_REG_B_V_MASK, RTC_RW_CMOS_PORT);
@@ -55,6 +58,26 @@ void rtc_set_frequency(int rate) {
 }
 
 /**
+ * Handle a rtc interrupt based on how the RTC was initalized
+ */
+void rtc_handle_interrupt() {
+	cli();
+	// Print based on mode
+	if(init_mode == RTC_SILENT) {
+		/* Do nothing */
+	} else if (init_mode == RTC_VERBOSE) {
+		printf("RTC Interrupt!\n");
+	} else {
+		test_interrupts();
+	}
+	// Send PIC EOI
+	i8259_ioctl(I8259_SEND_EOI, IRQ_RTC);
+	// Send RTC EOI
+    rtc_ioctl(RTC_EOI, 0);
+	sti();
+}
+
+/**
  * ioctl for calling various RTC functions
  * @param  cmd The command to be executed
  * @param  arg The argument to pass to the command
@@ -63,7 +86,10 @@ void rtc_set_frequency(int rate) {
 int rtc_ioctl(int cmd, int arg) {
 	switch(cmd) {
 		case RTC_INIT:
-			rtc_init();
+			if(arg > 2 || arg < 0) {
+				return -1;
+			}
+			rtc_init(arg);
 			return 0;
 		case RTC_EOI:
 			rtc_special_eoi();

@@ -4,6 +4,7 @@
 #define _RTC_H
 
 #include "lib.h"
+#include "i8259.h"
 
 /* Constants for port selection */
 #define RTC_REG_NUM_PORT 0x70
@@ -16,12 +17,21 @@
 #define RTC_REG_A_SELECT 0x8A
 #define RTC_REG_C_SELECT 0x0C
 
+/* Init constants */
+#define RTC_SILENT       0
+#define RTC_VERBOSE	 	 1
+#define RTC_TEST         2
+
 /* ioctl constants */
 #define RTC_INIT         100
 #define RTC_EOI          200
 #define RTC_SET_FREQ     300
 
+
 /* External functions */
 int rtc_ioctl(int cmd, int arg);
+
+/* Interrupt functions */
+void rtc_handle_interrupt();
 
 #endif /* _RTC_H */

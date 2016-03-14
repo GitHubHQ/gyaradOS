@@ -18,7 +18,7 @@ rtc_irq:
     pushl %eax
     pushl %ecx
     pushl %edx
-    call rtc_interrupt
+    call rtc_handle_interrupt
     popl %edx
     popl %ecx
     popl %eax

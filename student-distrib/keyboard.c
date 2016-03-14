@@ -7,6 +7,9 @@ uint8_t code_to_ascii[] = {
 
 // int special_key = 0;
 
+/**
+ * Handles the keypress interrupt from the keyboard
+ */
 void handle_keypress() {
     cli();
 
