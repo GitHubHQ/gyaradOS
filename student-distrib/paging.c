@@ -1,5 +1,7 @@
 #include "types.h"
 #include "paging.h"
+#include "lib.h"
+
 
 void init_paging(){
 
@@ -10,12 +12,13 @@ void init_paging(){
 	 * Supervisor privilege, Read/Write, not present
 	 */
 	for(i = 0; i < PAGE_TABLE_SIZE; i++){
-		pageTable1[i] = pageAddress | SET_OFF; 
+		pageTable1[i] = pageAddress & SET_DEFAULT_MASK; 
 		pageAddress += PAGE_SIZE;
     }
+
    
-    //enabling the present and read/write bit for the video memory at physical location 0xB8000
-	pageTable1[0xB8] |= SET_PRESENT; 
+    //enabling the present and read/write and user bit for the video memory at physical location 0xB8000
+	pageTable1[VIDEO_PHYS_ADDR/PAGE_SIZE] |= SET_USER_PRESENT; 
     
     //enabling bits for R/W and Present and supervisor level(0x3)
 	pageDirectory[0] = (unsigned int)pageTable1 | SET_PRESENT;
@@ -40,5 +43,36 @@ void init_paging(){
 		: /* no outputs */			
 		: "a" (pageDirectory)			
 		);						
+    
+}
 
+
+
+/* This function is solely for testing purposes */
+void test_paging(){
+
+    // test for access at 0x400000
+    uint8_t* x = (uint8_t*) KERNEL_PHYS_ADDR;
+    printf("\nkernel: %x\n",*x);
+    
+    // test access from in kernel
+    uint8_t* y = (uint8_t*) 0x600000;
+    printf("\n4-8:%x\n",*y);
+
+    // test access to 0xB8000
+    uint8_t* z = (uint8_t*) VIDEO_PHYS_ADDR;
+    printf("\nvidmem: %x\n",*z);
+
+    /* The following lines are to test for page faults */
+    /*
+    uint8_t* a = (uint8_t*) 0x300000;
+    printf("\npost-vidmem: %x\n",*a);
+
+    uint8_t* b = (uint8_t*) 0xA8000;
+    printf("\npre-vidmem: %x\n",*b);
+
+
+    uint8_t* c = (uint8_t*) 0x900000;
+    printf("\npost-kernel: %x\n",*c);
+    */
 }
