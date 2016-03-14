@@ -2,6 +2,7 @@
 #define _KEYBOARD_H
 
 #include "lib.h"
+#include "i8259.h"
 
 // Keyboard port
 #define KEYBOARD_D_PORT          0x60

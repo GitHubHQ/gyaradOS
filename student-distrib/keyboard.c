@@ -8,6 +8,8 @@ uint8_t code_to_ascii[] = {
 // int special_key = 0;
 
 void handle_keypress() {
+    cli();
+
     uint8_t key_code = inb(KEYBOARD_D_PORT);
 
     // if(key_code == SPECIAL_KEY) {
@@ -15,12 +17,17 @@ void handle_keypress() {
     // } else if (special_key) {
     //     // handle special key from special key table
     // } else {
-        if(key_code > 0x58)
+        if(key_code > 0x58) {
+            i8259_ioctl(I8259_SEND_EOI, IRQ_KEYBOARD_CTRL);
+            sti();
             return;
+        }
 
         uint8_t key_ascii = code_to_ascii[key_code];
         if(key_ascii != ASCII_PLACEHOLDER) {
             printf("%c", code_to_ascii[key_code]);
         }
     // }
+    i8259_ioctl(I8259_SEND_EOI, IRQ_KEYBOARD_CTRL);
+    sti();
 }

@@ -4,6 +4,7 @@
 #include "rtc.h"
 #include "keyboard.h"
 #include "i8259.h"
+#include "irq.h"
 #include "lib.h"
 #include "x86_desc.h"
 
@@ -68,12 +69,6 @@ void align_except();
 
 // 18 - Machine check exception
 void machine_chk_except();
-
-// rtc interrupt
-void rtc_interrupt();
-
-// keyboard interrupt
-void keyboard_interrupt();
 
 // generic interrupt
 void generic_interrupt();
