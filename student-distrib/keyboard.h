@@ -7,6 +7,9 @@
 // Keyboard port
 #define KEYBOARD_D_PORT          0x60
 
+// Number of keys we want to detect
+#define MAX_SCANCODE             0x58
+
 // Make keys
 #define KEY_MAKE_ESC             0x01
 #define KEY_MAKE_1               0x02
