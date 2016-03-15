@@ -60,7 +60,7 @@ void rtc_set_frequency(int rate) {
 /**
  * Handle a rtc interrupt based on how the RTC was initalized
  */
-void rtc_handle_interrupt() {
+void rtc_handle_interrupt(void) {
 	cli();
 	// Print based on mode
 	if(init_mode == RTC_SILENT) {
@@ -71,36 +71,8 @@ void rtc_handle_interrupt() {
 		test_interrupts();
 	}
 	// Send PIC EOI
-	i8259_ioctl(I8259_SEND_EOI, IRQ_RTC);
+	send_eoi(IRQ_RTC);
 	// Send RTC EOI
-    rtc_ioctl(RTC_EOI, 0);
+    rtc_special_eoi();
 	sti();
-}
-
-/**
- * ioctl for calling various RTC functions
- * @param  cmd The command to be executed
- * @param  arg The argument to pass to the command
- * @return     -1 on failure, 0 on success
- */
-int rtc_ioctl(int cmd, int arg) {
-	switch(cmd) {
-		case RTC_INIT:
-			if(arg > 2 || arg < 0) {
-				return -1;
-			}
-			rtc_init(arg);
-			return 0;
-		case RTC_EOI:
-			rtc_special_eoi();
-			return 0;
-		case RTC_SET_FREQ:
-			if (arg > 15 || arg < 0) {
-				return -1;
-			}
-			rtc_set_frequency(arg);
-			return 0;
-		default:
-			return -1;
-	}
 }

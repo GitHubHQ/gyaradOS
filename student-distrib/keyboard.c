@@ -44,7 +44,7 @@ void handle_keypress() {
 
     // if its a break key, ignore
     if(key_code > MAX_SCANCODE) {
-        i8259_ioctl(I8259_SEND_EOI, IRQ_KEYBOARD_CTRL);
+        send_eoi(IRQ_KEYBOARD_CTRL);
         sti();
         return;
     }
@@ -56,6 +56,6 @@ void handle_keypress() {
     }
 
     // send eoi and allow interrupts again
-    i8259_ioctl(I8259_SEND_EOI, IRQ_KEYBOARD_CTRL);
+    send_eoi(IRQ_KEYBOARD_CTRL);
     sti();
 }

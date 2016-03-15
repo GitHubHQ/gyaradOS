@@ -47,7 +47,7 @@ void enable_irq(uint32_t irq_num) {
 	// Disable interrupts
 	cli_and_save(flags);
 	// Save mask and write to port
-	if(irq_num >= 8) {
+	if(irq_num & 8) {
 		irq_num -= 8;
 		mask = ~(1 << irq_num);
 		outb(inb(SLAVE_8259_PORT_2) & mask, SLAVE_8259_PORT_2);
@@ -71,7 +71,7 @@ void disable_irq(uint32_t irq_num){
 	// Disable interrupts
 	cli_and_save(flags);
 	// Save mask and write to port
-	if(irq_num >= 8) {
+	if(irq_num & 8) {
 		irq_num -= 8;
 		mask = (1 << irq_num);
 		outb(inb(SLAVE_8259_PORT_2) | mask, SLAVE_8259_PORT_2);
@@ -93,39 +93,5 @@ void send_eoi(uint32_t irq_num){
 		outb(EOI + 2, MASTER_8259_PORT);
 	} else {
 		outb(EOI | irq_num, MASTER_8259_PORT);
-	}
-}
-
-/**
- * ioctl for calling various 8259 functions
- * @param  cmd The command to be executed
- * @param  arg Argument value to be passed (not always needed)
- * @return     -1 on failure, 0 on success
- */
-int i8259_ioctl(int cmd, uint32_t arg) {
-	switch(cmd) {
-		case I8259_INIT:
-			i8259_init();
-			return 0;
-		case I8259_ENABLE_IRQ:
-			if (arg > 15 || arg < 0) {
-				return -1;
-			}
-			enable_irq(arg);
-			return 0;
-		case I8259_DISABLE_IRQ:
-			if (arg > 15 || arg < 0) {
-				return -1;
-			}
-			disable_irq(arg);
-			return 0;
-		case I8259_SEND_EOI:
-			if (arg > 15 || arg < 0) {
-				return -1;
-			}
-			send_eoi(arg);
-			return 0;
-		default:
-			return -1;
 	}
 }

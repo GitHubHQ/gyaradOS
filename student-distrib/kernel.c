@@ -154,26 +154,25 @@ entry (unsigned long magic, unsigned long addr)
 	}
 
 	/* Init the PIC */
-	i8259_ioctl(I8259_INIT, 0);
+	i8259_init();
 
 	/* Initialize devices, memory, filesystem, enable device interrupts on the
 	 * PIC, any other initialization stuff... */
 	printf("Enabling keyboard interrupts ... [ OK ]\n");
-	i8259_ioctl(I8259_ENABLE_IRQ, IRQ_KEYBOARD_CTRL);
+	enable_irq(IRQ_KEYBOARD_CTRL);
 	printf("Initalizing RTC              ... [ OK ]\n");
-	rtc_ioctl(RTC_INIT, RTC_SILENT);
+	rtc_init(RTC_SILENT);
 	printf("Enabling Slave PIC interrupts... [ OK ]\n");
-	i8259_ioctl(I8259_ENABLE_IRQ, IRQ_CAS_SIG);
+	enable_irq(IRQ_CAS_SIG);
 	printf("Enabling RTC interrupts      ... [ OK ]\n");
-	i8259_ioctl(I8259_ENABLE_IRQ, IRQ_RTC);
-	//rtc_ioctl(RTC_SET_FREQ, 15); // Setting RTC to slowest frequency
+	enable_irq(IRQ_RTC);
 
 	/* Enable interrupts */
 	/* Do not enable the following until after you have set up your
 	 * IDT correctly otherwise QEMU will triple fault and simple close
 	 * without showing you any output */
 	printf("Enabling Interrupts          ... [ OK ]\n");
-	printf("RTDC                         ... [ FEI]\n");
+	printf("FEI DENG                     ... [RTDC]\n");
 	sti();
 
 	/* Enable paging */

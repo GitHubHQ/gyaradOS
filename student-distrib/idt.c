@@ -254,14 +254,6 @@ void machine_chk_except() {
     while(1);
 }
 
-void rtc_interrupt() {
-    cli();
-    printf("RTC Interrupt!\n");
-    i8259_ioctl(I8259_SEND_EOI, IRQ_RTC);
-    rtc_ioctl(RTC_EOI, 0);
-    sti();
-}
-
 /*
  * general_interrupt()
  *
@@ -273,7 +265,7 @@ void rtc_interrupt() {
 void general_interrupt() {
     cli();
     printf("General interrupt recieved!\n");
-    i8259_ioctl(I8259_SEND_EOI, IRQ_SYSTEM_TIMER);
+    send_eoi(IRQ_SYSTEM_TIMER);
     sti();
 }
 

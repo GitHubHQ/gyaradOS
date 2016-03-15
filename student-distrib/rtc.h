@@ -3,8 +3,8 @@
 #ifndef _RTC_H
 #define _RTC_H
 
-#include "lib.h"
-#include "i8259.h"
+#include "../lib.h"
+#include "../i8259.h"
 
 /* Constants for port selection */
 #define RTC_REG_NUM_PORT 0x70
@@ -29,9 +29,7 @@
 
 
 /* External functions */
-int rtc_ioctl(int cmd, int arg);
-
-/* Interrupt functions */
-void rtc_handle_interrupt();
+void rtc_init(int mode);
+void rtc_handle_interrupt(void);
 
 #endif /* _RTC_H */

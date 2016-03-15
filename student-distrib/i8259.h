@@ -63,6 +63,9 @@
 #define I8259_SEND_EOI    400
 
 /* Externally-visible functions */
-int i8259_ioctl(int cmd, uint32_t arg);
+void i8259_init(void);
+void enable_irq(uint32_t irq_num);
+void disable_irq(uint32_t irq_num);
+void send_eoi(uint32_t irq_num);
 
 #endif /* _I8259_H */
