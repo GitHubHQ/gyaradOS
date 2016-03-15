@@ -191,6 +191,6 @@
 
 #define ASCII_PLACEHOLDER     0xFE
 
-void handle_keypress();
+void handle_keypress(void);
 
 #endif  /* _KEYBOARD_H */
