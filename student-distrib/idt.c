@@ -9,8 +9,15 @@
  * Returns: none
  */
 void divide_by_zero_except() {
+    // block interrupts
+    cli();
+
+    // print the interrupt type
     printf("\nEXCEPTION: Divide by zero!\n");
     while(1);
+
+    // unblock interrupts (to be used when loop is removed)
+    sti();
 }
 
 /*
@@ -22,8 +29,15 @@ void divide_by_zero_except() {
  * Returns: none
  */
 void debug_except() {
+    // block interrupts
+    cli();
+
+    // print the interrupt type
     printf("\nEXCEPTION: Debug!\n");
     while(1);
+
+    // unblock interrupts (to be used when loop is removed)
+    sti();
 }
 
 /*
@@ -35,8 +49,15 @@ void debug_except() {
  * Returns: none
  */
 void nmi_except() {
+    // block interrupts
+    cli();
+
+    // print the interrupt type
     printf("\nEXCEPTION: Non-maskable interrupt!\n");
     while(1);
+
+    // unblock interrupts (to be used when loop is removed)
+    sti();
 }
 
 /*
@@ -48,8 +69,15 @@ void nmi_except() {
  * Returns: none
  */
 void breakpoint_except() {
+    // block interrupts
+    cli();
+
+    // print the interrupt type
     printf("\nEXCEPTION: Breakpoint!\n");
     while(1);
+
+    // unblock interrupts (to be used when loop is removed)
+    sti();
 }
 
 /*
@@ -61,8 +89,15 @@ void breakpoint_except() {
  * Returns: none
  */
 void overflow_except() {
+    // block interrupts
+    cli();
+
+    // print the interrupt type
     printf("\nEXCEPTION: Into detected overflow!\n");
     while(1);
+
+    // unblock interrupts (to be used when loop is removed)
+    sti();
 }
 
 /*
@@ -74,8 +109,15 @@ void overflow_except() {
  * Returns: none
  */
 void oob_except() {
+    // block interrupts
+    cli();
+
+    // print the interrupt type
     printf("\nEXCEPTION: Out of bounds!\n");
     while(1);
+
+    // unblock interrupts (to be used when loop is removed)
+    sti();
 }
 
 /*
@@ -87,8 +129,15 @@ void oob_except() {
  * Returns: none
  */
 void opcode_except() {
+    // block interrupts
+    cli();
+
+    // print the interrupt type
     printf("\nEXCEPTION: Invalid opcode!\n");
     while(1);
+
+    // unblock interrupts (to be used when loop is removed)
+    sti();
 }
 
 /*
@@ -100,8 +149,15 @@ void opcode_except() {
  * Returns: none
  */
 void no_coproc_except() {
+    // block interrupts
+    cli();
+
+    // print the interrupt type
     printf("\nEXCEPTION: No coprocessor!\n");
     while(1);
+
+    // unblock interrupts (to be used when loop is removed)
+    sti();
 }
 
 /*
@@ -114,8 +170,15 @@ void no_coproc_except() {
  * Returns: none
  */
 void double_fault_except() {
+    // block interrupts
+    cli();
+
+    // print the interrupt type
     printf("\nEXCEPTION: Double fault!\n");
     while(1);
+
+    // unblock interrupts (to be used when loop is removed)
+    sti();
 }
 
 /*
@@ -128,8 +191,15 @@ void double_fault_except() {
  * Returns: none
  */
 void coproc_seg_overrun_except() {
+    // block interrupts
+    cli();
+
+    // print the interrupt type
     printf("\nEXCEPTION: Coprocessor segment overrun!\n");
     while(1);
+
+    // unblock interrupts (to be used when loop is removed)
+    sti();
 }
 
 /*
@@ -142,12 +212,19 @@ void coproc_seg_overrun_except() {
  * Returns: none
  */
 void tss_except() {
+    // block interrupts
+    cli();
+
+    // print the interrupt type
     printf("\nEXCEPTION: Bad TSS!\n");
     while(1);
+
+    // unblock interrupts (to be used when loop is removed)
+    sti();
 }
 
 /*
- * segment_exept()
+ * segment_except()
  *
  * Description: Prints the segment not present exception when detected along with
  *              relevant error code data, and then spins infinitely
@@ -155,9 +232,16 @@ void tss_except() {
  * Outputs: none
  * Returns: none
  */
-void segment_exept() {
+void segment_except() {
+    // block interrupts
+    cli();
+
+    // print the interrupt type
     printf("\nEXCEPTION: Segment not present!\n");
     while(1);
+
+    // unblock interrupts (to be used when loop is removed)
+    sti();
 }
 
 /*
@@ -170,8 +254,15 @@ void segment_exept() {
  * Returns: none
  */
 void stack_except() {
+    // block interrupts
+    cli();
+
+    // print the interrupt type
     printf("\nEXCEPTION: Stack fault!\n");
     while(1);
+
+    // unblock interrupts (to be used when loop is removed)
+    sti();
 }
 
 /*
@@ -184,8 +275,15 @@ void stack_except() {
  * Returns: none
  */
 void general_protec_except() {
+    // block interrupts
+    cli();
+
+    // print the interrupt type
     printf("\nEXCEPTION: General protection fault!\n");
     while(1);
+
+    // unblock interrupts (to be used when loop is removed)
+    sti();
 }
 
 /*
@@ -198,8 +296,15 @@ void general_protec_except() {
  * Returns: none
  */
 void page_fault_except() {
+    // block interrupts
+    cli();
+
+    // print the interrupt type
     printf("\nEXCEPTION: Page fault!\n");
     while(1);
+
+    // unblock interrupts (to be used when loop is removed)
+    sti();
 }
 
 /*
@@ -211,8 +316,15 @@ void page_fault_except() {
  * Returns: none
  */
 void unknown_interr_except() {
+    // block interrupts
+    cli();
+
+    // print the interrupt type
     printf("\nEXCEPTION: Unknown interrupt!\n");
     while(1);
+
+    // unblock interrupts (to be used when loop is removed)
+    sti();
 }
 
 /*
@@ -224,8 +336,15 @@ void unknown_interr_except() {
  * Returns: none
  */
 void coproc_except() {
+    // block interrupts
+    cli();
+
+    // print the interrupt type
     printf("\nEXCEPTION: Coprocessor fault!\n");
     while(1);
+
+    // unblock interrupts (to be used when loop is removed)
+    sti();
 }
 
 /*
@@ -237,8 +356,15 @@ void coproc_except() {
  * Returns: none
  */
 void align_except() {
+    // block interrupts
+    cli();
+
+    // print the interrupt type
     printf("\nEXCEPTION: Alignment check!\n");
     while(1);
+
+    // unblock interrupts (to be used when loop is removed)
+    sti();
 }
 
 /*
@@ -250,8 +376,15 @@ void align_except() {
  * Returns: none
  */
 void machine_chk_except() {
+    // block interrupts
+    cli();
+
+    // print the interrupt type
     printf("\nEXCEPTION: Machine check!\n");
     while(1);
+
+    // unblock interrupts (to be used when loop is removed)
+    sti();
 }
 
 /*
@@ -304,25 +437,25 @@ void init_idt() {
     }
 
     // set the correct idt entries based off x86 convention
-    SET_IDT_ENTRY(idt[0], divide_by_zero_except);
-    SET_IDT_ENTRY(idt[1], debug_except);
-    SET_IDT_ENTRY(idt[2], nmi_except);
-    SET_IDT_ENTRY(idt[3], breakpoint_except);
-    SET_IDT_ENTRY(idt[4], overflow_except);
-    SET_IDT_ENTRY(idt[5], oob_except);
-    SET_IDT_ENTRY(idt[6], opcode_except);
-    SET_IDT_ENTRY(idt[7], no_coproc_except);
-    SET_IDT_ENTRY(idt[8], double_fault_except);
-    SET_IDT_ENTRY(idt[9], coproc_seg_overrun_except);
-    SET_IDT_ENTRY(idt[10], tss_except);
-    SET_IDT_ENTRY(idt[11], segment_exept);
-    SET_IDT_ENTRY(idt[12], stack_except);
-    SET_IDT_ENTRY(idt[13], general_protec_except);
-    SET_IDT_ENTRY(idt[14], page_fault_except);
-    SET_IDT_ENTRY(idt[15], unknown_interr_except);
-    SET_IDT_ENTRY(idt[16], coproc_except);
-    SET_IDT_ENTRY(idt[17], align_except);
-    SET_IDT_ENTRY(idt[18], machine_chk_except);
+    SET_IDT_ENTRY(idt[0], divide_by_zero_irq);
+    SET_IDT_ENTRY(idt[1], debug_irq);
+    SET_IDT_ENTRY(idt[2], nmi_irq);
+    SET_IDT_ENTRY(idt[3], breakpoint_irq);
+    SET_IDT_ENTRY(idt[4], overflow_irq);
+    SET_IDT_ENTRY(idt[5], oob_irq);
+    SET_IDT_ENTRY(idt[6], opcode_irq);
+    SET_IDT_ENTRY(idt[7], no_coproc_irq);
+    SET_IDT_ENTRY(idt[8], double_fault_irq);
+    SET_IDT_ENTRY(idt[9], coproc_seg_overrun_irq);
+    SET_IDT_ENTRY(idt[10], tss_irq);
+    SET_IDT_ENTRY(idt[11], segment_irq);
+    SET_IDT_ENTRY(idt[12], stack_irq);
+    SET_IDT_ENTRY(idt[13], general_protec_irq);
+    SET_IDT_ENTRY(idt[14], page_fault_irq);
+    SET_IDT_ENTRY(idt[15], unknown_interr_irq);
+    SET_IDT_ENTRY(idt[16], coproc_irq);
+    SET_IDT_ENTRY(idt[17], align_irq);
+    SET_IDT_ENTRY(idt[18], machine_chk_irq);
 
     // initialize the rest of the vectors as interrupts
     for(i = NUM_EXCEPTIONS; i < NUM_VEC; i++) {

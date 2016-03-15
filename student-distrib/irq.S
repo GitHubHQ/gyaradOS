@@ -1,9 +1,514 @@
 
 #define ASM 1
 
+// exceptions
+.global divide_by_zero_irq
+.global debug_irq
+.global nmi_irq
+.global breakpoint_irq
+.global overflow_irq
+.global oob_irq
+.global opcode_irq
+.global no_coproc_irq
+.global double_fault_irq
+.global coproc_seg_overrun_irq
+.global tss_irq
+.global segment_irq
+.global stack_irq
+.global general_protec_irq
+.global page_fault_irq
+.global unknown_interr_irq
+.global coproc_irq
+.global align_irq
+.global machine_chk_irq
+
+// interrupts
 .global key_irq
 .global rtc_irq
 .global general_irq
+
+/**
+ * Exceptions
+ */
+
+/*
+ * divide_by_zero_irq()
+ *
+ * Description: 
+ * Inputs: none
+ * Outputs: none
+ * Returns: none
+ */
+divide_by_zero_irq:
+    // save caller saved registers
+    pushl %eax
+    pushl %ecx
+    pushl %edx
+
+    // call the function
+    call divide_by_zero_except
+
+    // restore caller saved registers
+    popl %edx
+    popl %ecx
+    popl %eax
+
+    // return to the interrupt handler
+    iret
+
+/*
+ * debug_irq()
+ *
+ * Description: 
+ * Inputs: none
+ * Outputs: none
+ * Returns: none
+ */
+debug_irq:
+    // save caller saved registers
+    pushl %eax
+    pushl %ecx
+    pushl %edx
+
+    // call the function
+    call debug_except
+
+    // restore caller saved registers
+    popl %edx
+    popl %ecx
+    popl %eax
+
+    // return to the interrupt handler
+    iret
+
+/*
+ * nmi_irq()
+ *
+ * Description: 
+ * Inputs: none
+ * Outputs: none
+ * Returns: none
+ */
+nmi_irq:
+    // save caller saved registers
+    pushl %eax
+    pushl %ecx
+    pushl %edx
+
+    // call the function
+    call nmi_except
+
+    // restore caller saved registers
+    popl %edx
+    popl %ecx
+    popl %eax
+
+    // return to the interrupt handler
+    iret
+
+/*
+ * breakpoint_irq()
+ *
+ * Description: 
+ * Inputs: none
+ * Outputs: none
+ * Returns: none
+ */
+breakpoint_irq:
+    // save caller saved registers
+    pushl %eax
+    pushl %ecx
+    pushl %edx
+
+    // call the function
+    call breakpoint_except
+
+    // restore caller saved registers
+    popl %edx
+    popl %ecx
+    popl %eax
+
+    // return to the interrupt handler
+    iret
+
+/*
+ * overflow_irq()
+ *
+ * Description: 
+ * Inputs: none
+ * Outputs: none
+ * Returns: none
+ */
+overflow_irq:
+    // save caller saved registers
+    pushl %eax
+    pushl %ecx
+    pushl %edx
+
+    // call the function
+    call overflow_except
+
+    // restore caller saved registers
+    popl %edx
+    popl %ecx
+    popl %eax
+
+    // return to the interrupt handler
+    iret
+
+/*
+ * oob_irq()
+ *
+ * Description: 
+ * Inputs: none
+ * Outputs: none
+ * Returns: none
+ */
+oob_irq:
+    // save caller saved registers
+    pushl %eax
+    pushl %ecx
+    pushl %edx
+
+    // call the function
+    call oob_except
+
+    // restore caller saved registers
+    popl %edx
+    popl %ecx
+    popl %eax
+
+    // return to the interrupt handler
+    iret
+
+/*
+ * opcode_irq()
+ *
+ * Description: 
+ * Inputs: none
+ * Outputs: none
+ * Returns: none
+ */
+opcode_irq:
+    // save caller saved registers
+    pushl %eax
+    pushl %ecx
+    pushl %edx
+
+    // call the function
+    call opcode_except
+
+    // restore caller saved registers
+    popl %edx
+    popl %ecx
+    popl %eax
+
+    // return to the interrupt handler
+    iret
+
+/*
+ * no_coproc_irq()
+ *
+ * Description: 
+ * Inputs: none
+ * Outputs: none
+ * Returns: none
+ */
+no_coproc_irq:
+    // save caller saved registers
+    pushl %eax
+    pushl %ecx
+    pushl %edx
+
+    // call the function
+    call no_coproc_except
+
+    // restore caller saved registers
+    popl %edx
+    popl %ecx
+    popl %eax
+
+    // return to the interrupt handler
+    iret
+
+/*
+ * double_fault_irq()
+ *
+ * Description: 
+ * Inputs: none
+ * Outputs: none
+ * Returns: none
+ */
+double_fault_irq:
+    // save caller saved registers
+    pushl %eax
+    pushl %ecx
+    pushl %edx
+
+    // call the function
+    call double_fault_except
+
+    // restore caller saved registers
+    popl %edx
+    popl %ecx
+    popl %eax
+
+    // return to the interrupt handler
+    iret
+
+/*
+ * coproc_seg_overrun_irq()
+ *
+ * Description: 
+ * Inputs: none
+ * Outputs: none
+ * Returns: none
+ */
+coproc_seg_overrun_irq:
+    // save caller saved registers
+    pushl %eax
+    pushl %ecx
+    pushl %edx
+
+    // call the function
+    call coproc_seg_overrun_except
+
+    // restore caller saved registers
+    popl %edx
+    popl %ecx
+    popl %eax
+
+    // return to the interrupt handler
+    iret
+
+/*
+ * tss_irq()
+ *
+ * Description: 
+ * Inputs: none
+ * Outputs: none
+ * Returns: none
+ */
+tss_irq:
+    // save caller saved registers
+    pushl %eax
+    pushl %ecx
+    pushl %edx
+
+    // call the function
+    call tss_except
+
+    // restore caller saved registers
+    popl %edx
+    popl %ecx
+    popl %eax
+
+    // return to the interrupt handler
+    iret
+
+/*
+ * segment_irq()
+ *
+ * Description: 
+ * Inputs: none
+ * Outputs: none
+ * Returns: none
+ */
+segment_irq:
+    // save caller saved registers
+    pushl %eax
+    pushl %ecx
+    pushl %edx
+
+    // call the function
+    call segment_except
+
+    // restore caller saved registers
+    popl %edx
+    popl %ecx
+    popl %eax
+
+    // return to the interrupt handler
+    iret
+
+/*
+ * stack_irq()
+ *
+ * Description: 
+ * Inputs: none
+ * Outputs: none
+ * Returns: none
+ */
+stack_irq:
+    // save caller saved registers
+    pushl %eax
+    pushl %ecx
+    pushl %edx
+
+    // call the function
+    call stack_except
+
+    // restore caller saved registers
+    popl %edx
+    popl %ecx
+    popl %eax
+
+    // return to the interrupt handler
+    iret
+
+/*
+ * general_protec_irq()
+ *
+ * Description: 
+ * Inputs: none
+ * Outputs: none
+ * Returns: none
+ */
+general_protec_irq:
+    // save caller saved registers
+    pushl %eax
+    pushl %ecx
+    pushl %edx
+
+    // call the function
+    call general_protec_except
+
+    // restore caller saved registers
+    popl %edx
+    popl %ecx
+    popl %eax
+
+    // return to the interrupt handler
+    iret
+
+/*
+ * page_fault_irq()
+ *
+ * Description: 
+ * Inputs: none
+ * Outputs: none
+ * Returns: none
+ */
+page_fault_irq:
+    // save caller saved registers
+    pushl %eax
+    pushl %ecx
+    pushl %edx
+
+    // call the function
+    call page_fault_except
+
+    // restore caller saved registers
+    popl %edx
+    popl %ecx
+    popl %eax
+
+    // return to the interrupt handler
+    iret
+
+/*
+ * unknown_interr_irq()
+ *
+ * Description: 
+ * Inputs: none
+ * Outputs: none
+ * Returns: none
+ */
+unknown_interr_irq:
+    // save caller saved registers
+    pushl %eax
+    pushl %ecx
+    pushl %edx
+
+    // call the function
+    call unknown_interr_except
+
+    // restore caller saved registers
+    popl %edx
+    popl %ecx
+    popl %eax
+
+    // return to the interrupt handler
+    iret
+
+/*
+ * coproc_irq()
+ *
+ * Description: 
+ * Inputs: none
+ * Outputs: none
+ * Returns: none
+ */
+coproc_irq:
+    // save caller saved registers
+    pushl %eax
+    pushl %ecx
+    pushl %edx
+
+    // call the function
+    call coproc_except
+
+    // restore caller saved registers
+    popl %edx
+    popl %ecx
+    popl %eax
+
+    // return to the interrupt handler
+    iret
+
+/*
+ * align_irq()
+ *
+ * Description: 
+ * Inputs: none
+ * Outputs: none
+ * Returns: none
+ */
+align_irq:
+    // save caller saved registers
+    pushl %eax
+    pushl %ecx
+    pushl %edx
+
+    // call the function
+    call align_except
+
+    // restore caller saved registers
+    popl %edx
+    popl %ecx
+    popl %eax
+
+    // return to the interrupt handler
+    iret
+
+/*
+ * machine_chk_irq()
+ *
+ * Description: 
+ * Inputs: none
+ * Outputs: none
+ * Returns: none
+ */
+machine_chk_irq:
+    // save caller saved registers
+    pushl %eax
+    pushl %ecx
+    pushl %edx
+
+    // call the function
+    call machine_chk_except
+
+    // restore caller saved registers
+    popl %edx
+    popl %ecx
+    popl %eax
+
+    // return to the interrupt handler
+    iret
+
+/**
+ * Interrupts
+ */
 
 /*
  * key_irq()

@@ -47,7 +47,7 @@ void coproc_seg_overrun_except();
 void tss_except();
 
 // 11 - Segment not present (pushes an error code)
-void segment_exept();
+void segment_except();
 
 // 12 - Stack fault (pushes an error code)
 void stack_except();
