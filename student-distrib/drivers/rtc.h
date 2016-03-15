@@ -3,8 +3,9 @@
 #ifndef _RTC_H
 #define _RTC_H
 
-#include "../lib.h"
+#include "../libs/lib.h"
 #include "i8259.h"
+#include "../libs/math.h"
 
 /* Constants for port selection */
 #define RTC_REG_NUM_PORT 0x70

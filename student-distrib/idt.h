@@ -5,7 +5,7 @@
 #include "drivers/keyboard.h"
 #include "drivers/i8259.h"
 #include "irq.h"
-#include "lib.h"
+#include "libs/lib.h"
 #include "x86_desc.h"
 
 #define NUM_EXCEPTIONS 0x20

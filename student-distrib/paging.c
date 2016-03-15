@@ -1,7 +1,4 @@
-#include "types.h"
 #include "paging.h"
-#include "lib.h"
-
 /* void init_paging()
  * Description: initialize video memory page in 0-4mb range, and kernel memory
  * from 4-8mb

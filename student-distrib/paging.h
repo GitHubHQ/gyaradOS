@@ -1,7 +1,8 @@
 
 #ifndef _PAGING_H
 #define _PAGING_H
-#include "types.h"
+#include "libs/types.h"
+#include "libs/lib.h"
 
 #define PAGE_DIRECTORY_SIZE     1024
 #define PAGE_TABLE_SIZE         1024

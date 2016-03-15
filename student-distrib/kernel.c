@@ -2,11 +2,11 @@
  * vim:ts=4 noexpandtab
  */
 
-#include "multiboot.h"
-#include "x86_desc.h"
-#include "lib.h"
 #include "drivers/i8259.h"
 #include "drivers/rtc.h"
+#include "libs/lib.h"
+#include "multiboot.h"
+#include "x86_desc.h"
 #include "debug.h"
 #include "paging.h"
 
