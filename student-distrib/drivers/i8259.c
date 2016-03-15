@@ -2,7 +2,6 @@
  */
 
 #include "i8259.h"
-#include "lib.h"
 
 /* Interrupt masks to determine which interrupts
  * are enabled and disabled */

@@ -3,7 +3,7 @@
 #ifndef _RTC_H
 #define _RTC_H
 
-#include "lib.h"
+#include "../lib.h"
 #include "i8259.h"
 
 /* Constants for port selection */

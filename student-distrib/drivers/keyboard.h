@@ -1,7 +1,7 @@
 #ifndef _KEYBOARD_H
 #define _KEYBOARD_H
 
-#include "lib.h"
+#include "../lib.h"
 #include "i8259.h"
 
 // Keyboard port

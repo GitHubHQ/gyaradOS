@@ -1,9 +1,9 @@
 #ifndef _IDT_H
 #define _IDT_H
 
-#include "rtc.h"
-#include "keyboard.h"
-#include "i8259.h"
+#include "drivers/rtc.h"
+#include "drivers/keyboard.h"
+#include "drivers/i8259.h"
 #include "irq.h"
 #include "lib.h"
 #include "x86_desc.h"

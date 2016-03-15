@@ -14,7 +14,7 @@ CC=gcc
 CPPFLAGS +=-nostdinc -g
 
 # This generates the list of source files
-SRC =  $(wildcard *.S) $(wildcard *.c)
+SRC =  $(wildcard *.S) $(wildcard *.c) $(wildcard **/*.S) $(wildcard **/*.c)
 
 # This generates the list of .o files. The order matters, boot.o must be first
 OBJS  = boot.o
@@ -33,6 +33,7 @@ Makefile.dep: $(SRC)
 
 .PHONY: clean
 clean: 
+	rm -f */*.o Makefile.dep bootimg
 	rm -f *.o Makefile.dep bootimg
 
 ifneq ($(MAKECMDGOALS),dep)
