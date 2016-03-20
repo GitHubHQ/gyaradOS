@@ -23,14 +23,18 @@
 #define RTC_VERBOSE	 	 1
 #define RTC_TEST         2
 
-/* ioctl constants */
-#define RTC_INIT         100
-#define RTC_EOI          200
-#define RTC_SET_FREQ     300
+/* Other constants */
+#define RTC_DEFAULT_HZ   10
 
 
 /* External functions */
 void rtc_init(int mode);
 void rtc_handle_interrupt(void);
+
+/* External Sys Call functions */
+int32_t rtc_open(void);
+int32_t rtc_close(void);
+int32_t rtc_read(int32_t fd, void* buf, int32_t nbytes);
+int32_t rtc_write (int32_t fd, int32_t* buf, int32_t nbytes);
 
 #endif /* _RTC_H */

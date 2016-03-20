@@ -2,7 +2,51 @@
  */
 #include "rtc.h"
 
-int init_mode;
+int32_t init_mode;
+
+volatile int32_t intr_occ = 0;
+
+/**
+ * Sets the frequency divisor for the RTC clock
+ * @param frequency A value between 2 and 1024 inclusive to set the rate to
+ */
+int32_t rtc_set_frequency(int32_t frequency) {
+	float rateVal = logBase2(frequency);
+	int32_t rate;
+
+	// Error checking
+	if (frequency < 2 || frequency > 1024)
+	{
+		return -1;
+	}
+
+	// Be nice to the user, round up for down for them if they don't give a power of 2
+	if( ((int)((int)(rateVal * 10) % 10)) > 5) {
+		rate = ceil(rateVal);
+	} else {
+		rate = floor(rateVal);
+	}
+
+	// Get the actual divider
+	rate = 16 - rate;
+
+	// Normalize the rate
+	rate &= 0x0F;
+	// Disable interrupts
+	cli();
+	// Select the A register
+	outb(RTC_REG_A_SELECT, RTC_REG_NUM_PORT);
+	// Grab the current value
+	char previous = inb(RTC_RW_CMOS_PORT);
+	// Set index
+	outb(RTC_REG_A_SELECT, RTC_REG_NUM_PORT);
+	// Write the new divisor value for rate
+	outb((previous & RTC_REG_A_V_MASK) | rate, RTC_RW_CMOS_PORT);
+	// Enable interrupts
+	sti();
+	// Success
+	return 0;
+}
 
 /**
  * Initalizes the RTC to default interrupt values (1024 Hz)
@@ -21,6 +65,8 @@ void rtc_init(int mode) {
 	outb(previous | RTC_REG_B_V_MASK, RTC_RW_CMOS_PORT);
 	// Enable interrupts
 	sti();
+
+	rtc_set_frequency(RTC_DEFAULT_HZ);
 }
 
 /**
@@ -37,31 +83,11 @@ void rtc_special_eoi() {
 }
 
 /**
- * Sets the frequency divisor for the RTC clock
- * @param rate A value between 1 and 15 inclusive to divide by
- */
-void rtc_set_frequency(int rate) {
-	// Normalize the rate
-	rate &= 0x0F;
-	// Disable interrupts
-	cli();
-	// Select the A register
-	outb(RTC_REG_A_SELECT, RTC_REG_NUM_PORT);
-	// Grab the current value
-	char previous = inb(RTC_RW_CMOS_PORT);
-	// Set index
-	outb(RTC_REG_A_SELECT, RTC_REG_NUM_PORT);
-	// Write the new divisor value for rate
-	outb((previous & RTC_REG_A_V_MASK) | rate, RTC_RW_CMOS_PORT);
-	// Enable interrupts
-	sti();
-}
-
-/**
  * Handle a rtc interrupt based on how the RTC was initalized
  */
 void rtc_handle_interrupt(void) {
 	cli();
+	intr_occ = 1;
 	// Print based on mode
 	if(init_mode == RTC_SILENT) {
 		/* Do nothing */
@@ -75,4 +101,34 @@ void rtc_handle_interrupt(void) {
 	// Send RTC EOI
     rtc_special_eoi();
 	sti();
+}
+
+int32_t rtc_open(void) {
+	rtc_set_frequency(RTC_DEFAULT_HZ);
+	return 0;
+}
+
+int32_t rtc_close(void) {
+	//Reset frequency and return
+	rtc_set_frequency(RTC_DEFAULT_HZ);
+	return 0;
+}
+
+int32_t rtc_read(int32_t fd, void* buf, int32_t nbytes) {
+	while(!intr_occ) {
+		/* Do nothing */
+	}
+
+	intr_occ = 0;
+
+	return 0;
+}
+
+int32_t rtc_write (int32_t fd, int32_t* buf, int32_t nbytes) {
+	if (buf == NULL)
+	{
+		return -1;
+	}
+	int32_t frequency = *buf;
+	return rtc_set_frequency(frequency);
 }
