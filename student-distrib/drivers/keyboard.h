@@ -8,7 +8,7 @@
 #define KEYBOARD_D_PORT          0x60
 
 // Number of keys we want to detect
-#define MAX_SCANCODE             0x58
+#define MAX_MAKE_SCANCODE             0x59
 
 // Make keys
 #define KEY_MAKE_ESC             0x01
@@ -97,7 +97,18 @@
 #define KEY_MAKE_F11             0x57
 #define KEY_MAKE_F12             0x58
 
+// Break keys
+#define KEY_BREAK_L_CTRL          0x9D
+#define KEY_BREAK_L_SHIFT         0xAA
+#define KEY_BREAK_R_SHIFT         0xB6
+#define KEY_BREAK_CAPS            0xBA
+
+// special make keys
 #define SPECIAL_KEY              0xE0
+#define KEY_MAKE_R_CTRL          0x1D
+#define KEY_BREAK_R_CTRL         0x9D
+#define KEY_MAKE_R_ALT           0x38
+#define KEY_BREAK_R_ALT          0xB8
 
 // ASCII keys
 #define ASCII_A               0x61
@@ -164,13 +175,38 @@
 #define ASCII_KP_PERIOD       0x2E
 #define ASCII_NULL_CHAR       0x00
 
-// no ascii to print for these:
+#define ASCII_CAPS_A          0x41
+#define ASCII_CAPS_B          0x42
+#define ASCII_CAPS_C          0x43
+#define ASCII_CAPS_D          0x44
+#define ASCII_CAPS_E          0x45
+#define ASCII_CAPS_F          0x46
+#define ASCII_CAPS_G          0x47
+#define ASCII_CAPS_H          0x48
+#define ASCII_CAPS_I          0x49
+#define ASCII_CAPS_J          0x4A
+#define ASCII_CAPS_K          0x4B
+#define ASCII_CAPS_L          0x4C
+#define ASCII_CAPS_M          0x4D
+#define ASCII_CAPS_N          0x4E
+#define ASCII_CAPS_O          0x4F
+#define ASCII_CAPS_P          0x50
+#define ASCII_CAPS_Q          0x51
+#define ASCII_CAPS_R          0x52
+#define ASCII_CAPS_S          0x53
+#define ASCII_CAPS_T          0x54
+#define ASCII_CAPS_U          0x55
+#define ASCII_CAPS_V          0x56
+#define ASCII_CAPS_W          0x57
+#define ASCII_CAPS_X          0x58
+#define ASCII_CAPS_Y          0x59
+#define ASCII_CAPS_Z          0x5A
+
+#define ASCII_PLACEHOLDER     0xFE
+
+// not currently handled:
 // #define KEY_MAKE_ESC             0x01
-// #define KEY_MAKE_BKSP            0x0E
 // #define KEY_MAKE_TAB             0x0F
-// #define KEY_MAKE_ENTER           0x1C
-// #define KEY_MAKE_L_CTRL          0x1D
-// #define KEY_MAKE_L_SHIFT         0x2A
 // #define KEY_MAKE_F1              0x3B
 // #define KEY_MAKE_F2              0x3C
 // #define KEY_MAKE_F3              0x3D
@@ -183,13 +219,9 @@
 // #define KEY_MAKE_F10             0x44
 // #define KEY_MAKE_F11             0x57
 // #define KEY_MAKE_F12             0x58
-// #define KEY_MAKE_R_SHIFT         0x36
-// #define KEY_MAKE_CAPS            0x3A
 // #define KEY_MAKE_L_ALT           0x38
 // #define KEY_MAKE_NUM             0x45
 // #define KEY_MAKE_SCROLL          0x46
-
-#define ASCII_PLACEHOLDER     0xFE
 
 void handle_keypress(void);
 

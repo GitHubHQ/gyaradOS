@@ -194,9 +194,71 @@ putc(uint8_t c)
         *(uint8_t *)(video_mem + ((NUM_COLS*screen_y + screen_x) << 1)) = c;
         *(uint8_t *)(video_mem + ((NUM_COLS*screen_y + screen_x) << 1) + 1) = ATTRIB;
         screen_x++;
+        
         screen_x %= NUM_COLS;
         screen_y = (screen_y + (screen_x / NUM_COLS)) % NUM_ROWS;
     }
+}
+
+void update_cursor(int row, int col) {
+	unsigned short position=(row * NUM_COLS) + col;
+
+	// cursor LOW port to vga INDEX register
+	outb(0x3D4, 0x0F);
+	outb(0x3D5, (unsigned char)(position&0xFF));
+
+	// cursor HIGH port to vga INDEX register
+	outb(0x3D4, 0x0E);
+	outb(0x3D5, (unsigned char )((position>>8)&0xFF));
+}
+
+/*
+* void print_char(uint8_t c);
+*   Inputs: uint_8* c = character to print
+*   Return Value: void
+*	Function: Output a character to the console, inserting newlines as necessary
+*/
+
+void print_char(uint8_t c) {
+    if(c == '\n' || c == '\r') {
+        screen_y++;
+        screen_x=0;
+    } else {
+        *(uint8_t *)(video_mem + ((NUM_COLS*screen_y + screen_x) << 1)) = c;
+        *(uint8_t *)(video_mem + ((NUM_COLS*screen_y + screen_x) << 1) + 1) = ATTRIB;
+        screen_x++;
+
+        if(screen_x == NUM_COLS) {
+        	screen_x = 0;
+        	screen_y++;
+        }
+        
+        screen_x %= NUM_COLS;
+        screen_y = (screen_y + (screen_x / NUM_COLS)) % NUM_ROWS;
+    }
+
+    update_cursor(screen_y, screen_x);
+}
+
+void new_line() {
+	screen_y++;
+	screen_x = 0;
+
+    update_cursor(screen_y, screen_x);
+}
+
+void del_last_char() {
+	if(screen_x == 0) {
+		screen_x = NUM_COLS;
+		screen_y--;
+	} else {
+		screen_x--;
+	}
+
+    *(uint8_t *)(video_mem + ((NUM_COLS*screen_y + screen_x) << 1)) = ' ';
+    *(uint8_t *)(video_mem + ((NUM_COLS*screen_y + screen_x) << 1) + 1) = ATTRIB;
+
+    update_cursor(screen_y, screen_x);
 }
 
 /*
