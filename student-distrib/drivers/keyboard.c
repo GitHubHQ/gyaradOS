@@ -130,6 +130,38 @@ void make_backspace() {
 }
 
 /**
+ * Wait for a keyboard ACK
+ */
+void kbd_ack(void){ 
+  while(!(inb(KEYBOARD_D_PORT)==KEYBOARD_D_ACK));
+}
+
+/**
+ * Set the keyboard LED status 
+ * @param caps   0 or 1 If caps lock is enabled
+ * @param num    0 or 1 If num lock is enabled
+ * @param scroll 0 or 1 If scroll lock is enabled
+ */
+void kbd_led_handling(int caps, int num, int scroll) {
+    // Tell keyboard we want to set LED's and wait for ack
+    outb(KEYBOARD_LED_V, KEYBOARD_D_PORT);
+    kbd_ack();
+    // If nothing is enabled, then all LEDs will be set to 0 (off)
+    int ledstatus = 0x0;
+    // Check which LED to enable and set based on bit masks
+    if (caps) {
+        ledstatus = ledstatus | 0x4;
+    }
+    if (num) {
+        ledstatus = ledstatus | 0x2;
+    }
+    if (scroll) {
+        ledstatus = ledstatus | 0x1;
+    }
+    outb(ledstatus, KEYBOARD_D_PORT);
+}
+
+/**
  * handle_keypress()
  * 
  * Description: Prints the key pressed by the keyboard to the screen
@@ -180,6 +212,7 @@ void handle_keypress() {
                     break;
                 case KEY_MAKE_CAPS:
                     caps_on = !caps_on;
+                    kbd_led_handling(caps_on, 0, 0);
                     break;
                 case KEY_MAKE_ENTER:
                     clear_buf();
