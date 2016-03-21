@@ -1,8 +1,8 @@
 #ifndef _FILES_H
 #define _FILES_H
 
-#include "libs/types.h"
-#include "libs/lib.h"
+#include "../libs/types.h"
+#include "../libs/lib.h"
 
 struct dentry_t {
 	uint8_t file_name[32];
