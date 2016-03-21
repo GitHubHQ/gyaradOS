@@ -158,26 +158,34 @@ entry (unsigned long magic, unsigned long addr)
 
 	/* Initialize devices, memory, filesystem, enable device interrupts on the
 	 * PIC, any other initialization stuff... */
-	printf("Enabling keyboard interrupts ... [ OK ]\n");
+	printf("Enabling keyboard interrupts  ... ");
 	enable_irq(IRQ_KEYBOARD_CTRL);
-	printf("Initalizing RTC              ... [ OK ]\n");
+	printf("[ OK ]\n");
+
+	printf("Initalizing RTC               ... ");
 	rtc_init(RTC_SILENT);
-	printf("Enabling Slave PIC interrupts... [ OK ]\n");
+	printf("[ OK ]\n");
+
+	printf("Enabling Slave PIC interrupts ... ");
 	enable_irq(IRQ_CAS_SIG);
-	printf("Enabling RTC interrupts      ... [ OK ]\n");
+	printf("[ OK ]\n");
+
+	printf("Enabling RTC interrupts       ... ");
 	enable_irq(IRQ_RTC);
+	printf("[ OK ]\n");
 
 	/* Enable interrupts */
 	/* Do not enable the following until after you have set up your
 	 * IDT correctly otherwise QEMU will triple fault and simple close
 	 * without showing you any output */
-	printf("Enabling Interrupts          ... [ OK ]\n");
-	printf("FEI DENG                     ... [RTDC]\n");
+	printf("Enabling Interrupts           ... ");
 	sti();
+	printf("[ OK ]\n");
 
 	/* Enable paging */
-	printf("Enabling Paging              ... [ OK ]\n");
+	printf("Enabling Paging               ... ");
 	init_paging();
+	printf("[ OK ]\n");
 
 	/* Execute the first program (`shell') ... */
 
