@@ -187,6 +187,9 @@ entry (unsigned long magic, unsigned long addr)
 	init_paging();
 	printf("[ OK ]\n");
 
+	/* Clear the screen */
+	clear_screen();
+
 	/* Execute the first program (`shell') ... */
 
 	/* Spin (nicely, so we don't chew up cycles) */
