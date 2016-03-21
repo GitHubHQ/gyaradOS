@@ -22,6 +22,7 @@ uint8_t code_to_ascii[] = {
     ASCII_PLACEHOLDER, ASCII_PLACEHOLDER
 };
 
+// array of capitalized letters
 uint8_t caps_ascii[] = {
     ASCII_NULL_CHAR, ASCII_PLACEHOLDER, '!', '@', '#', '$',
     '%', '^', '&', '*', '(', ')', '_',
@@ -42,12 +43,91 @@ uint8_t caps_ascii[] = {
     ASCII_PLACEHOLDER, ASCII_PLACEHOLDER
 };
 
+int8_t keyboard_buf[MAX_CHARS_IN_BUF];
+uint8_t num_chars_in_buf = 0;
+
 // variables designating status of special keys
 int cntrl_l_on = 0;
 int cntrl_r_on = 0;
 int caps_on = 0;
 int shift_l_on = 0;
 int shift_r_on = 0;
+
+int32_t terminal_open (const uint8_t * filename) {
+    int i = 0;
+
+    for(i = 0; i < num_chars_in_buf; i++) {
+        keyboard_buf[i] = NULL;
+    }
+    num_chars_in_buf = 0;
+
+    return 0;
+}
+
+int32_t terminal_close (int32_t fd) {
+    return 0;
+}
+
+int32_t terminal_read (int32_t fd, uint8_t * buf, int32_t nbytes) {
+    int bytes_read = 0;
+    int i = 0;
+
+    for(i = 0; i < nbytes; i++) {
+        buf[i] = keyboard_buf[i];
+        bytes_read++;
+    }
+
+    return bytes_read;
+}
+
+int32_t terminal_write (int32_t fd, const uint8_t * buf, int32_t nbytes) {
+    int num_printed = 0;
+    int i = 0;
+
+    for(i = 0; i < nbytes; i++) {
+        print_char(buf[i]);
+        num_printed++;
+    }
+
+    return num_printed;
+}
+
+void reset_term() {
+    int i = 0;
+
+    for(i = 0; i < num_chars_in_buf; i++) {
+        keyboard_buf[i] = NULL;
+    }
+    num_chars_in_buf = 0;
+
+    clear_screen();
+}
+
+void add_char_to_buffer(uint8_t new_char) {
+    // if we haven't reached the buffer limit, add the char to the buffer and print the key
+    if(num_chars_in_buf < MAX_CHARS_IN_BUF) {
+        keyboard_buf[num_chars_in_buf] = new_char;
+        num_chars_in_buf++;
+        print_char(new_char);
+    }
+}
+
+void clear_buf() {
+    int i = 0;
+    
+    for(i = 0; i < num_chars_in_buf; i++) {
+        keyboard_buf[i] = NULL;
+    }
+    num_chars_in_buf = 0;
+
+    new_line();
+}
+
+void make_backspace() {
+    num_chars_in_buf--;
+    keyboard_buf[num_chars_in_buf] = NULL;
+    del_last_char();
+}
 
 /**
  * handle_keypress()
@@ -74,7 +154,7 @@ void handle_keypress() {
             if(cntrl_l_on || cntrl_r_on) {
                 switch (key_code) {
                     case KEY_MAKE_L:
-                        clear();
+                        reset_term();
                         break;
                     default:
                         break;
@@ -82,10 +162,10 @@ void handle_keypress() {
             } else if (caps_on || shift_l_on || shift_r_on) {
                 // print caps version
                 key_ascii = caps_ascii[key_code];
-                print_char(key_ascii);
+                add_char_to_buffer(key_ascii);
             } else {
                 // print char normally
-                print_char(key_ascii);
+                add_char_to_buffer(key_ascii);
             }
         } else {
             switch(key_code) {
@@ -102,10 +182,10 @@ void handle_keypress() {
                     caps_on = !caps_on;
                     break;
                 case KEY_MAKE_ENTER:
-                    new_line();
+                    clear_buf();
                     break;
                 case KEY_MAKE_BKSP:
-                    del_last_char();
+                    make_backspace();
                     break;
                 default:
                     break;
@@ -139,9 +219,6 @@ void handle_keypress() {
                     break;
                 case KEY_BREAK_R_SHIFT:
                     shift_r_on = 0;
-                    break;
-                case KEY_BREAK_CAPS:
-                    // only make toggles caps, so do nothing
                     break;
                 default:
                     // we don't care about the rest of the breaks

@@ -28,6 +28,7 @@ int8_t* strncpy(int8_t* dest, const int8_t*src, uint32_t n);
 void print_char(uint8_t c);
 void new_line();
 void del_last_char();
+void clear_screen (void);
 
 /* Userspace address-check functions */
 int32_t bad_userspace_addr(const void* addr, int32_t len);

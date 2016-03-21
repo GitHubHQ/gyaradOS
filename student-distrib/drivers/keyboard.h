@@ -8,7 +8,10 @@
 #define KEYBOARD_D_PORT          0x60
 
 // Number of keys we want to detect
-#define MAX_MAKE_SCANCODE             0x59
+#define MAX_MAKE_SCANCODE        0x59
+
+// max number of chars in the keyboard buffer
+#define MAX_CHARS_IN_BUF         128
 
 // Make keys
 #define KEY_MAKE_ESC             0x01
@@ -223,6 +226,14 @@
 // #define KEY_MAKE_NUM             0x45
 // #define KEY_MAKE_SCROLL          0x46
 
+int32_t terminal_open (const uint8_t * filename);
+int32_t terminal_close (int32_t fd);
+int32_t terminal_read (int32_t fd, uint8_t * buf, int32_t nbytes);
+int32_t terminal_write (int32_t fd, const uint8_t * buf, int32_t nbytes);
+void reset_term();
+void add_char_to_buffer(uint8_t new_char);
+void clear_buf();
+void make_backspace();
 void handle_keypress(void);
 
 #endif  /* _KEYBOARD_H */

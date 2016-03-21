@@ -261,6 +261,18 @@ void del_last_char() {
     update_cursor(screen_y, screen_x);
 }
 
+void clear_screen (void) {
+    int32_t i;
+    for(i=0; i<NUM_ROWS*NUM_COLS; i++) {
+        *(uint8_t *)(video_mem + (i << 1)) = ' ';
+        *(uint8_t *)(video_mem + (i << 1) + 1) = ATTRIB;
+    }
+
+    screen_x = 0;
+    screen_y = 0;
+    update_cursor(screen_y, screen_x);
+}
+
 /*
 * int8_t* itoa(uint32_t value, int8_t* buf, int32_t radix);
 *   Inputs: uint32_t value = number to convert
