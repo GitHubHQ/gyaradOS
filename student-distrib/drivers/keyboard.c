@@ -112,7 +112,7 @@ void add_char_to_buffer(uint8_t new_char) {
     }
 }
 
-void clear_buf() {
+void handle_enter() {
     int i = 0;
     
     for(i = 0; i < num_chars_in_buf; i++) {
@@ -123,10 +123,12 @@ void clear_buf() {
     new_line();
 }
 
-void make_backspace() {
-    num_chars_in_buf--;
-    keyboard_buf[num_chars_in_buf] = NULL;
-    del_last_char();
+void handle_backspace() {
+    if(num_chars_in_buf > 0) {
+        num_chars_in_buf--;
+        keyboard_buf[num_chars_in_buf] = NULL;
+        del_last_char();
+    }
 }
 
 /**
@@ -146,18 +148,23 @@ void kbd_led_handling(int caps, int num, int scroll) {
     // Tell keyboard we want to set LED's and wait for ack
     outb(KEYBOARD_LED_V, KEYBOARD_D_PORT);
     kbd_ack();
+
     // If nothing is enabled, then all LEDs will be set to 0 (off)
     int ledstatus = 0x0;
+
     // Check which LED to enable and set based on bit masks
     if (caps) {
         ledstatus = ledstatus | 0x4;
     }
+
     if (num) {
         ledstatus = ledstatus | 0x2;
     }
+
     if (scroll) {
         ledstatus = ledstatus | 0x1;
     }
+
     outb(ledstatus, KEYBOARD_D_PORT);
 }
 
@@ -215,10 +222,10 @@ void handle_keypress() {
                     kbd_led_handling(caps_on, 0, 0);
                     break;
                 case KEY_MAKE_ENTER:
-                    clear_buf();
+                    handle_enter();
                     break;
                 case KEY_MAKE_BKSP:
-                    make_backspace();
+                    handle_backspace();
                     break;
                 default:
                     break;

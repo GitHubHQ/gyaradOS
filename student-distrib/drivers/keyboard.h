@@ -236,8 +236,8 @@ int32_t terminal_read (int32_t fd, uint8_t * buf, int32_t nbytes);
 int32_t terminal_write (int32_t fd, const uint8_t * buf, int32_t nbytes);
 void reset_term();
 void add_char_to_buffer(uint8_t new_char);
-void clear_buf();
-void make_backspace();
+void handle_enter();
+void handle_backspace();
 void handle_keypress(void);
 
 #endif  /* _KEYBOARD_H */
