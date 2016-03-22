@@ -8,6 +8,13 @@
 #define NUM_ROWS 25
 #define ATTRIB 0x04
 
+/* The VGA cursor ports/commands */
+#define FB_POSITION_MASK        0xFF
+#define FB_COMMAND_PORT         0x3D4
+#define FB_DATA_PORT            0x3D5
+#define FB_HIGH_BYTE_COMMAND    14
+#define FB_LOW_BYTE_COMMAND     15
+
 static int screen_x;
 static int screen_y;
 static char* video_mem = (char *)VIDEO;
@@ -195,12 +202,12 @@ void update_cursor(int row, int col) {
 	unsigned short position = (row * NUM_COLS) + col;
 
 	// cursor LOW port to vga INDEX register
-	outb(0x0F, 0x3D4);
-	outb((unsigned char)(position&0xFF), 0x3D5);
+	outb(FB_LOW_BYTE_COMMAND, FB_COMMAND_PORT);
+	outb((unsigned char) (position & FB_POSITION_MASK), FB_DATA_PORT);
 
 	// cursor HIGH port to vga INDEX register
-	outb(0x0E, 0x3D4);
-	outb((unsigned char )((position>>8)&0xFF), 0x3D5);
+	outb(FB_HIGH_BYTE_COMMAND, FB_COMMAND_PORT);
+	outb((unsigned char ) ((position >> 8) & FB_POSITION_MASK), FB_DATA_PORT);
 }
 
 /*
@@ -262,7 +269,7 @@ void new_line() {
 
 void del_last_char() {
 	if(screen_x == 0) {
-		screen_x = NUM_COLS;
+		screen_x = NUM_COLS - 1;
 		screen_y--;
 	} else {
 		screen_x--;
