@@ -287,6 +287,30 @@ void clear_screen (void) {
     update_cursor(screen_y, screen_x);
 }
 
+void print_splash_screen(void) {
+	/* Clear the screen */
+	clear_screen();
+
+	printf("\n\n\n\n\n\n\n\n");
+	printf("                                                _  ____   _____                \n");
+	printf("                                               | |/ __ \\ / ____|               \n");
+	printf("                 __ _ _   _  __ _ _ __ __ _  __| | |  | | (___                 \n");
+	printf("                / _` | | | |/ _` | '__/ _` |/ _` | |  | |\\___ \\                \n");
+	printf("               | (_| | |_| | (_| | | | (_| | (_| | |__| |____) |               \n");
+	printf("                \\__, |\\__, |\\__,_|_|  \\__,_|\\__,_|\\____/|_____/                \n");
+	printf("                 __/ | __/ |                                                   \n");
+	printf("                |___/ |___/                                                    ");
+	printf("\n\n\n\n\n\n\n\n");
+
+	int splash_time = 10;
+	while(splash_time > 0) {
+		rtc_read(NULL, NULL, NULL);
+		splash_time--;
+	}
+	
+	clear_screen();
+}
+
 /*
 * int8_t* itoa(uint32_t value, int8_t* buf, int32_t radix);
 *   Inputs: uint32_t value = number to convert

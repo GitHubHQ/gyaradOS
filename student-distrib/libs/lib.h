@@ -6,6 +6,7 @@
 #define _LIB_H
 
 #include "types.h"
+#include "../drivers/rtc.h"
 
 int32_t printf(int8_t *format, ...);
 void putc(uint8_t c);
@@ -30,6 +31,7 @@ void print_char(uint8_t c);
 void new_line();
 void del_last_char();
 void clear_screen (void);
+void print_splash_screen(void);
 
 /* Userspace address-check functions */
 int32_t bad_userspace_addr(const void* addr, int32_t len);
