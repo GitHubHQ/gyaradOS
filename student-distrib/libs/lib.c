@@ -6,7 +6,7 @@
 #define VIDEO 0xB8000
 #define NUM_COLS 80
 #define NUM_ROWS 25
-#define ATTRIB 0x2
+#define ATTRIB 0x04
 
 static int screen_x;
 static int screen_y;
@@ -192,7 +192,7 @@ void putc(uint8_t c) {
 }
 
 void update_cursor(int row, int col) {
-	unsigned short position = (row * 80) + col;
+	unsigned short position = (row * NUM_COLS) + col;
 
 	// cursor LOW port to vga INDEX register
 	outb(0x0F, 0x3D4);
