@@ -191,6 +191,18 @@ void putc(uint8_t c) {
     }
 }
 
+void update_cursor(int row, int col) {
+	unsigned short position = (row * 80) + col;
+
+	// cursor LOW port to vga INDEX register
+	outb(0x0F, 0x3D4);
+	outb((unsigned char)(position&0xFF), 0x3D5);
+
+	// cursor HIGH port to vga INDEX register
+	outb(0x0E, 0x3D4);
+	outb((unsigned char )((position>>8)&0xFF), 0x3D5);
+}
+
 /*
 * void print_char(uint8_t c);
 *   Inputs: uint_8* c = character to print
@@ -214,6 +226,8 @@ void print_char(uint8_t c) {
         screen_x %= NUM_COLS;
         screen_y = (screen_y + (screen_x / NUM_COLS)) % NUM_ROWS;
     }
+
+    update_cursor(screen_y, screen_x);
 }
 
 void new_line() {
@@ -242,6 +256,8 @@ void new_line() {
 		screen_y++;
 		screen_x = 0;
 	}
+
+	update_cursor(screen_y, screen_x);
 }
 
 void del_last_char() {
@@ -254,6 +270,8 @@ void del_last_char() {
 
     *(uint8_t *)(video_mem + ((NUM_COLS*screen_y + screen_x) << 1)) = ' ';
     *(uint8_t *)(video_mem + ((NUM_COLS*screen_y + screen_x) << 1) + 1) = ATTRIB;
+
+    update_cursor(screen_y, screen_x);
 }
 
 void clear_screen (void) {
@@ -265,6 +283,8 @@ void clear_screen (void) {
 
     screen_x = 0;
     screen_y = 0;
+
+    update_cursor(screen_y, screen_x);
 }
 
 /*

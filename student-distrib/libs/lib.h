@@ -25,6 +25,7 @@ int8_t* strcpy(int8_t* dest, const int8_t*src);
 int8_t* strncpy(int8_t* dest, const int8_t*src, uint32_t n);
 
 /* VGA text-mode input helpers */
+void update_cursor(int row, int col);
 void print_char(uint8_t c);
 void new_line();
 void del_last_char();
