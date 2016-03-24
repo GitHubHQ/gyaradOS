@@ -4,6 +4,7 @@
 
 #include "drivers/i8259.h"
 #include "drivers/rtc.h"
+#include "drivers/speaker.h"
 #include "libs/lib.h"
 #include "multiboot.h"
 #include "x86_desc.h"
@@ -186,7 +187,9 @@ void entry (unsigned long magic, unsigned long addr) {
 	printf("[ OK ]\n");
 
 	/* print splash screen */
+	speaker_single_beep();
 	print_splash_screen();
+	
 
 	/* Execute the first program (`shell') ... */
 

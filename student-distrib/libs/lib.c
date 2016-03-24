@@ -302,11 +302,13 @@ void print_splash_screen(void) {
 	printf("                |___/ |___/                                                    ");
 	printf("\n\n\n\n\n\n\n\n");
 
-	int splash_time = 10;
-	while(splash_time > 0) {
-		rtc_read(NULL, NULL, NULL);
-		splash_time--;
-	}
+	sound_bootup();
+	// int splash_time = 10;
+	// while(splash_time > 0) {
+	// 	rtc_read(NULL, NULL, NULL);
+	// 	splash_time--;
+	// }
+
 	
 	clear_screen();
 }
