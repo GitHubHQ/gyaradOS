@@ -98,7 +98,7 @@ int32_t terminal_write (int32_t fd, const uint8_t * buf, int32_t nbytes) {
 void reset_term() {
     int i = 0;
 
-    for(i = 0; i < num_chars_in_buf; i++) {
+    for(i = 0; i < MAX_CHARS_IN_BUF; i++) {
         keyboard_buf[i] = NULL;
     }
     num_chars_in_buf = 0;
@@ -118,7 +118,7 @@ void add_char_to_buffer(uint8_t new_char) {
 void handle_enter() {
     int i = 0;
     
-    for(i = 0; i < num_chars_in_buf; i++) {
+    for(i = 0; i < MAX_CHARS_IN_BUF; i++) {
         keyboard_buf[i] = NULL;
     }
     num_chars_in_buf = 0;
@@ -128,9 +128,9 @@ void handle_enter() {
 
 void handle_backspace() {
     if(num_chars_in_buf > 0) {
+        del_last_char();
         num_chars_in_buf--;
         keyboard_buf[num_chars_in_buf] = NULL;
-        del_last_char();
     }
 }
 

@@ -1,5 +1,20 @@
 #include "files.h"
 
+int32_t fs_read(int32_t fd, void* buf, int32_t nbytes){
+    return 0;
+}
+
+int32_t fs_write(int32_t fd, const void* buf, int32_t nbytes){
+    return -1;
+}
+
+int32_t fs_open(){
+    return 0;
+}
+int32_t fs_close(){
+    return 0;
+}
+
 int32_t read_dentry_by_name (const uint8_t* fname, struct dentry_t * dentry) {
     return 0;
 }
