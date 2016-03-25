@@ -12,6 +12,8 @@ volatile int32_t intr_occ = 0;
  */
 int32_t rtc_set_frequency(int32_t frequency) {
 	float rateVal = logBase2(frequency);
+	unsigned long flags;
+
 	int32_t rate;
 
 	// Error checking
@@ -32,8 +34,9 @@ int32_t rtc_set_frequency(int32_t frequency) {
 
 	// Normalize the rate
 	rate &= 0x0F;
+
 	// Disable interrupts
-	cli();
+	cli_and_save(flags);
 	// Select the A register
 	outb(RTC_REG_A_SELECT, RTC_REG_NUM_PORT);
 	// Grab the current value
@@ -42,8 +45,10 @@ int32_t rtc_set_frequency(int32_t frequency) {
 	outb(RTC_REG_A_SELECT, RTC_REG_NUM_PORT);
 	// Write the new divisor value for rate
 	outb((previous & RTC_REG_A_V_MASK) | rate, RTC_RW_CMOS_PORT);
-	// Enable interrupts
-	sti();
+
+	// Restore flags
+	restore_flags(flags);
+
 	// Success
 	return 0;
 }
@@ -52,8 +57,11 @@ int32_t rtc_set_frequency(int32_t frequency) {
  * Initalizes the RTC to default interrupt values (1024 Hz)
  */
 void rtc_init(int mode) {
+	unsigned long flags;
+
 	// Disable interrupts
-	cli();
+	cli_and_save(flags);
+	
 	init_mode = mode;
 	// Select register B
 	outb(RTC_NMI_INIT_VAL, RTC_REG_NUM_PORT);
@@ -63,8 +71,9 @@ void rtc_init(int mode) {
 	outb(RTC_NMI_INIT_VAL, RTC_REG_NUM_PORT);
 	// Enable bit 6 of register B, enabling interrupts from RTC
 	outb(previous | RTC_REG_B_V_MASK, RTC_RW_CMOS_PORT);
-	// Enable interrupts
-	sti();
+
+	// Restore flags
+	restore_flags(flags);
 
 	rtc_set_frequency(RTC_DEFAULT_HZ);
 }

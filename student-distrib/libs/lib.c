@@ -294,7 +294,7 @@ void clear_screen (void) {
     update_cursor(screen_y, screen_x);
 }
 
-void print_splash_screen(void) {
+void splash_screen(void) {
 	/* Clear the screen */
 	clear_screen();
 
@@ -310,12 +310,6 @@ void print_splash_screen(void) {
 	printf("\n\n\n\n\n\n\n\n");
 
 	sound_bootup();
-	// int splash_time = 10;
-	// while(splash_time > 0) {
-	// 	rtc_read(NULL, NULL, NULL);
-	// 	splash_time--;
-	// }
-
 	
 	clear_screen();
 }

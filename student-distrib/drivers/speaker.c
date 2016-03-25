@@ -38,7 +38,7 @@ void speaker_mute(void) {
  * Plays a single beep, good for errors
  */
 void speaker_single_beep(void) {
-	int i, j;
+	int i;
 	
 	for (i = 0; i < 100000; i++)
 	{
