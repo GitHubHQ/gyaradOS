@@ -22,7 +22,7 @@ int32_t mouse_ack(uint32_t ack_type) {
 	}
 }
 
-int32_t mouse_write(int32_t fd, const int8_t* buf, int32_t nbytes) {
+int32_t mouse_write(int32_t fd, const uint8_t* buf, int32_t nbytes) {
 	// Check if params valid
 	if(buf == NULL) {
 		return -1;
@@ -59,6 +59,29 @@ int32_t mouse_read(int32_t fd, int32_t* buf, int32_t nbytes) {
 	return inb(0x60);
 }
 
-int32_t mouse_init() {
-	return 0;
+void mouse_init() {
+	mouse_ack(1);
+	outb(0xA8, 0x64);
+
+	mouse_ack(1);
+	outb(0x20, 0x64);
+
+	mouse_ack(0);
+	uint8_t currStatus = (inb(0x60) | 2);
+	
+	mouse_ack(1);
+	outb(0x60, 0x64);
+
+	mouse_ack(1);
+	outb(currStatus, 0x60);
+
+	uint8_t writeVal = 0xF6;
+	mouse_write(NULL, &writeVal, 1);
+	mouse_read(NULL, NULL, NULL);
+
+	writeVal = 0xF4;
+	mouse_write(NULL, &writeVal, 1);
+	mouse_read(NULL, NULL, NULL);
 }
+
+
