@@ -101,6 +101,7 @@ void reset_term() {
     for(i = 0; i < MAX_CHARS_IN_BUF; i++) {
         keyboard_buf[i] = NULL;
     }
+
     num_chars_in_buf = 0;
 
     clear_screen();
@@ -121,6 +122,7 @@ void handle_enter() {
     for(i = 0; i < MAX_CHARS_IN_BUF; i++) {
         keyboard_buf[i] = NULL;
     }
+
     num_chars_in_buf = 0;
 
     new_line();
@@ -138,7 +140,7 @@ void handle_backspace() {
  * Wait for a keyboard ACK
  */
 void kbd_ack(void){ 
-  while(!(inb(KEYBOARD_D_PORT)==KEYBOARD_D_ACK));
+  while(!(inb(KEYBOARD_D_PORT) == KEYBOARD_D_ACK));
 }
 
 /**
@@ -181,8 +183,10 @@ void kbd_led_handling(int caps, int num, int scroll) {
  * Returns: None
  */
 void handle_keypress() {
+    unsigned long flags;
+
     // block interrupts
-    cli();
+    cli_and_save(flags);
 
     // get scan code
     uint8_t key_code = inb(KEYBOARD_D_PORT);
@@ -201,7 +205,7 @@ void handle_keypress() {
                     default:
                         break;
                 }
-            } else if (caps_on || shift_l_on || shift_r_on) {
+            } else if ((caps_on || shift_l_on || shift_r_on) && !(caps_on & (shift_l_on || shift_r_on))) {
                 // print caps version
                 key_ascii = caps_ascii[key_code];
                 add_char_to_buffer(key_ascii);
@@ -242,6 +246,7 @@ void handle_keypress() {
         if(key_code == SPECIAL_KEY) {
             // get next code
             key_code = inb(KEYBOARD_D_PORT);
+            
             switch(key_code) {
                 case KEY_MAKE_R_CTRL:
                     cntrl_r_on = 1;
@@ -276,7 +281,7 @@ void handle_keypress() {
         }
     }
 
-    // send eoi and allow interrupts again
+    // send eoi and restore prev flags
     send_eoi(IRQ_KEYBOARD_CTRL);
-    sti();
+    restore_flags(flags);
 }

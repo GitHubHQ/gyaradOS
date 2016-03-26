@@ -45,6 +45,7 @@ void enable_irq(uint32_t irq_num) {
 
 	// Disable interrupts
 	cli_and_save(flags);
+
 	// Save mask and write to port
 	if(irq_num & 8) {
 		irq_num -= 8;
@@ -54,8 +55,9 @@ void enable_irq(uint32_t irq_num) {
 		mask = ~(1 << irq_num);
 		outb(inb(MASTER_8259_PORT_2) & mask, MASTER_8259_PORT_2);
 	}
+
+	// restore flags
 	restore_flags(flags);
-	sti();
 }
 
 /**
@@ -78,8 +80,9 @@ void disable_irq(uint32_t irq_num){
 		mask = (1 << irq_num);
 		outb(inb(MASTER_8259_PORT_2) | mask, MASTER_8259_PORT_2);
 	}
+
+	// restore flags
 	restore_flags(flags);
-	sti();
 }
 
 /**

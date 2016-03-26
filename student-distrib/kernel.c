@@ -173,16 +173,16 @@ void entry (unsigned long magic, unsigned long addr) {
 	enable_irq(IRQ_RTC);
 	printf("[ OK ]\n");
 
+	/* Print splash screen */
+	splash_screen();
+
 	/* Enable interrupts */
 	/* Do not enable the following until after you have set up your
 	 * IDT correctly otherwise QEMU will triple fault and simple close
 	 * without showing you any output */
-	printf("Enabling Interrupts           ... ");
 	sti();
-	printf("[ OK ]\n");
 
 	/* Enable paging */
-	printf("Enabling Paging               ... ");
 	init_paging();
 	printf("[ OK ]\n");
 
@@ -199,7 +199,6 @@ void entry (unsigned long magic, unsigned long addr) {
 		printf("%s\n", "Success!");
 	}
 	*/
-	
 
 	/* Execute the first program (`shell') ... */
 
