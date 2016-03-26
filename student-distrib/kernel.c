@@ -187,8 +187,18 @@ void entry (unsigned long magic, unsigned long addr) {
 	printf("[ OK ]\n");
 
 	/* print splash screen */
-	speaker_single_beep();
 	print_splash_screen();
+	
+	// RTC Testing
+	/*
+	rtc_init(RTC_VERBOSE);
+	int freq = 1024;
+	if(rtc_write(NULL, &freq, 4)){
+		printf("%s\n", "Fail!");
+	} else {
+		printf("%s\n", "Success!");
+	}
+	*/
 	
 
 	/* Execute the first program (`shell') ... */

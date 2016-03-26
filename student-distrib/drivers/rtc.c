@@ -20,12 +20,20 @@ int32_t rtc_set_frequency(int32_t frequency) {
 		return -1;
 	}
 
+	// Check if power of 2 (malloc.c implementation)
+	if(!((frequency != 0) && !(frequency & (frequency - 1)))) {
+		return -1;
+	}
+
 	// Be nice to the user, round up for down for them if they don't give a power of 2
+	// NOTE: This is not used if a power of 2 check is enabled
 	if( ((int)((int)(rateVal * 10) % 10)) > 5) {
 		rate = ceil(rateVal);
 	} else {
 		rate = floor(rateVal);
 	}
+
+
 
 	// Get the actual divider
 	rate = 16 - rate;
@@ -114,7 +122,7 @@ int32_t rtc_close(void) {
 	return 0;
 }
 
-int32_t rtc_read(int32_t fd, void* buf, int32_t nbytes) {
+int32_t rtc_read(int32_t fd, uint8_t* buf, int32_t nbytes) {
 	while(!intr_occ) {
 		/* Do nothing */
 	}
@@ -124,7 +132,10 @@ int32_t rtc_read(int32_t fd, void* buf, int32_t nbytes) {
 	return 0;
 }
 
-int32_t rtc_write (int32_t fd, int32_t* buf, int32_t nbytes) {
+int32_t rtc_write(int32_t fd, const int32_t* buf, int32_t nbytes) {
+	if (nbytes != 4) {
+		return -1;
+	}
 	if (buf == NULL)
 	{
 		return -1;
