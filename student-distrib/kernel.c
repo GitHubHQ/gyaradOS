@@ -10,6 +10,7 @@
 #include "x86_desc.h"
 #include "debug.h"
 #include "paging.h"
+#include "fs/files.h"
 
 /* Macros. */
 /* Check if the bit BIT in FLAGS is set. */
@@ -180,8 +181,13 @@ void entry (unsigned long magic, unsigned long addr) {
 	sti();
 
 	/* Enable paging */
+	printf("Enabling Paging               ... ");
 	init_paging();
 	printf("[ OK ]\n");
+
+	/* Initializing files */
+	module_t* mod = (module_t*)mbi->mods_addr;
+	fs_init(mod->mod_start);
 
 	/* print splash screen */
 	splash_screen();
