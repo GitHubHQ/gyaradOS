@@ -1,5 +1,7 @@
 #include "mouse.h"
 
+uint8_t mouse_data[3];
+
 int32_t mouse_ack(uint32_t ack_type) {
 	uint32_t mouse_wait;
 	mouse_wait = MOUSE_ACK_WAIT;
@@ -84,4 +86,12 @@ void mouse_init() {
 	mouse_read(NULL, NULL, NULL);
 }
 
-
+void mouse_handle_interrupt() {
+	mouse_data[0] = mouse_read(NULL, NULL, NULL);
+	mouse_data[1] = mouse_read(NULL, NULL, NULL);
+	mouse_data[2] = mouse_read(NULL, NULL, NULL);
+	int i;
+	for(i = 0; i < 3; i++) {
+		printf("%x\n", mouse_data[i]);
+	}
+}

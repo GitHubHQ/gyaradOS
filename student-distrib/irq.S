@@ -561,6 +561,31 @@ rtc_irq:
     iret
 
 /*
+ * mouse_irq()
+ *
+ * Description: Calls the mouse handler function and then exits the interrupt cleanly using iret
+ * Inputs: none
+ * Outputs: none
+ * Returns: none
+ */
+mouse_irq:
+    // save caller saved registers
+    pushl %eax
+    pushl %ecx
+    pushl %edx
+
+    // call the function
+    call mouse_handle_interrupt
+
+    // restore caller saved registers
+    popl %edx
+    popl %ecx
+    popl %eax
+
+    // return to the interrupt handler
+    iret
+
+/*
  * general_irq()
  *
  * Description: Calls the general interrupt handler function and then exits the interrupt cleanly using iret
