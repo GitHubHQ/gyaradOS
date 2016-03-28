@@ -324,10 +324,10 @@ void test_read(void) {
     uint8_t buf[10];
     int32_t nbytes = 10;
 
-    int32_t num_bytes_read = terminal_read(NULL, &buf, nbytes);
+    int32_t num_bytes_read = terminal_read(NULL, buf, nbytes);
 
     printf("\nRead the first %d chars from the terminal.\n", num_bytes_read);
-    printf("They are %c%c%c%c%c%c%c%c%c%c\n", buf[0], buf[1], buf[2], buf[3], buf[4], buf[5], buf[6], buf[7], buf[8], buf[9]);
+    printf("They are: %c%c%c%c%c%c%c%c%c%c\n", buf[0], buf[1], buf[2], buf[3], buf[4], buf[5], buf[6], buf[7], buf[8], buf[9]);
 }
 
 void test_write(void) {
@@ -339,5 +339,5 @@ void test_write(void) {
         buf[i] = 'A';
     }
 
-    terminal_write(NULL, &buf, nbytes);
+    terminal_write(NULL, buf, nbytes);
 }
