@@ -245,4 +245,10 @@ void handle_enter();
 void handle_backspace();
 void handle_keypress(void);
 
+/* Tester functions */
+void test_open(void);
+void test_close(void);
+void test_write(void);
+void test_read(void);
+
 #endif  /* _KEYBOARD_H */

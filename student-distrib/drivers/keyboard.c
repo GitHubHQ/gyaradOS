@@ -59,6 +59,8 @@ int shift_l_on = 0;
 int shift_r_on = 0;
 
 int32_t terminal_open (const uint8_t * filename) {
+    clear_screen();
+
     int i = 0;
 
     for(i = 0; i < num_chars_in_buf; i++) {
@@ -267,12 +269,16 @@ void handle_keypress() {
                     cntrl_r_on = 0;
                     break;
                 case KEY_MAKE_L_ARROW:
+                    test_open();
                     break;
                 case KEY_MAKE_R_ARROW:
+                    test_close();
                     break;
                 case KEY_MAKE_U_ARROW:
+                    test_read();
                     break;
                 case KEY_MAKE_D_ARROW:
+                    test_write();
                     break;
                 default:
                     // we don't care about the rest of the special keys
@@ -304,4 +310,34 @@ void handle_keypress() {
     // send eoi and restore prev flags
     send_eoi(IRQ_KEYBOARD_CTRL);
     restore_flags(flags);
+}
+
+void test_open(void) {
+    terminal_open(NULL);
+}
+
+void test_close(void) {
+    terminal_close(NULL);
+}
+
+void test_read(void) {
+    uint8_t buf[10];
+    int32_t nbytes = 10;
+
+    int32_t num_bytes_read = terminal_read(NULL, &buf, nbytes);
+
+    printf("\nRead the first %d chars from the terminal.\n", num_bytes_read);
+    printf("They are %c%c%c%c%c%c%c%c%c%c\n", buf[0], buf[1], buf[2], buf[3], buf[4], buf[5], buf[6], buf[7], buf[8], buf[9]);
+}
+
+void test_write(void) {
+    int i = 0;
+    uint8_t buf[10];
+    int32_t nbytes = 10;
+
+    for(i = 0; i < nbytes; i++) {
+        buf[i] = 'A';
+    }
+
+    terminal_write(NULL, &buf, nbytes);
 }
