@@ -15,7 +15,7 @@
 #define MAX_MAKE_SCANCODE        0x59
 
 // max number of chars in the keyboard buffer
-#define MAX_CHARS_IN_BUF         128
+#define MAX_CHARS_IN_BUF         127
 
 // Make keys
 #define KEY_MAKE_ESC             0x01
@@ -180,6 +180,7 @@
 #define ASCII_KP_HYPHEN       0x2D
 #define ASCII_KP_PLUS         0x2B
 #define ASCII_KP_PERIOD       0x2E
+#define ASCII_NEW_LINE        0x0A
 #define ASCII_NULL_CHAR       0x00
 
 #define ASCII_CAPS_A          0x41
@@ -235,7 +236,7 @@ int32_t terminal_close (int32_t fd);
 int32_t terminal_read (int32_t fd, uint8_t * buf, int32_t nbytes);
 int32_t terminal_write (int32_t fd, const uint8_t * buf, int32_t nbytes);
 void reset_term();
-void add_char_to_buffer(uint8_t new_char);
+uint32_t add_char_to_buffer(uint8_t new_char);
 void handle_enter();
 void handle_backspace();
 void handle_keypress(void);

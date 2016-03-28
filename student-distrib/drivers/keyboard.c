@@ -88,8 +88,9 @@ int32_t terminal_write (int32_t fd, const uint8_t * buf, int32_t nbytes) {
     int i = 0;
 
     for(i = 0; i < nbytes; i++) {
-        print_char(buf[i]);
-        num_printed++;
+        if(add_char_to_buffer(buf[i])) {
+            num_printed++;
+        }
     }
 
     return num_printed;
@@ -107,25 +108,30 @@ void reset_term() {
     clear_screen();
 }
 
-void add_char_to_buffer(uint8_t new_char) {
+uint32_t add_char_to_buffer(uint8_t new_char) {
     // if we haven't reached the buffer limit, add the char to the buffer and print the key
     if(num_chars_in_buf < MAX_CHARS_IN_BUF) {
         keyboard_buf[num_chars_in_buf] = new_char;
         num_chars_in_buf++;
         print_char(new_char);
+        return 1;
     }
+
+    return 0;
 }
 
 void handle_enter() {
     int i = 0;
-    
+
+    keyboard_buf[num_chars_in_buf] = ASCII_NEW_LINE;
+    new_line();
+
+    // clear the buffer
     for(i = 0; i < MAX_CHARS_IN_BUF; i++) {
         keyboard_buf[i] = NULL;
     }
 
     num_chars_in_buf = 0;
-
-    new_line();
 }
 
 void handle_backspace() {
