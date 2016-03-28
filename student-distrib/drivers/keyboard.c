@@ -47,6 +47,8 @@ int8_t keyboard_buf[MAX_CHARS_IN_BUF];
 uint8_t num_chars_in_buf = 0;
 
 // variables designating status of special keys
+int special_key_enabled = 0;
+
 int cntrl_l_on = 0;
 int cntrl_r_on = 0;
 
@@ -201,7 +203,7 @@ void handle_keypress() {
         // make key
         uint8_t key_ascii = code_to_ascii[key_code];
 
-        if(key_ascii != ASCII_PLACEHOLDER) {
+        if(key_ascii != ASCII_PLACEHOLDER && !special_key_enabled) {
             // if its a valid char that we can print, print it
             if(cntrl_l_on || cntrl_r_on) {
                 switch (key_code) {
@@ -219,6 +221,8 @@ void handle_keypress() {
                 // print char normally
                 add_char_to_buffer(key_ascii);
             }
+        } else if(special_key_enabled) {
+            special_key_enabled = 0;
         } else {
             switch(key_code) {
                 case KEY_MAKE_L_CTRL:
@@ -250,6 +254,8 @@ void handle_keypress() {
     } else {
         // break or special key
         if(key_code == SPECIAL_KEY) {
+            special_key_enabled = 1;
+
             // get next code
             key_code = inb(KEYBOARD_D_PORT);
             
@@ -259,6 +265,14 @@ void handle_keypress() {
                     break;
                 case KEY_BREAK_R_CTRL:
                     cntrl_r_on = 0;
+                    break;
+                case KEY_MAKE_L_ARROW:
+                    break;
+                case KEY_MAKE_R_ARROW:
+                    break;
+                case KEY_MAKE_U_ARROW:
+                    break;
+                case KEY_MAKE_D_ARROW:
                     break;
                 default:
                     // we don't care about the rest of the special keys

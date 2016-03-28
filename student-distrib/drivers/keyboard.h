@@ -116,6 +116,10 @@
 #define KEY_BREAK_R_CTRL         0x9D
 #define KEY_MAKE_R_ALT           0x38
 #define KEY_BREAK_R_ALT          0xB8
+#define KEY_MAKE_L_ARROW         0x4B
+#define KEY_MAKE_R_ARROW         0x4D
+#define KEY_MAKE_U_ARROW         0x48
+#define KEY_MAKE_D_ARROW         0x50
 
 // ASCII keys
 #define ASCII_A               0x61
