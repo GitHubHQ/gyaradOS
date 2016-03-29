@@ -193,8 +193,14 @@ void entry (unsigned long magic, unsigned long addr) {
 	fs_init(fs_start);
 
 	/* print splash screen */
+    
+    int32_t fd = 0, cnt = 0;
+    uint8_t buf[33];
+    while(0 != (cnt = dir_read(fd,buf,32))){
+        //buf[cnt] = '\n';
+        printf("%s\n",buf);
+    }
 
-	
 	// RTC Testing
 	/*
 	rtc_init(RTC_VERBOSE);

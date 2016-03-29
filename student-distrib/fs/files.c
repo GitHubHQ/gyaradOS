@@ -6,6 +6,7 @@ uint32_t b_block_addrs;
 dentry_t * dentries;
 inode_t * inodes;
 uint32_t data_blocks;
+uint32_t dirReads;
 
 /**
  * Initializing the Boot block by getting the data from address
@@ -26,6 +27,7 @@ void fs_init(uint32_t addrs) {
     uint8_t buf[10];
     read_dentry_by_name(fname, &dentry);
     read_data(dentry.inode_num, 0, buf, 10);
+    dirReads = 0;
 }
 
 int32_t fs_read(int32_t fd, void* buf, int32_t nbytes){
@@ -61,7 +63,7 @@ int32_t read_dentry_by_name (const uint8_t* fname, dentry_t* dentry) {
             dentry->file_type = dentries[i].file_type;
             dentry->inode_num = dentries[i].inode_num;
 
-            printf("inside read dentry by name %d\n", dentries[i].inode_num);
+            //printf("inside read dentry by name %d\n", dentries[i].inode_num);
 
             return 0;
         }
@@ -104,7 +106,7 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t * buf, uint32_t leng
      
     while(num_reads < length) {
         buf[buf_pos] = *curr_read_pos;
-        printf("%d, ", *curr_read_pos);
+        //printf("%d, ", *curr_read_pos);
         num_reads++;
         buf_pos++;
         curr_read_pos++;
@@ -126,4 +128,30 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t * buf, uint32_t leng
     }
 
     return num_reads;
+}
+
+int32_t dir_open(){
+    return 0;
+}
+
+int32_t dir_close(){
+    return 0;
+}
+
+
+int32_t dir_write(){
+    return -1;
+}
+
+int32_t dir_read(int32_t fd, int8_t * buf, int32_t length){
+       
+        if(dirReads >= b.n_dentries){
+            dirReads = 0;
+            return 0;
+        }
+        strcpy(buf, dentries[dirReads].file_name);
+        int bytesCopied = strlen(buf);
+        //buf[bytesCopied] = '\n'; 
+        dirReads++;
+        return bytesCopied;
 }
