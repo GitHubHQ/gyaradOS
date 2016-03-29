@@ -25,3 +25,9 @@ Checkpoint 1:
     a. Problem: I’m not Fei
     b. Solution: RTDC
     c. Time to fix: 20+ years
+
+Checkpoint 2:
+1. Date: 3/25/16
+    a. Problem: RTC change frequency would always be set to max frequency, even though values lower than 1024 were being passed in.
+    b. Solution: Since the frequency information was being sent in though a pointer, it had to be dereferenced. Once interesting part of this bug was that the pointer for the frequency buffer was also, coincidently, a power of two, thus passing our power of 2 check and making finding this bug quite difficult.
+    c. Time to fix: 1 Hour

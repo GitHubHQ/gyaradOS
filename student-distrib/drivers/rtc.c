@@ -183,9 +183,9 @@ void rtc_test(void) {
 	int freq = 4;
 	int i;
 	if(rtc_write(NULL, &freq, 4)){
-		printf("%s\n", "Fail!");
+		printf("Fail! Attempted to set frequency to %d !", freq);
 	} else {
-		printf("Success! Freq set to 4. Reading...");
+		printf("Success! Freq set to %d. Reading...\n", freq);
 	}
 	for(i = 0; i < 15; i++){
 		if(!rtc_read(NULL, NULL, NULL)) {
@@ -193,26 +193,6 @@ void rtc_test(void) {
 		}
 	}
 
-	clear();
-	freq = 2;
-	if(rtc_write(NULL, &freq, 4)){
-		printf("%s\n", "Fail!");
-	} else {
-		printf("Success! Freq set to 2. Reading...");
-	}
-	for(i = 0; i < 15; i++){
-		if(!rtc_read(NULL, NULL, NULL)) {
-			printf("Interrupted by RTC!\n");
-		}
-	}
-
-	clear();
-	freq = 7;
-	if(rtc_write(NULL, &freq, 4)){
-		printf("%s\n", "Fail! Attempted to set Frequency to 7!");
-	} else {
-		printf("Success! Freq set to 7. Reading...");
-	}
 	for(i = 0; i < 1000; i++){
 		int j;
 			for(j = 0; j < 500000; j++){
@@ -220,16 +200,60 @@ void rtc_test(void) {
 		}
 	}
 
-	clear();
-	freq = 512;
+	clear_screen();
+	freq = 2;
 	if(rtc_write(NULL, &freq, 4)){
-		printf("%s\n", "Fail!");
+		printf("Fail! Attempted to set frequency to %d !", freq);
 	} else {
-		printf("Success! Freq set to 512. Reading...");
+		printf("Success! Freq set to %d. Reading...\n", freq);
 	}
 	for(i = 0; i < 15; i++){
 		if(!rtc_read(NULL, NULL, NULL)) {
 			printf("Interrupted by RTC!\n");
 		}
 	}
+
+	for(i = 0; i < 1000; i++){
+		int j;
+			for(j = 0; j < 500000; j++){
+		/* Spin for a second so you can read output */
+		}
+	}
+
+	clear_screen();
+	freq = 7;
+	if(rtc_write(NULL, &freq, 4)){
+		printf("Fail! Attempted to set frequency to %d !", freq);
+	} else {
+		printf("Success! Freq set to %d. Reading...\n", freq);
+	}
+
+	for(i = 0; i < 1000; i++){
+		int j;
+			for(j = 0; j < 500000; j++){
+		/* Spin for a second so you can read output */
+		}
+	}
+
+	clear_screen();
+	freq = 512;
+	if(rtc_write(NULL, &freq, 4)){
+		printf("Fail! Attempted to set frequency to %d !", freq);
+	} else {
+		printf("Success! Freq set to %d. Reading...\n", freq);
+	}
+	for(i = 0; i < 15; i++){
+		if(!rtc_read(NULL, NULL, NULL)) {
+			printf("Interrupted by RTC!\n");
+		}
+	}
+
+	for(i = 0; i < 1000; i++){
+		int j;
+			for(j = 0; j < 500000; j++){
+		/* Spin for a second so you can read output */
+		}
+	}
+
+	clear_screen();
 }
