@@ -192,7 +192,7 @@ void entry (unsigned long magic, unsigned long addr) {
 	fs_init(fs_start);
 
 	/* print splash screen */
-	//splash_screen();
+	// splash_screen();
 	
 	// RTC Testing
 	/*

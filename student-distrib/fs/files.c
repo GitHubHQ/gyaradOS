@@ -5,7 +5,7 @@ uint32_t b_block_addrs;
 
 dentry_t * dentries;
 inode_t * inodes;
-unsigned int * data_blocks;
+uint32_t * data_blocks;
 
 /**
  * Initializing the Boot block by getting the data from address
@@ -17,11 +17,13 @@ void fs_init(uint32_t addrs) {
 
     dentries = (dentry_t *) (b_block_addrs + BOOT_BLOCK_SIZE);
     inodes = (inode_t *) (b_block_addrs + BLOCK_SIZE);
-    data_blocks = b_block_addrs + b.n_inodes * BLOCK_SIZE + BLOCK_SIZE;
+    data_blocks = (uint32_t *) (b_block_addrs + b.n_inodes * BLOCK_SIZE + BLOCK_SIZE);
 
-    char * fname = "fish";
-    dentry_t * dentry;
-    read_dentry_by_name(fname, dentry);
+    char * fname = "frame0.txt";
+    dentry_t dentry;
+    uint8_t buf[10];
+    read_dentry_by_name(fname, &dentry);
+    read_data(dentry.inode_num, 0, buf, 10);
 }
 
 int32_t fs_read(int32_t fd, void* buf, int32_t nbytes){
@@ -52,9 +54,12 @@ int32_t read_dentry_by_name (const uint8_t* fname, dentry_t* dentry) {
     //loop through dir entries until file name is found
     for(i = 0; i < b.n_dentries; i++) {
         if(0 == strncmp((int8_t *) dentries[i].file_name, (int8_t *) fname, 32)) {
-            strcpy(dentry->file_name, dentries[i].file_name);
+            strcpy((int8_t *) dentry->file_name, (int8_t *) dentries[i].file_name);
             dentry->file_type = dentries[i].file_type;
             dentry->inode_num = dentries[i].inode_num;
+
+            printf("inside read dentry by name %d", dentries[i].inode_num);
+
             return 0;
         }
      }
@@ -96,6 +101,7 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t * buf, uint32_t leng
      
     while(num_reads < length) {
         buf[buf_pos] = *curr_read_pos;
+        printf("%d", *curr_read_pos);
         num_reads++;
         buf_pos++;
         curr_read_pos++;
@@ -110,6 +116,6 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t * buf, uint32_t leng
             curr_read_pos = data_blocks + inodes[inode].blocks[curr_block] * BLOCK_SIZE + location_in_block;
         }
     }
-     
-    return num_reads;
+
+    return 0;
 }
