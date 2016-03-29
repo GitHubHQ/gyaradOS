@@ -5,7 +5,7 @@ uint32_t b_block_addrs;
 
 dentry_t * dentries;
 inode_t * inodes;
-uint32_t * data_blocks;
+uint32_t data_blocks;
 
 /**
  * Initializing the Boot block by getting the data from address
@@ -15,11 +15,13 @@ void fs_init(uint32_t addrs) {
     b_block_addrs = addrs;
     memcpy(&b, (void *) b_block_addrs, BOOT_BLOCK_SIZE);
 
-    dentries = (dentry_t *) (b_block_addrs + BOOT_BLOCK_SIZE);
+    dentries = (dentry_t *)(b_block_addrs + BOOT_BLOCK_SIZE);
     inodes = (inode_t *) (b_block_addrs + BLOCK_SIZE);
-    data_blocks = (uint32_t *) (b_block_addrs + b.n_inodes * BLOCK_SIZE + BLOCK_SIZE);
-
-    char * fname = "frame0.txt";
+    data_blocks = b_block_addrs + b.n_inodes * BLOCK_SIZE + BLOCK_SIZE;
+    // printf("Boot Block Address: %d\n", b_block_addrs);
+    // printf("Inode numbers: %d Inodes address: %d\n", b.n_inodes, inodes);
+    // printf("Data Block Address: %d\n", data_blocks);
+    char * fname = "cat";
     dentry_t dentry;
     uint8_t buf[10];
     read_dentry_by_name(fname, &dentry);
@@ -53,12 +55,13 @@ int32_t read_dentry_by_name (const uint8_t* fname, dentry_t* dentry) {
 
     //loop through dir entries until file name is found
     for(i = 0; i < b.n_dentries; i++) {
+    	//printf("%d\n", dentries[i].inode_num);
         if(0 == strncmp((int8_t *) dentries[i].file_name, (int8_t *) fname, 32)) {
-            strcpy((int8_t *) dentry->file_name, (int8_t *) dentries[i].file_name);
+            strncpy((int8_t *) dentry->file_name, (int8_t *) dentries[i].file_name, 32);
             dentry->file_type = dentries[i].file_type;
             dentry->inode_num = dentries[i].inode_num;
 
-            printf("inside read dentry by name %d", dentries[i].inode_num);
+            printf("inside read dentry by name %d\n", dentries[i].inode_num);
 
             return 0;
         }
@@ -80,7 +83,7 @@ int32_t read_dentry_by_index (uint32_t index, dentry_t* dentry) {
         return -1;
 
     //copying the data from the index to the dentry
-    strcpy((int8_t *)dentry->file_name, (int8_t *)dentries[index].file_name);
+    strncpy((int8_t *)dentry->file_name, (int8_t *)dentries[index].file_name, 32);
     dentry->file_type = dentries[index].file_type;
     dentry->inode_num = dentries[index].inode_num;
 
@@ -94,14 +97,14 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t * buf, uint32_t leng
     int curr_block = offset / BLOCK_SIZE;
     int location_in_block = offset % BLOCK_SIZE;
 
-    unsigned int * curr_read_pos = data_blocks + inodes[inode].blocks[curr_block] * BLOCK_SIZE + location_in_block;
+    uint8_t * curr_read_pos = (uint8_t *) (data_blocks + inodes[inode].blocks[curr_block] * BLOCK_SIZE + location_in_block);
 
     int num_reads = 0;
     int buf_pos = 0;
      
     while(num_reads < length) {
         buf[buf_pos] = *curr_read_pos;
-        printf("%d", *curr_read_pos);
+        printf("%d, ", *curr_read_pos);
         num_reads++;
         buf_pos++;
         curr_read_pos++;
@@ -111,11 +114,16 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t * buf, uint32_t leng
             // reset location
             location_in_block = 0;
             curr_block++;
-     
+     		
+     		//checking if the data block is invalid
+     		if(inodes[inode].blocks[curr_block] >= b.n_data_blocks) {
+     			return -1;
+     		}
+     		
             // recalculate read position
             curr_read_pos = data_blocks + inodes[inode].blocks[curr_block] * BLOCK_SIZE + location_in_block;
         }
     }
 
-    return 0;
+    return num_reads;
 }

@@ -188,11 +188,12 @@ void entry (unsigned long magic, unsigned long addr) {
 	/* Enable paging */
 	init_paging();
 
+	 splash_screen();
 	/* Initializing files */
 	fs_init(fs_start);
 
 	/* print splash screen */
-	// splash_screen();
+
 	
 	// RTC Testing
 	/*
