@@ -59,7 +59,9 @@ void entry (unsigned long magic, unsigned long addr) {
 		int i;
 		module_t* mod = (module_t*)mbi->mods_addr;
 		while(mod_count < mbi->mods_count) {
-			fs_start = (unsigned int) mod->mod_start;
+			if(mod->string == MOD_FS_STRING) {
+				fs_start = (unsigned int) mod->mod_start;
+			}
 
 			if(DEBUG_F) {
 				printf("Module %d loaded at address: 0x%#x\n", mod_count, (unsigned int)mod->mod_start);
@@ -186,13 +188,16 @@ void entry (unsigned long magic, unsigned long addr) {
 	/* Enable paging */
 	init_paging();
 
+	splash_screen();
 	/* Initializing files */
-	//fs_init(fs_start);
+	fs_init(fs_start);
 
-	/* print splash screen */
-	// splash_screen();
-	
-	rtc_test();
+	//Test RTC driver
+	//rtc_test();
+
+	//File system testing
+	//test_fs();
+
 
 	/* Execute the first program (`shell') ... */
 
