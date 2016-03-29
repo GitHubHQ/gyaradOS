@@ -1,97 +1,110 @@
 #include "mouse.h"
 
-uint8_t mouse_data[3];
+// Current mouse position
+// Initalized to (0,0)
+uint32_t mouse_x;
+uint32_t mouse_y;
 
-int32_t mouse_ack(uint32_t ack_type) {
-	uint32_t mouse_wait;
-	mouse_wait = MOUSE_ACK_WAIT;
-	if(ack_type) {
-		while(mouse_wait--) {
-			if (!(inb(0x64) & 2)) {
-				return 0;
-			}
-		}
-		printf("ERROR: Mouse acknowledge timeout!\n");
-		return -1;
+// Set any flags related to mouse
+// 	1 - Mouse read successfully
+// 	0 - Mouse timeout, should retry
+uint32_t flags = 0;
+
+int8_t mouse_byte_1;
+
+uint8_t mouse_ack() {
+	if(!(inb(MOUSE_DATA_PORT) & 0x1)) {
+		flags = 1;
+		return inb(MOUSE_DATA_PORT);
 	} else {
-		while(mouse_wait--) {
-			if ((inb(0x64) & 1)) {
-				return 0;
-			}
-		}
-		printf("ERROR: Mouse acknowledge timeout!\n");
-		return -1;
+		flags = 0;
+		return 0;
 	}
-}
-
-int32_t mouse_write(int32_t fd, const uint8_t* buf, int32_t nbytes) {
-	// Check if params valid
-	if(buf == NULL) {
-		return -1;
-	}
-	if(nbytes != 1) {
-		return -1;
-	}
-
-	// Check if mouse ready, else wait
-	if(mouse_ack(1)) {
-		return -1;
-	}
-
-	// Send mouse command prep
-	outb(0xD4, 0x64);
-
-	// Check mouse ack
-	if (mouse_ack(1)) {
-		return -1;
-	}
-
-	// Write to mouse
-	outb(*buf, 0x60);
-
-	return 0;
-}
-
-int32_t mouse_read(int32_t fd, int32_t* buf, int32_t nbytes) {
-	// Wait for mouse ready
-	if(mouse_ack(0)) {
-		return -1;
-	}
-	// Return current mouse values
-	return inb(0x60);
 }
 
 void mouse_init() {
-	mouse_ack(1);
-	outb(0xA8, 0x64);
+	// Reset mouse coord to (0,0)
+	mouse_x = 0;
+	mouse_y = 0;
 
-	mouse_ack(1);
-	outb(0x20, 0x64);
+	uint8_t currStatus = inb(MOUSE_DATA_PORT);
+	currStatus |= 0x2;
 
-	mouse_ack(0);
-	uint8_t currStatus = (inb(0x60) | 2);
-	
-	mouse_ack(1);
-	outb(0x60, 0x64);
+	outb(MOUSE_AUXE_BIT, MOUSE_COMM_PORT);
+	outb(MOUSE_CMPQ_BIT, MOUSE_COMM_PORT);
 
-	mouse_ack(1);
-	outb(currStatus, 0x60);
+	outb(MOUSE_DATA_PORT, MOUSE_COMM_PORT);
+	outb(currStatus, MOUSE_DATA_PORT);
 
-	uint8_t writeVal = 0xF6;
-	mouse_write(NULL, &writeVal, 1);
-	mouse_read(NULL, NULL, NULL);
+	outb(MOUSE_DATA_PORT, MOUSE_COMM_PORT);
+	outb(MOUSE_STAT_BIT, MOUSE_DATA_PORT);
 
-	writeVal = 0xF4;
-	mouse_write(NULL, &writeVal, 1);
-	mouse_read(NULL, NULL, NULL);
+	outb(MOUSE_CMND_BIT, MOUSE_COMM_PORT);
+	outb(MOUSE_ENAB_BIT, MOUSE_DATA_PORT);
+	//printf("Before check X, Y: %d, %d\n", mouse_x, mouse_y);
 }
 
 void mouse_handle_interrupt() {
-	mouse_data[0] = mouse_read(NULL, NULL, NULL);
-	mouse_data[1] = mouse_read(NULL, NULL, NULL);
-	mouse_data[2] = mouse_read(NULL, NULL, NULL);
-	int i;
-	for(i = 0; i < 3; i++) {
-		printf("%x\n", mouse_data[i]);
+	mouse_byte_1 = mouse_ack();
+
+	// Check to see if we recieved a valid mouse packet (Bit 4, Byte 1)
+	if (mouse_byte_1 & MOUSE_AL1_BITM) {
+		// Check for overflow (don't attempt to handle it)
+		if (!(mouse_byte_1 & MOUSE_YOF_BITM) && !(mouse_byte_1 & MOUSE_XOF_BITM)) {
+			// Grab the other parts of the mouse packet
+			uint8_t mouse_byte_2 = inb(MOUSE_DATA_PORT);
+			uint8_t mouse_byte_3 = inb(MOUSE_DATA_PORT);
+			// Quick and dirty sign extension
+			int32_t deltaX = (int8_t)mouse_byte_2;
+			int32_t deltaY = (int8_t)mouse_byte_3;
+
+			// Since we sign extended to 32 bits, we should also do this if
+			// negative to retain signedness
+			if (mouse_byte_1 & MOUSE_XS_BITM) {
+				deltaX |= MOUSE_SGN_BITM;
+			}
+			if (mouse_byte_1 & MOUSE_YS_BITM) {
+				deltaY |= MOUSE_SGN_BITM;
+			}
+
+			//deltaX = deltaX%3;
+			//deltaY = deltaY%2;
+
+			// Actually move the mouse now:
+			// This draw ensures that if the movement was minimal (0)
+			// the mouse block is still drawn
+			//draw_full_block(mouse_x, mouse_y, 0x00);
+
+			// Change values
+			mouse_x += deltaX;
+
+			if(mouse_byte_1 && MOUSE_YS_BITM){
+				mouse_y += deltaY;				
+			} else {
+				mouse_y -= deltaY;
+			}
+
+			//printf("Before check X, Y: %d, %d\n", mouse_x, mouse_y);
+
+			// Check for bounds
+			if(mouse_x < 0) {
+				mouse_x = 0;
+			}
+			if(mouse_x > 79) {
+				mouse_x = 79;
+			}
+			if(mouse_y < 0) {
+				mouse_y = 0;
+			}
+			if(mouse_y > 24) {
+				mouse_y = 24;
+			}
+
+			//printf("After check X, Y: %d, %d\n", mouse_x, mouse_y);
+
+			// New position is set, redraw the cursor
+			//draw_full_block(mouse_x, mouse_y, 0x00);
+		}
 	}
+	send_eoi(IRQ_MOUSE_PS2);
 }

@@ -33,6 +33,11 @@ void clear(void) {
     }
 }
 
+void draw_full_block(int32_t x, int32_t y, int8_t color) {
+	int32_t offset = y*NUM_COLS + x;
+  	*(uint8_t *)(video_mem + (offset<<1) + 1) = 0x01;
+}
+
 /* Standard printf().
  * Only supports the following format strings:
  * %%  - print a literal '%' character

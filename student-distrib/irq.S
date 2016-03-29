@@ -25,6 +25,7 @@
 // interrupts
 .global key_irq
 .global rtc_irq
+.global mouse_irq
 .global general_irq
 
 /**
