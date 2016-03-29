@@ -43,6 +43,8 @@ uint8_t caps_ascii[] = {
     ASCII_PLACEHOLDER, ASCII_PLACEHOLDER
 };
 
+#define TERM_TEST 0
+
 int8_t keyboard_buf[MAX_CHARS_IN_BUF];
 uint8_t num_chars_in_buf = 0;
 
@@ -80,8 +82,13 @@ int32_t terminal_read (int32_t fd, uint8_t * buf, int32_t nbytes) {
 
     for(i = 0; i < nbytes; i++) {
         buf[i] = keyboard_buf[i];
+        keyboard_buf[i] = NULL;
         bytes_read++;
     }
+
+    num_chars_in_buf = 0;
+
+    new_line();
 
     return bytes_read;
 }
@@ -127,14 +134,16 @@ void handle_enter() {
     int i = 0;
 
     keyboard_buf[num_chars_in_buf] = ASCII_NEW_LINE;
-    new_line();
 
-    // clear the buffer
-    for(i = 0; i < MAX_CHARS_IN_BUF; i++) {
-        keyboard_buf[i] = NULL;
+    uint8_t buf[128];
+    int32_t nbytes = 128;
+    terminal_read(NULL, buf, nbytes);
+
+    if(TERM_TEST) {
+        for(i = 0; i < nbytes; i++) {
+            printf("%c", buf[i]);
+        }
     }
-
-    num_chars_in_buf = 0;
 }
 
 void handle_backspace() {
@@ -265,16 +274,21 @@ void handle_keypress() {
                     cntrl_r_on = 0;
                     break;
                 case KEY_MAKE_L_ARROW:
-                    test_open();
+                    if(TERM_TEST) {
+                        test_open();
+                    }
                     break;
                 case KEY_MAKE_R_ARROW:
-                    test_close();
+                    if(TERM_TEST) {
+                        test_close();
+                    }
                     break;
                 case KEY_MAKE_U_ARROW:
-                    test_read();
                     break;
                 case KEY_MAKE_D_ARROW:
-                    test_write();
+                    if(TERM_TEST) {
+                        test_write();
+                    }
                     break;
                 default:
                     // we don't care about the rest of the special keys
@@ -311,16 +325,6 @@ void test_open(void) {
 
 void test_close(void) {
     terminal_close(NULL);
-}
-
-void test_read(void) {
-    uint8_t buf[10];
-    int32_t nbytes = 10;
-
-    int32_t num_bytes_read = terminal_read(NULL, buf, nbytes);
-
-    printf("\nRead the first %d chars from the terminal.\n", num_bytes_read);
-    printf("They are: %c%c%c%c%c%c%c%c%c%c\n", buf[0], buf[1], buf[2], buf[3], buf[4], buf[5], buf[6], buf[7], buf[8], buf[9]);
 }
 
 void test_write(void) {
