@@ -174,11 +174,6 @@ void entry (unsigned long magic, unsigned long addr) {
 	enable_irq(IRQ_RTC);
 	printf("[ OK ]\n");
 
-	printf("Enabling mouse interrupts     ... ");
-	enable_irq(IRQ_MOUSE_PS2);
-	mouse_init();
-	printf("[ OK ]\n");
-
 	/* Enable interrupts */
 	/* Do not enable the following until after you have set up your
 	 * IDT correctly otherwise QEMU will triple fault and simple close
@@ -193,13 +188,14 @@ void entry (unsigned long magic, unsigned long addr) {
 	splash_screen();
 	
 	// RTC Testing
+	// Change the frequency
 	/*
 	rtc_init(RTC_VERBOSE);
-	int freq = 1024;
+	int freq = 4;
 	if(rtc_write(NULL, &freq, 4)){
 		printf("%s\n", "Fail!");
 	} else {
-		printf("%s\n", "Success!");
+		printf("Success! Changed to %d.\n", freq);
 	}
 	*/
 
