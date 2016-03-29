@@ -196,7 +196,6 @@ void entry (unsigned long magic, unsigned long addr) {
 	//rtc_test();
 
 	//File system testing
-<<<<<<< HEAD
 	//test_fs();
 
 	/* print splash screen */
@@ -215,10 +214,7 @@ void entry (unsigned long magic, unsigned long addr) {
 		printf("Success! Changed to %d.\n", freq);
 	}
 	*/
-=======
-	test_fs();
 
->>>>>>> 5eee8085635e6263a6cad53611ddfdfa7bb04bc3
 
 	/* Execute the first program (`shell') ... */
 
