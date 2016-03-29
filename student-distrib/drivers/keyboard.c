@@ -47,6 +47,8 @@ int8_t keyboard_buf[MAX_CHARS_IN_BUF];
 uint8_t num_chars_in_buf = 0;
 
 // variables designating status of special keys
+int special_key_enabled = 0;
+
 int cntrl_l_on = 0;
 int cntrl_r_on = 0;
 
@@ -57,6 +59,8 @@ int shift_l_on = 0;
 int shift_r_on = 0;
 
 int32_t terminal_open (const uint8_t * filename) {
+    clear_screen();
+
     int i = 0;
 
     for(i = 0; i < num_chars_in_buf; i++) {
@@ -88,8 +92,9 @@ int32_t terminal_write (int32_t fd, const uint8_t * buf, int32_t nbytes) {
     int i = 0;
 
     for(i = 0; i < nbytes; i++) {
-        print_char(buf[i]);
-        num_printed++;
+        if(add_char_to_buffer(buf[i])) {
+            num_printed++;
+        }
     }
 
     return num_printed;
@@ -107,25 +112,30 @@ void reset_term() {
     clear_screen();
 }
 
-void add_char_to_buffer(uint8_t new_char) {
+uint32_t add_char_to_buffer(uint8_t new_char) {
     // if we haven't reached the buffer limit, add the char to the buffer and print the key
     if(num_chars_in_buf < MAX_CHARS_IN_BUF) {
         keyboard_buf[num_chars_in_buf] = new_char;
         num_chars_in_buf++;
         print_char(new_char);
+        return 1;
     }
+
+    return 0;
 }
 
 void handle_enter() {
     int i = 0;
-    
+
+    keyboard_buf[num_chars_in_buf] = ASCII_NEW_LINE;
+    new_line();
+
+    // clear the buffer
     for(i = 0; i < MAX_CHARS_IN_BUF; i++) {
         keyboard_buf[i] = NULL;
     }
 
     num_chars_in_buf = 0;
-
-    new_line();
 }
 
 void handle_backspace() {
@@ -195,7 +205,7 @@ void handle_keypress() {
         // make key
         uint8_t key_ascii = code_to_ascii[key_code];
 
-        if(key_ascii != ASCII_PLACEHOLDER) {
+        if(key_ascii != ASCII_PLACEHOLDER && !special_key_enabled) {
             // if its a valid char that we can print, print it
             if(cntrl_l_on || cntrl_r_on) {
                 switch (key_code) {
@@ -213,6 +223,8 @@ void handle_keypress() {
                 // print char normally
                 add_char_to_buffer(key_ascii);
             }
+        } else if(special_key_enabled) {
+            special_key_enabled = 0;
         } else {
             switch(key_code) {
                 case KEY_MAKE_L_CTRL:
@@ -244,6 +256,8 @@ void handle_keypress() {
     } else {
         // break or special key
         if(key_code == SPECIAL_KEY) {
+            special_key_enabled = 1;
+
             // get next code
             key_code = inb(KEYBOARD_D_PORT);
             
@@ -253,6 +267,18 @@ void handle_keypress() {
                     break;
                 case KEY_BREAK_R_CTRL:
                     cntrl_r_on = 0;
+                    break;
+                case KEY_MAKE_L_ARROW:
+                    test_open();
+                    break;
+                case KEY_MAKE_R_ARROW:
+                    test_close();
+                    break;
+                case KEY_MAKE_U_ARROW:
+                    test_read();
+                    break;
+                case KEY_MAKE_D_ARROW:
+                    test_write();
                     break;
                 default:
                     // we don't care about the rest of the special keys
@@ -284,4 +310,34 @@ void handle_keypress() {
     // send eoi and restore prev flags
     send_eoi(IRQ_KEYBOARD_CTRL);
     restore_flags(flags);
+}
+
+void test_open(void) {
+    terminal_open(NULL);
+}
+
+void test_close(void) {
+    terminal_close(NULL);
+}
+
+void test_read(void) {
+    uint8_t buf[10];
+    int32_t nbytes = 10;
+
+    int32_t num_bytes_read = terminal_read(NULL, buf, nbytes);
+
+    printf("\nRead the first %d chars from the terminal.\n", num_bytes_read);
+    printf("They are: %c%c%c%c%c%c%c%c%c%c\n", buf[0], buf[1], buf[2], buf[3], buf[4], buf[5], buf[6], buf[7], buf[8], buf[9]);
+}
+
+void test_write(void) {
+    int i = 0;
+    uint8_t buf[10];
+    int32_t nbytes = 10;
+
+    for(i = 0; i < nbytes; i++) {
+        buf[i] = 'A';
+    }
+
+    terminal_write(NULL, buf, nbytes);
 }
