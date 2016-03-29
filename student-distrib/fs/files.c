@@ -204,14 +204,30 @@ int32_t dir_write(){
 }
 
 int32_t dir_read(int32_t fd, int8_t * buf, int32_t length){
-       
+        //check if reached end       
         if(dirReads >= b.n_dentries){
             dirReads = 0;
             return 0;
         }
+        //copy name into buf
         strcpy(buf, dentries[dirReads].file_name);
+        
+        //get number of bytes and increment the directory read counter
         int bytesCopied = strlen(buf);
-    
         dirReads++;
+
         return bytesCopied;
+}
+
+void test_dir_read(){
+    
+    int32_t fd = 0, cnt = 0;
+    uint8_t buf[33];
+
+    printf("Testing dir_read...\n");
+    
+    //print out all files in directory
+    while(0 != (cnt = dir_read(fd,buf,32))){
+        printf("%s\n",buf);
+    }
 }
