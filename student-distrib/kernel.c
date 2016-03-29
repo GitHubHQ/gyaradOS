@@ -5,6 +5,7 @@
 #include "drivers/i8259.h"
 #include "drivers/rtc.h"
 #include "drivers/speaker.h"
+#include "drivers/mouse.h"
 #include "libs/lib.h"
 #include "multiboot.h"
 #include "x86_desc.h"
@@ -171,6 +172,11 @@ void entry (unsigned long magic, unsigned long addr) {
 
 	printf("Enabling RTC interrupts       ... ");
 	enable_irq(IRQ_RTC);
+	printf("[ OK ]\n");
+
+	printf("Enabling mouse interrupts     ... ");
+	enable_irq(IRQ_MOUSE_PS2);
+	mouse_init();
 	printf("[ OK ]\n");
 
 	/* Enable interrupts */
