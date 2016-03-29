@@ -14,17 +14,17 @@ typedef struct {
 } inode_t;
 
 typedef struct {
-	uint8_t file_name[32];
-	uint8_t file_type;
+	int8_t file_name[32];
+	uint32_t file_type;
 	uint32_t inode_num;
-	uint32_t blocks_reserved[24];
+	uint8_t blocks_reserved[24];
 } dentry_t;
 
 typedef struct {
 	uint32_t n_dentries;
 	uint32_t n_inodes;
 	uint32_t n_data_blocks;
-	uint32_t blocks_reserved[52];
+	uint8_t blocks_reserved[52];
 } boot_block;
 
 int32_t read_dentry_by_name (const uint8_t* fname, dentry_t * dentry);

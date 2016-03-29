@@ -192,7 +192,7 @@ void entry (unsigned long magic, unsigned long addr) {
 	fs_init(fs_start);
 
 	/* print splash screen */
-	splash_screen();
+	//splash_screen();
 	
 	// RTC Testing
 	/*
@@ -204,10 +204,6 @@ void entry (unsigned long magic, unsigned long addr) {
 		printf("%s\n", "Success!");
 	}
 	*/
-
-	char fname[4] = {'f', 'i', 's', 'h'};
-	dentry_t * dentry;
-	read_dentry_by_name(fname, dentry);
 
 	/* Execute the first program (`shell') ... */
 
