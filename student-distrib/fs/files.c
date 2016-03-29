@@ -16,8 +16,8 @@ void fs_init(uint32_t addrs)
 	b_block_addrs = addrs;
 	memcpy(&b, (void *)b_block_addrs, BOOT_BLOCK_SIZE);
 
-    dentries = (dentry_t *) b_block_addrs + BOOT_BLOCK_SIZE;
-    inodes = (inode_t *) b_block_addrs + BLOCK_SIZE;
+    dentries = (dentry_t *) (b_block_addrs + BOOT_BLOCK_SIZE);
+    inodes = (inode_t *) (b_block_addrs + BLOCK_SIZE);
     data_blocks = b_block_addrs + b.n_inodes * BLOCK_SIZE + BLOCK_SIZE;
 }
 
@@ -32,6 +32,7 @@ int32_t fs_write(int32_t fd, const void* buf, int32_t nbytes){
 int32_t fs_open(){
     return 0;
 }
+
 int32_t fs_close(){
     return 0;
 }
@@ -46,8 +47,10 @@ int32_t read_dentry_by_name (const uint8_t* fname, dentry_t* dentry) {
 	int i;
 
 	//loop through dir entries until file name is found
-	for(i = 0; i < 63; i++) {
-		if(0 == strncmp((int8_t *)dentries[i].file_name, (int8_t *)fname, 32)) {
+	for(i = 0; i < b.n_dentries; i++) {
+        printf("%s\n", dentries[i].file_name);
+
+		if(0 == strncmp((int8_t *) dentries[i].file_name, (int8_t *) fname, 32)) {
             printf("hi");
 	 		strcpy((int8_t *) dentry->file_name, (int8_t *) dentries[i].file_name);
 	 		dentry->file_type = dentries[i].file_type;
@@ -68,8 +71,8 @@ int32_t read_dentry_by_name (const uint8_t* fname, dentry_t* dentry) {
  */
 int32_t read_dentry_by_index (uint32_t index, dentry_t* dentry) {
 	// //check if index out of bounds
-	// if(index >= b.dir_entries || index < 0)
-	//  	return -1;
+	if(index >= b.n_dentries || index < 0)
+	 	return -1;
 
 	//copying the data from the index to the dentry
 	strcpy((int8_t *)dentry->file_name, (int8_t *)dentries[index].file_name);
@@ -80,9 +83,9 @@ int32_t read_dentry_by_index (uint32_t index, dentry_t* dentry) {
 }
 
 int32_t read_data (uint32_t inode, uint32_t offset, uint8_t * buf, uint32_t length) {
-	// if(inode >= b.inodes || inode < 0)
-	// 	return -1;
-     
+	if(inode >= b.n_inodes || inode < 0)
+		return -1;
+
     int curr_block = offset / BLOCK_SIZE;
     int location_in_block = offset % BLOCK_SIZE;
 
