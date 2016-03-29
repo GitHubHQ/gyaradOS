@@ -32,9 +32,10 @@ int32_t read_dentry_by_index (uint32_t index, dentry_t * dentry);
 int32_t read_data (uint32_t inode, uint32_t offset, uint8_t * buf, uint32_t length);
 
 void fs_init(uint32_t addrs);
-int32_t fs_write(int32_t fd, const void* buf, int32_t nbytes);
-int32_t fs_read(int32_t fd, void* buf, int32_t nbytes);
+int32_t fs_write(int8_t* fd, uint8_t * buf, int32_t nbytes);
+int32_t fs_read(int8_t* fd, uint8_t * buf, int32_t nbytes);
 int32_t fs_open();
 int32_t fs_close();
+void test_fs();
 
 #endif

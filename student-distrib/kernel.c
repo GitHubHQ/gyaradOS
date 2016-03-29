@@ -192,6 +192,9 @@ void entry (unsigned long magic, unsigned long addr) {
 	/* Initializing files */
 	fs_init(fs_start);
 
+	//File system testing
+	test_fs();
+
 	/* print splash screen */
 
 	
