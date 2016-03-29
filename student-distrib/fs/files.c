@@ -24,6 +24,11 @@ void fs_init(uint32_t addrs) {
     read_location = 0;
 }
 
+/* fs_read(int8_t* fd, uint8_t * buf, int32_t nbytes)
+ * inputs: file descriptor fd, output buffer buf, and number of bytes to read
+ * nbytes
+ * ouputs: return number of bytes read into the buffer for output
+ */
 int32_t fs_read(int8_t* fd, uint8_t * buf, int32_t nbytes) {
     dentry_t temp;
     read_dentry_by_name((uint8_t*)fd, &temp);
@@ -32,14 +37,26 @@ int32_t fs_read(int8_t* fd, uint8_t * buf, int32_t nbytes) {
     return bytesRead;
 }
 
+/* fs_write()
+ * inputs: none
+ * ouputs: none return -1 because read only
+ */
 int32_t fs_write(int8_t* fd, uint8_t * buf, int32_t nbytes) {
     return -1;
 }
 
+/* fs_open()
+ * inputs: none
+ * ouputs: none return 0
+ */
 int32_t fs_open(){
     return 0;
 }
 
+/* fs_close()
+ * inputs: none
+ * ouputs: none return 0
+ */
 int32_t fs_close(){
     return 0;
 }
@@ -132,6 +149,11 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t * buf, uint32_t leng
     return num_reads;
 }
 
+/* test_fs()
+ * description: tests the filesystem functions
+ * input: none
+ * output:none
+ */
 void test_fs() {
     //reading a non txt file
     // char * fname = "cat";
@@ -184,19 +206,35 @@ void test_fs() {
     // }
  }
 
+/* dir_open()
+ * inputs: none
+ * ouputs: none return 0
+ */
 int32_t dir_open(){
     return 0;
 }
 
+/* dir_close()
+ * inputs: none
+ * ouputs: none return 0
+ */
 int32_t dir_close(){
     return 0;
 }
 
-
+/* dir_write()
+ * inputs: none
+ * outputs: return -1 because read only
+ */
 int32_t dir_write(){
     return -1;
 }
 
+/* dir_read(int32_t fd, int8_t * buf, int32_t length)
+ * description: reads next filename into the buffer eveytime dir_read is called
+ * inputs: file descriptor, buffer for output, and length for bytes to copy
+ * outputs: copies filename into buf and returns the number of bytes copied
+ */
 int32_t dir_read(int32_t fd, int8_t * buf, int32_t length){
         //check if reached end       
         if(dirReads >= b.n_dentries){
@@ -213,10 +251,15 @@ int32_t dir_read(int32_t fd, int8_t * buf, int32_t length){
         return bytesCopied;
 }
 
+/* test_dir_read()
+ * description: this function tests printing out all files in the directory
+ * inputs: none
+ * outputs: none
+ */
 void test_dir_read(){
     
     int32_t fd = 0, cnt = 0;
-    uint8_t buf[33];
+    int8_t buf[33];
 
     printf("Testing dir_read...\n");
     
