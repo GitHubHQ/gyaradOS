@@ -120,17 +120,32 @@ void rtc_handle_interrupt(void) {
 	sti();
 }
 
+/**
+ * Sets the RTC to its default frequency
+ * @return  0 on success
+ */
 int32_t rtc_open(void) {
 	rtc_set_frequency(RTC_DEFAULT_HZ);
 	return 0;
 }
 
+/**
+ * Closes the rtc file for a program and returns the RTC to default freq
+ * @return  0 on success
+ */
 int32_t rtc_close(void) {
 	//Reset frequency and return
 	rtc_set_frequency(RTC_DEFAULT_HZ);
 	return 0;
 }
 
+/**
+ * Returns when there is a rtc interuupt, spins while there isn't
+ * @param  fd     Not used
+ * @param  buf    Not used
+ * @param  nbytes Not used
+ * @return        0 on interrupt
+ */
 int32_t rtc_read(int32_t fd, uint8_t* buf, int32_t nbytes) {
 	while(!intr_occ) {
 		/* Do nothing */
@@ -141,6 +156,13 @@ int32_t rtc_read(int32_t fd, uint8_t* buf, int32_t nbytes) {
 	return 0;
 }
 
+/**
+ * Sets the frequency of the RTC
+ * @param  fd     Not used
+ * @param  buf    Frequency to set RTC to
+ * @param  nbytes Size of buf
+ * @return        0 on success, -1 on failure
+ */
 int32_t rtc_write(int32_t fd, const int32_t* buf, int32_t nbytes) {
 	if (nbytes != 4) {
 		return -1;
@@ -151,4 +173,63 @@ int32_t rtc_write(int32_t fd, const int32_t* buf, int32_t nbytes) {
 	}
 	int32_t frequency = *buf;
 	return rtc_set_frequency(frequency);
+}
+
+/**
+ * Tets the RTC functions
+ */
+void rtc_test(void) {
+	// RTC Testing
+	int freq = 4;
+	int i;
+	if(rtc_write(NULL, &freq, 4)){
+		printf("%s\n", "Fail!");
+	} else {
+		printf("Success! Freq set to 4. Reading...");
+	}
+	for(i = 0; i < 15; i++){
+		if(!rtc_read(NULL, NULL, NULL)) {
+			printf("Interrupted by RTC!\n");
+		}
+	}
+
+	clear();
+	freq = 2;
+	if(rtc_write(NULL, &freq, 4)){
+		printf("%s\n", "Fail!");
+	} else {
+		printf("Success! Freq set to 2. Reading...");
+	}
+	for(i = 0; i < 15; i++){
+		if(!rtc_read(NULL, NULL, NULL)) {
+			printf("Interrupted by RTC!\n");
+		}
+	}
+
+	clear();
+	freq = 7;
+	if(rtc_write(NULL, &freq, 4)){
+		printf("%s\n", "Fail! Attempted to set Frequency to 7!");
+	} else {
+		printf("Success! Freq set to 7. Reading...");
+	}
+	for(i = 0; i < 1000; i++){
+		int j;
+			for(j = 0; j < 500000; j++){
+		/* Spin for a second so you can read output */
+		}
+	}
+
+	clear();
+	freq = 512;
+	if(rtc_write(NULL, &freq, 4)){
+		printf("%s\n", "Fail!");
+	} else {
+		printf("Success! Freq set to 512. Reading...");
+	}
+	for(i = 0; i < 15; i++){
+		if(!rtc_read(NULL, NULL, NULL)) {
+			printf("Interrupted by RTC!\n");
+		}
+	}
 }

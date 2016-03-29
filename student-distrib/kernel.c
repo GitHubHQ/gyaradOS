@@ -5,12 +5,12 @@
 #include "drivers/i8259.h"
 #include "drivers/rtc.h"
 #include "drivers/speaker.h"
-#include "drivers/mouse.h"
 #include "libs/lib.h"
 #include "multiboot.h"
 #include "x86_desc.h"
 #include "debug.h"
 #include "paging.h"
+#include "fs/files.h"
 
 /* Macros. */
 /* Check if the bit BIT in FLAGS is set. */
@@ -21,6 +21,7 @@
    pointed by ADDR. */
 void entry (unsigned long magic, unsigned long addr) {
 	multiboot_info_t *mbi;
+	uint32_t fs_start = 0;
 
 	/* Clear the screen. */
 	clear();
@@ -58,6 +59,8 @@ void entry (unsigned long magic, unsigned long addr) {
 		int i;
 		module_t* mod = (module_t*)mbi->mods_addr;
 		while(mod_count < mbi->mods_count) {
+			fs_start = (unsigned int) mod->mod_start;
+
 			if(DEBUG_F) {
 				printf("Module %d loaded at address: 0x%#x\n", mod_count, (unsigned int)mod->mod_start);
 				printf("Module %d ends at address: 0x%#x\n", mod_count, (unsigned int)mod->mod_end);
@@ -65,8 +68,8 @@ void entry (unsigned long magic, unsigned long addr) {
 				for(i = 0; i<16; i++) {
 					printf("0x%x ", *((char*)(mod->mod_start+i)));
 				}
+				printf("\n");
 			}
-			printf("\n");
 			mod_count++;
 			mod++;
 		}
@@ -182,22 +185,14 @@ void entry (unsigned long magic, unsigned long addr) {
 
 	/* Enable paging */
 	init_paging();
-	printf("[ OK ]\n");
+
+	/* Initializing files */
+	//fs_init(fs_start);
 
 	/* print splash screen */
-	splash_screen();
+	// splash_screen();
 	
-	// RTC Testing
-	// Change the frequency
-	/*
-	rtc_init(RTC_VERBOSE);
-	int freq = 4;
-	if(rtc_write(NULL, &freq, 4)){
-		printf("%s\n", "Fail!");
-	} else {
-		printf("Success! Changed to %d.\n", freq);
-	}
-	*/
+	rtc_test();
 
 	/* Execute the first program (`shell') ... */
 
