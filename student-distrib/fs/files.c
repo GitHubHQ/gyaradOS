@@ -7,6 +7,7 @@ uint32_t read_location;
 dentry_t * dentries;
 inode_t * inodes;
 uint32_t data_blocks;
+uint32_t dirReads;
 
 /**
  * Initializing the Boot block by getting the data from address
@@ -19,9 +20,6 @@ void fs_init(uint32_t addrs) {
     dentries = (dentry_t *)(b_block_addrs + BOOT_BLOCK_SIZE);
     inodes = (inode_t *) (b_block_addrs + BLOCK_SIZE);
     data_blocks = b_block_addrs + b.n_inodes * BLOCK_SIZE + BLOCK_SIZE;
-    // printf("Boot Block Address: %d\n", b_block_addrs);
-    // printf("Inode numbers: %d Inodes address: %d\n", b.n_inodes, inodes);
-    // printf("Data Block Address: %d\n", data_blocks);
 
     read_location = 0;
 }
@@ -69,7 +67,6 @@ int32_t read_dentry_by_name (const uint8_t* fname, dentry_t* dentry) {
             dentry->file_type = dentries[i].file_type;
             dentry->inode_num = dentries[i].inode_num;
 
-
             return 0;
         }
      }
@@ -112,7 +109,6 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t * buf, uint32_t leng
      
     while(num_reads < length) {
         buf[buf_pos] = *curr_read_pos;
-        // printf("%d, ", *curr_read_pos);
         num_reads++;
         buf_pos++;
         curr_read_pos++;
@@ -136,8 +132,7 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t * buf, uint32_t leng
     return num_reads;
 }
 
-void test_fs()
-{
+void test_fs() {
 		//reading a non txt file
     char * fname = "cat";
     printf("Reading cat... \n");
@@ -173,11 +168,11 @@ void test_fs()
  //    	//printf("\n");
  //    }
  //    printf("Done\n");
-    // fs_read(fname, buf, 10);
-    // for(i = 0 ; i < 10; i++)
-    // printf("%d, ", buf[i]);
+ //    fs_read(fname, buf, 10);
+ //    for(i = 0 ; i < 10; i++)
+ //    printf("%d, ", buf[i]);
 
-	//reading a large file
+	// reading a large file
 	// char * fname = "verylargetxtwithverylongname.txt";
 	// printf("Reading verylargetxtwithverylongname.txt... \n");
  //    dentry_t temp;
@@ -193,4 +188,30 @@ void test_fs()
  //        //printf("\n");
  //    }
  //    printf("Done\n");
+ }
+
+int32_t dir_open(){
+    return 0;
+}
+
+int32_t dir_close(){
+    return 0;
+}
+
+
+int32_t dir_write(){
+    return -1;
+}
+
+int32_t dir_read(int32_t fd, int8_t * buf, int32_t length){
+       
+        if(dirReads >= b.n_dentries){
+            dirReads = 0;
+            return 0;
+        }
+        strcpy(buf, dentries[dirReads].file_name);
+        int bytesCopied = strlen(buf);
+    
+        dirReads++;
+        return bytesCopied;
 }

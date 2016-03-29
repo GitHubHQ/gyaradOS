@@ -193,11 +193,19 @@ void entry (unsigned long magic, unsigned long addr) {
 	fs_init(fs_start);
 
 	//File system testing
-	test_fs();
+	//test_fs();
 
 	/* print splash screen */
+    
+    //dir_read testing
+    /*
+    int32_t fd = 0, cnt = 0;
+    uint8_t buf[33];
+    while(0 != (cnt = dir_read(fd,buf,32))){
+        printf("%s\n",buf);
+    }
+    */
 
-	
 	// RTC Testing
 	/*
 	rtc_init(RTC_VERBOSE);
