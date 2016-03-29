@@ -9,6 +9,7 @@
 #define MULTIBOOT_HEADER_FLAGS          0x00000003
 #define MULTIBOOT_HEADER_MAGIC      	0x1BADB002
 #define MULTIBOOT_BOOTLOADER_MAGIC      0x2BADB002
+#define MOD_FS_STRING                   8201
 
 #ifndef ASM
 

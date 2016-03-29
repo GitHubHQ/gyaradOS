@@ -11,6 +11,7 @@
 #include "x86_desc.h"
 #include "debug.h"
 #include "paging.h"
+#include "fs/files.h"
 
 /* Macros. */
 /* Check if the bit BIT in FLAGS is set. */
@@ -21,6 +22,7 @@
    pointed by ADDR. */
 void entry (unsigned long magic, unsigned long addr) {
 	multiboot_info_t *mbi;
+	uint32_t fs_start = 0;
 
 	/* Clear the screen. */
 	clear();
@@ -58,6 +60,10 @@ void entry (unsigned long magic, unsigned long addr) {
 		int i;
 		module_t* mod = (module_t*)mbi->mods_addr;
 		while(mod_count < mbi->mods_count) {
+			if(mod->string == MOD_FS_STRING) {
+				fs_start = (unsigned int) mod->mod_start;
+			}
+
 			if(DEBUG_F) {
 				printf("Module %d loaded at address: 0x%#x\n", mod_count, (unsigned int)mod->mod_start);
 				printf("Module %d ends at address: 0x%#x\n", mod_count, (unsigned int)mod->mod_end);
@@ -65,8 +71,8 @@ void entry (unsigned long magic, unsigned long addr) {
 				for(i = 0; i<16; i++) {
 					printf("0x%x ", *((char*)(mod->mod_start+i)));
 				}
+				printf("\n");
 			}
-			printf("\n");
 			mod_count++;
 			mod++;
 		}
@@ -182,11 +188,25 @@ void entry (unsigned long magic, unsigned long addr) {
 
 	/* Enable paging */
 	init_paging();
-	printf("[ OK ]\n");
+
+	 splash_screen();
+	/* Initializing files */
+	fs_init(fs_start);
+
+	//File system testing
+	//test_fs();
 
 	/* print splash screen */
-	splash_screen();
-	
+    
+    //dir_read testing
+    /*
+    int32_t fd = 0, cnt = 0;
+    uint8_t buf[33];
+    while(0 != (cnt = dir_read(fd,buf,32))){
+        printf("%s\n",buf);
+    }
+    */
+
 	// RTC Testing
 	// Change the frequency
 	/*
