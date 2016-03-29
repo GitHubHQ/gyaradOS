@@ -5,7 +5,6 @@
 #include "drivers/i8259.h"
 #include "drivers/rtc.h"
 #include "drivers/speaker.h"
-#include "drivers/mouse.h"
 #include "libs/lib.h"
 #include "multiboot.h"
 #include "x86_desc.h"
@@ -189,35 +188,16 @@ void entry (unsigned long magic, unsigned long addr) {
 	/* Enable paging */
 	init_paging();
 
-	 splash_screen();
+	splash_screen();
 	/* Initializing files */
 	fs_init(fs_start);
 
+	//Test RTC driver
+	//rtc_test();
+
 	//File system testing
-	//test_fs();
+	test_fs();
 
-	/* print splash screen */
-    
-    //dir_read testing
-    /*
-    int32_t fd = 0, cnt = 0;
-    uint8_t buf[33];
-    while(0 != (cnt = dir_read(fd,buf,32))){
-        printf("%s\n",buf);
-    }
-    */
-
-	// RTC Testing
-	// Change the frequency
-	/*
-	rtc_init(RTC_VERBOSE);
-	int freq = 4;
-	if(rtc_write(NULL, &freq, 4)){
-		printf("%s\n", "Fail!");
-	} else {
-		printf("Success! Changed to %d.\n", freq);
-	}
-	*/
 
 	/* Execute the first program (`shell') ... */
 
