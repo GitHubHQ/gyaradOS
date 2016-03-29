@@ -62,6 +62,10 @@
 #define B3		987.77
 #define C4		1046.50
 
+#define HALF_NOTE		1800000
+#define QUARTER_NOTE	900000
+#define EIGHTH_NOTE		450000
+
 /* External functions */
 void speaker_play_sound(uint32_t sound_freq);
 void speaker_mute(void);

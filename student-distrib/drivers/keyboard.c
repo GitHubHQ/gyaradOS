@@ -53,7 +53,6 @@ int cntrl_l_on = 0;
 int cntrl_r_on = 0;
 
 int caps_on = 0;
-int caps_btn_pressed = 0;
 
 int shift_l_on = 0;
 int shift_r_on = 0;
@@ -237,11 +236,8 @@ void handle_keypress() {
                     shift_r_on = 1;
                     break;
                 case KEY_MAKE_CAPS:
-                    if(!caps_btn_pressed) {
-                        caps_on = !caps_on;
-                        kbd_led_handling(caps_on, 0, 0);
-                    }
-                    caps_btn_pressed = 1;
+                    caps_on = !caps_on;
+                    kbd_led_handling(caps_on, 0, 0);
                     break;
                 case KEY_MAKE_ENTER:
                     handle_enter();
@@ -296,9 +292,6 @@ void handle_keypress() {
                     break;
                 case KEY_BREAK_R_SHIFT:
                     shift_r_on = 0;
-                    break;
-                case KEY_BREAK_CAPS:
-                    caps_btn_pressed = 0;
                     break;
                 default:
                     // we don't care about the rest of the breaks

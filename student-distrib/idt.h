@@ -4,6 +4,7 @@
 #include "drivers/rtc.h"
 #include "drivers/keyboard.h"
 #include "drivers/i8259.h"
+#include "drivers/mouse.h"
 #include "irq.h"
 #include "libs/lib.h"
 #include "x86_desc.h"
@@ -12,6 +13,7 @@
 
 #define KEYBOARD_IDT   0x21
 #define RTC_IDT        0x28
+#define MOUSE_IDT	   0x2C
 
 // 0 - Division by zero exception
 void divide_by_zero_except();

@@ -33,6 +33,11 @@ void clear(void) {
     }
 }
 
+void draw_full_block(int32_t x, int32_t y, int8_t color) {
+	int32_t offset = y*NUM_COLS + x;
+  	*(uint8_t *)(video_mem + (offset<<1) + 1) = 0x01;
+}
+
 /* Standard printf().
  * Only supports the following format strings:
  * %%  - print a literal '%' character
@@ -192,6 +197,10 @@ void putc(uint8_t c) {
         *(uint8_t *)(video_mem + ((NUM_COLS*screen_y + screen_x) << 1)) = c;
         *(uint8_t *)(video_mem + ((NUM_COLS*screen_y + screen_x) << 1) + 1) = ATTRIB;
         screen_x++;
+
+        if(screen_x == NUM_COLS) {
+        	new_line();
+        }
         
         screen_x %= NUM_COLS;
         screen_y = (screen_y + (screen_x / NUM_COLS)) % NUM_ROWS;

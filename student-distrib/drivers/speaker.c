@@ -53,72 +53,36 @@ void speaker_single_beep(void) {
  */
 void sound_bootup(void) {
 	int i;
-	for (i = 0; i < 999000; i++)
-	{
-		speaker_play_sound(C3);
+	for(i = 0; i < QUARTER_NOTE; i++) {
+		speaker_play_sound(E3);
 	}
-	speaker_mute();
-	for (i = 0; i < 999000; i++)
-	{
-		speaker_play_sound(A2);
-	}
-	speaker_mute();
-	for (i = 0; i < 1000000; i++)
-	{
-		speaker_play_sound(F2);
-	}
-	speaker_mute();
-	for (i = 0; i < 500000; i++)
-	{
-		speaker_play_sound(D3S);
-	}
-	for (i = 0; i < 200000; i++)
+	for (i = 0; i < EIGHTH_NOTE; ++i)
 	{
 		speaker_mute();
 	}
-	for (i = 0; i < 300000; i++)
-	{
-		speaker_play_sound(D3S);
+	for(i = 0; i < QUARTER_NOTE; i++) {
+		speaker_play_sound(E3);
 	}
-	for (i = 0; i < 200000; i++)
+	for (i = 0; i < EIGHTH_NOTE; ++i)
 	{
 		speaker_mute();
 	}
-	for (i = 0; i < 500000; i++)
-	{
-		speaker_play_sound(D3S);
+	for(i = 0; i < EIGHTH_NOTE; i++) {
+		speaker_play_sound(E3);
 	}
-	for (i = 0; i < 200000; i++)
+	for (i = 0; i < EIGHTH_NOTE; ++i)
 	{
 		speaker_mute();
 	}
-	for (i = 0; i < 500000; i++)
-	{
-		speaker_play_sound(D3S);
+	for(i = 0; i < EIGHTH_NOTE; i++) {
+		speaker_play_sound(C3S);
 	}
-	for (i = 0; i < 200000; i++)
+	for (i = 0; i < EIGHTH_NOTE; ++i)
 	{
 		speaker_mute();
 	}
-	for (i = 0; i < 500000; i++)
-	{
-		speaker_play_sound(D3S);
-	}
-	for (i = 0; i < 200000; i++)
-	{
-		speaker_mute();
-	}
-	for (i = 0; i < 500000; i++)
-	{
-		speaker_play_sound(G3);
-	}
-	for (i = 0; i < 200000; i++)
-	{
-		speaker_mute();
-	}
-	for (i = 0; i < 1000000; i++)
-	{
-		speaker_play_sound(F3);
+	for(i = 0; i < HALF_NOTE; i++) {
+		speaker_play_sound(A3);
 	}
 	speaker_mute();
 }
