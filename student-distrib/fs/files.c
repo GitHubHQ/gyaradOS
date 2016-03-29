@@ -151,7 +151,7 @@ int32_t dir_read(int32_t fd, int8_t * buf, int32_t length){
         }
         strcpy(buf, dentries[dirReads].file_name);
         int bytesCopied = strlen(buf);
-        //buf[bytesCopied] = '\n'; 
+    
         dirReads++;
         return bytesCopied;
 }

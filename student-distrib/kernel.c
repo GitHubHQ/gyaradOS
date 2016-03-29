@@ -194,12 +194,14 @@ void entry (unsigned long magic, unsigned long addr) {
 
 	/* print splash screen */
     
+    //dir_read testing
+    /*
     int32_t fd = 0, cnt = 0;
     uint8_t buf[33];
     while(0 != (cnt = dir_read(fd,buf,32))){
-        //buf[cnt] = '\n';
         printf("%s\n",buf);
     }
+    */
 
 	// RTC Testing
 	/*
