@@ -33,6 +33,12 @@ void clear(void) {
     }
 }
 
+/**
+ * Draw A cursor block at position (non functioning)
+ * @param x     x location to draw at
+ * @param y     y location to draw at
+ * @param color color of the cursor
+ */
 void draw_full_block(int32_t x, int32_t y, int8_t color) {
 	int32_t offset = y*NUM_COLS + x;
   	*(uint8_t *)(video_mem + (offset<<1) + 1) = 0x01;

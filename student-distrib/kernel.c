@@ -188,32 +188,23 @@ void entry (unsigned long magic, unsigned long addr) {
 	/* Enable paging */
 	init_paging();
 
-	splash_screen();
+	//splash_screen();
+	
 	/* Initializing files */
 	fs_init(fs_start);
+
+	// Clear the screen for use
+	clear_screen();
 
 	//Test RTC driver
 	//rtc_test();
 
 	//File system testing
 	//test_fs();
-
-	/* print splash screen */
     
     //dir_read testing
     //test_dir_read(); 
 
-	// RTC Testing
-	// Change the frequency
-	/*
-	rtc_init(RTC_VERBOSE);
-	int freq = 4;
-	if(rtc_write(NULL, &freq, 4)){
-		printf("%s\n", "Fail!");
-	} else {
-		printf("Success! Changed to %d.\n", freq);
-	}
-	*/
 
 
 	/* Execute the first program (`shell') ... */
