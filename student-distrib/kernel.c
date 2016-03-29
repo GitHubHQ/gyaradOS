@@ -196,7 +196,7 @@ void entry (unsigned long magic, unsigned long addr) {
 	//rtc_test();
 
 	//File system testing
-	//test_fs();
+	test_fs();
 
 
 	/* Execute the first program (`shell') ... */
