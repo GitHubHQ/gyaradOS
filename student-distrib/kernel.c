@@ -205,6 +205,10 @@ void entry (unsigned long magic, unsigned long addr) {
 	}
 	*/
 
+	char fname[4] = {'f', 'i', 's', 'h'};
+	dentry_t * dentry;
+	read_dentry_by_name(fname, dentry);
+
 	/* Execute the first program (`shell') ... */
 
 	/* Spin (nicely, so we don't chew up cycles) */

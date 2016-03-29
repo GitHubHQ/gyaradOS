@@ -6,11 +6,12 @@
 
 #define BOOT_BLOCK_SIZE 64
 #define DENTRY_SIZE 64
+#define BLOCK_SIZE 0x1000
 
 typedef struct {
 	uint32_t file_size;
 	uint32_t blocks[1023];
-} i_node;
+} inode_t;
 
 typedef struct {
 	uint8_t file_name[32];
@@ -20,11 +21,10 @@ typedef struct {
 } dentry_t;
 
 typedef struct {
-	uint32_t dir_entries;
-	uint32_t inodes;
-	uint32_t data_blocks;
+	uint32_t n_dentries;
+	uint32_t n_inodes;
+	uint32_t n_data_blocks;
 	uint32_t blocks_reserved[52];
-	dentry_t* dentry_entries;
 } boot_block;
 
 int32_t read_dentry_by_name (const uint8_t* fname, dentry_t * dentry);
