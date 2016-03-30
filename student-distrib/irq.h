@@ -79,4 +79,7 @@ extern void mouse_irq();
 // handler for general interrupts
 extern void general_irq();
 
+// handler for syscall interrupts
+extern void syscall_irq();
+
 #endif /* IRQ_H*/

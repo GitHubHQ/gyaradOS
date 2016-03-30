@@ -27,6 +27,7 @@
 .global rtc_irq
 .global mouse_irq
 .global general_irq
+.global syscall_irq
 
 /**
  * Exceptions
@@ -610,3 +611,46 @@ general_irq:
 
     // return to the interrupt handler
     iret
+
+syscall_jumptable:
+    // .long 0x0
+    // .long halt
+    // .long execute
+    // .long read
+    // .long write
+    // .long open
+    // .long close
+    // .long getargs
+    // .long vidmap
+    // .long set_handler
+    // .long sigreturn
+
+syscall_irq:
+    cmpl $1, %eax
+    jl invalid_eax
+    cmpl $10, %eax
+    jg invalid_eax
+
+    // save other registers we need
+
+    // push arguments in order
+    pushl %edx
+    pushl %ecx
+    pushl %ebx
+
+    // call the correct syscall
+    // call *syscall_jumptable(,%eax,4)
+
+    // pop args
+    addl $12,%esp
+
+    // restore other registers we need back
+
+    // return 0 as syscall executed correctly
+    xorl %eax, %eax
+
+    // return to interrupt handler
+    iret
+
+invalid_eax:
+    movl $-1, %eax
