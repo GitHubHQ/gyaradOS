@@ -179,6 +179,9 @@ void entry (unsigned long magic, unsigned long addr) {
 	enable_irq(IRQ_RTC);
 	printf("[ OK ]\n");
 
+	/* Display the splash screen */
+	// splash_screen();
+
 	/* Enable interrupts */
 	/* Do not enable the following until after you have set up your
 	 * IDT correctly otherwise QEMU will triple fault and simple close
@@ -188,14 +191,13 @@ void entry (unsigned long magic, unsigned long addr) {
 	/* Enable paging */
 	init_paging();
 
-	//splash_screen();
-	
-	/* Initializing files */
+	/* Initialize filesystem */
 	fs_init(fs_start);
 
 	// Clear the screen for use
 	clear_screen();
 
+	/* TESTS */
 	//Test RTC driver
 	//rtc_test();
 
@@ -204,8 +206,6 @@ void entry (unsigned long magic, unsigned long addr) {
     
     //dir_read testing
     //test_dir_read(); 
-
-
 
 	/* Execute the first program (`shell') ... */
 
