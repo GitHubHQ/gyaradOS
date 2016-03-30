@@ -127,7 +127,7 @@ uint32_t add_char_to_buffer(uint8_t new_char) {
     if(num_chars_in_buf < MAX_CHARS_IN_BUF) {
         keyboard_buf[num_chars_in_buf] = new_char;
         num_chars_in_buf++;
-        print_char(new_char);
+        putc(new_char);
         return 1;
     }
 
