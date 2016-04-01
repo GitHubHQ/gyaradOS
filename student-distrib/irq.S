@@ -613,17 +613,17 @@ general_irq:
     iret
 
 syscall_jumptable:
-    // .long 0x0
-    // .long halt
-    // .long execute
-    // .long read
-    // .long write
-    // .long open
-    // .long close
-    // .long getargs
-    // .long vidmap
-    // .long set_handler
-    // .long sigreturn
+    .long 0x00
+    .long halt
+    .long execute
+    .long read
+    .long write
+    .long open
+    .long close
+    .long getargs
+    .long vidmap
+    .long set_handler
+    .long sigreturn
 
 syscall_irq:
     cmpl $1, %eax
@@ -639,7 +639,7 @@ syscall_irq:
     pushl %ebx
 
     // call the correct syscall
-    // call *syscall_jumptable(,%eax,4)
+    call *syscall_jumptable(,%eax,4)
 
     // pop args
     addl $12,%esp
