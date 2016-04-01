@@ -627,11 +627,17 @@ syscall_jumptable:
 
 syscall_irq:
     cmpl $1, %eax
-    jl invalid_eax
+    jl syscall_invalid_eax
     cmpl $10, %eax
-    jg invalid_eax
+    jg syscall_invalid_eax
 
     // save other registers we need
+    pushl %ebp
+    pushl %ebx
+    pushl %ecx
+    pushl %edx
+    pushl %edi
+    pushl %esi
 
     // push arguments in order
     pushl %edx
@@ -645,12 +651,20 @@ syscall_irq:
     addl $12,%esp
 
     // restore other registers we need back
+    popl %esi
+    popl %edi
+    popl %edx
+    popl %ecx
+    popl %ebx
+    popl %ebp
 
-    // return 0 as syscall executed correctly
-    xorl %eax, %eax
+    // jump to return
+    jmp syscall_ret
 
+syscall_invalid_eax:
+    movl $-1, %eax
+    jmp syscall_ret
+
+syscall_ret:
     // return to interrupt handler
     iret
-
-invalid_eax:
-    movl $-1, %eax
