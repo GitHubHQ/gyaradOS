@@ -11,12 +11,14 @@
 
 #define VIDEO_PHYS_ADDR         0XB8000
 #define KERNEL_PHYS_ADDR        0x400000
+#define PROCESS_START_ADDR      0x08048000
 
 #define SET_USER_PRESENT        0x7
 #define SET_PRESENT 			0x3
 #define SET_4MB_PRESENT         0x83
 #define SET_OFF                 0x2
 #define SET_DEFAULT_MASK        0xFFFFF000
+#define SET_4MB_USER_PRESENT    0x87
 /* The page directory */
 uint32_t pageDirectory[PAGE_DIRECTORY_SIZE] __attribute__((aligned(PAGE_SIZE)));
 

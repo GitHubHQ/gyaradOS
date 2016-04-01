@@ -1,4 +1,6 @@
 #include "paging.h"
+
+int32_t num_processes;
 /* void init_paging()
  * Description: initialize video memory page in 0-4mb range, and kernel memory
  * from 4-8mb
@@ -10,6 +12,7 @@ void init_paging(){
 
 	uint32_t pageAddress = 0;
 	int i;
+    num_processes = 0;
 
 	/*disabling the 4kb pages in the first 4MB of the PD by setting the pages to be
 	 * Supervisor privilege, Read/Write, not present
@@ -49,7 +52,19 @@ void init_paging(){
     
 }
 
+int init_new_process(){
+      if(num_processes > 10 || num_processes < 0){
+        return -1;
+      }
+      //get address and index
+      uint32_t address = PROCESS_START_ADDR + num_processes*PAGE_SIZE_LARGE;
+      uint32_t idx = address/PAGE_SIZE_LARGE;
 
+      //enable the given page;
+      pageDirectory[idx] = address | SET_4MB_USER_PRESENT;
+      num_processes++;
+      return 0;
+}
 
 /* void test_paging()
  * Description: Test access to different pages in memory. Purely for testing
