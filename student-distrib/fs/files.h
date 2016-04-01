@@ -7,6 +7,7 @@
 #define BOOT_BLOCK_SIZE 64
 #define DENTRY_SIZE 64
 #define BLOCK_SIZE 0x1000
+#define MAX_FILENAME_LENGTH 31
 
 typedef struct {
 	uint32_t file_size;

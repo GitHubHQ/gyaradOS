@@ -31,9 +31,17 @@ void fs_init(uint32_t addrs) {
  */
 int32_t fs_read(int8_t* fd, uint8_t * buf, int32_t nbytes) {
     dentry_t temp;
-    read_dentry_by_name((uint8_t*)fd, &temp);
+
+    if(0 != read_dentry_by_name((uint8_t*)fd, &temp)) {
+        return -1;
+    }
+
     int bytesRead = read_data(temp.inode_num, read_location, buf, nbytes);
+
+    if(bytesRead != -1) {
         read_location += bytesRead;
+    }
+
     return bytesRead;
 }
 
@@ -70,20 +78,18 @@ int32_t fs_close(){
 int32_t read_dentry_by_name (const uint8_t* fname, dentry_t* dentry) {
     int i;
 
-    int readBytes = 32; //32 is the max bytes for a file name
-    if (strlen((int8_t *)fname) >= 32) 
-    {
-        readBytes = 31;
+    int readBytes = strlen((int8_t *) fname);
+
+    if (readBytes > MAX_FILENAME_LENGTH) {
+        readBytes = MAX_FILENAME_LENGTH;
     }
 
     //loop through dir entries until file name is found
     for(i = 0; i < b.n_dentries; i++) {
-        //printf("%s\n", dentries[i].file_name);
         if(0 == strncmp((int8_t *) dentries[i].file_name, (int8_t *) fname, readBytes)) {
-            strncpy((int8_t *) dentry->file_name, (int8_t *) dentries[i].file_name, 32);
+            strncpy((int8_t *) dentry->file_name, (int8_t *) dentries[i].file_name, readBytes);
             dentry->file_type = dentries[i].file_type;
             dentry->inode_num = dentries[i].inode_num;
-
             return 0;
         }
      }
@@ -114,8 +120,10 @@ int32_t read_dentry_by_index (uint32_t index, dentry_t* dentry) {
 int32_t read_data (uint32_t inode, uint32_t offset, uint8_t * buf, uint32_t length) {
     if(inode >= b.n_inodes || inode < 0)
         return -1;
+
     if(offset >= inodes[inode].file_size)
         return 0;
+
     int curr_block = offset / BLOCK_SIZE;
     int location_in_block = offset % BLOCK_SIZE;
 
@@ -129,8 +137,12 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t * buf, uint32_t leng
         num_reads++;
         buf_pos++;
         curr_read_pos++;
-     
         location_in_block++;
+
+        if(offset + num_reads > inodes[inode].file_size) {
+            return num_reads;
+        }
+
         if(location_in_block >= BLOCK_SIZE) {
             // reset location
             location_in_block = 0;
