@@ -33,6 +33,12 @@ void clear(void) {
     }
 }
 
+/**
+ * Draw A cursor block at position (non functioning)
+ * @param x     x location to draw at
+ * @param y     y location to draw at
+ * @param color color of the cursor
+ */
 void draw_full_block(int32_t x, int32_t y, int8_t color) {
 	int32_t offset = y*NUM_COLS + x;
   	*(uint8_t *)(video_mem + (offset<<1) + 1) = 0x01;
@@ -205,6 +211,8 @@ void putc(uint8_t c) {
         screen_x %= NUM_COLS;
         screen_y = (screen_y + (screen_x / NUM_COLS)) % NUM_ROWS;
     }
+
+    update_cursor(screen_y, screen_x);
 }
 
 void update_cursor(int row, int col) {
@@ -217,33 +225,6 @@ void update_cursor(int row, int col) {
 	// cursor HIGH port to vga INDEX register
 	outb(FB_HIGH_BYTE_COMMAND, FB_COMMAND_PORT);
 	outb((unsigned char ) ((position >> 8) & FB_POSITION_MASK), FB_DATA_PORT);
-}
-
-/*
-* void print_char(uint8_t c);
-*   Inputs: uint_8* c = character to print
-*   Return Value: void
-*	Function: Output a character to the console, inserting newlines as necessary
-*/
-
-void print_char(uint8_t c) {
-    if(c == '\n' || c == '\r') {
-        screen_y++;
-        screen_x=0;
-    } else {
-        *(uint8_t *)(video_mem + ((NUM_COLS*screen_y + screen_x) << 1)) = c;
-        *(uint8_t *)(video_mem + ((NUM_COLS*screen_y + screen_x) << 1) + 1) = ATTRIB;
-        screen_x++;
-
-        if(screen_x == NUM_COLS) {
-        	new_line();
-        }
-        
-        screen_x %= NUM_COLS;
-        screen_y = (screen_y + (screen_x / NUM_COLS)) % NUM_ROWS;
-    }
-
-    update_cursor(screen_y, screen_x);
 }
 
 void new_line() {

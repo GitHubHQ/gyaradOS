@@ -24,22 +24,47 @@ void fs_init(uint32_t addrs) {
     read_location = 0;
 }
 
+/* fs_read(int8_t* fd, uint8_t * buf, int32_t nbytes)
+ * inputs: file descriptor fd, output buffer buf, and number of bytes to read
+ * nbytes
+ * ouputs: return number of bytes read into the buffer for output
+ */
 int32_t fs_read(int8_t* fd, uint8_t * buf, int32_t nbytes) {
     dentry_t temp;
-    read_dentry_by_name((uint8_t*)fd, &temp);
+
+    if(0 != read_dentry_by_name((uint8_t*)fd, &temp)) {
+        return -1;
+    }
+
     int bytesRead = read_data(temp.inode_num, read_location, buf, nbytes);
+
+    if(bytesRead != -1) {
         read_location += bytesRead;
+    }
+
     return bytesRead;
 }
 
+/* fs_write()
+ * inputs: none
+ * ouputs: none return -1 because read only
+ */
 int32_t fs_write(int8_t* fd, uint8_t * buf, int32_t nbytes) {
     return -1;
 }
 
+/* fs_open()
+ * inputs: none
+ * ouputs: none return 0
+ */
 int32_t fs_open(){
     return 0;
 }
 
+/* fs_close()
+ * inputs: none
+ * ouputs: none return 0
+ */
 int32_t fs_close(){
     return 0;
 }
@@ -53,20 +78,18 @@ int32_t fs_close(){
 int32_t read_dentry_by_name (const uint8_t* fname, dentry_t* dentry) {
     int i;
 
-    int readBytes = 32; //32 is the max bytes for a file name
-    if (strlen((int8_t *)fname) >= 32) 
-    {
-        readBytes = 31;
+    int readBytes = strlen((int8_t *) fname);
+
+    if (readBytes > MAX_FILENAME_LENGTH) {
+        readBytes = MAX_FILENAME_LENGTH;
     }
 
     //loop through dir entries until file name is found
     for(i = 0; i < b.n_dentries; i++) {
-        //printf("%s\n", dentries[i].file_name);
         if(0 == strncmp((int8_t *) dentries[i].file_name, (int8_t *) fname, readBytes)) {
-            strncpy((int8_t *) dentry->file_name, (int8_t *) dentries[i].file_name, 32);
+            strncpy((int8_t *) dentry->file_name, (int8_t *) dentries[i].file_name, readBytes);
             dentry->file_type = dentries[i].file_type;
             dentry->inode_num = dentries[i].inode_num;
-
             return 0;
         }
      }
@@ -97,8 +120,10 @@ int32_t read_dentry_by_index (uint32_t index, dentry_t* dentry) {
 int32_t read_data (uint32_t inode, uint32_t offset, uint8_t * buf, uint32_t length) {
     if(inode >= b.n_inodes || inode < 0)
         return -1;
+
     if(offset >= inodes[inode].file_size)
         return 0;
+
     int curr_block = offset / BLOCK_SIZE;
     int location_in_block = offset % BLOCK_SIZE;
 
@@ -112,8 +137,12 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t * buf, uint32_t leng
         num_reads++;
         buf_pos++;
         curr_read_pos++;
-     
         location_in_block++;
+
+        if(offset + num_reads > inodes[inode].file_size) {
+            return num_reads;
+        }
+
         if(location_in_block >= BLOCK_SIZE) {
             // reset location
             location_in_block = 0;
@@ -132,6 +161,11 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t * buf, uint32_t leng
     return num_reads;
 }
 
+/* test_fs()
+ * description: tests the filesystem functions
+ * input: none
+ * output:none
+ */
 void test_fs() {
     //reading a non txt file
     // char * fname = "cat";
@@ -184,28 +218,65 @@ void test_fs() {
     // }
  }
 
+/* dir_open()
+ * inputs: none
+ * ouputs: none return 0
+ */
 int32_t dir_open(){
     return 0;
 }
 
+/* dir_close()
+ * inputs: none
+ * ouputs: none return 0
+ */
 int32_t dir_close(){
     return 0;
 }
 
-
+/* dir_write()
+ * inputs: none
+ * outputs: return -1 because read only
+ */
 int32_t dir_write(){
     return -1;
 }
 
+/* dir_read(int32_t fd, int8_t * buf, int32_t length)
+ * description: reads next filename into the buffer eveytime dir_read is called
+ * inputs: file descriptor, buffer for output, and length for bytes to copy
+ * outputs: copies filename into buf and returns the number of bytes copied
+ */
 int32_t dir_read(int32_t fd, int8_t * buf, int32_t length){
-       
+        //check if reached end       
         if(dirReads >= b.n_dentries){
             dirReads = 0;
             return 0;
         }
+        //copy name into buf
         strcpy(buf, dentries[dirReads].file_name);
+        
+        //get number of bytes and increment the directory read counter
         int bytesCopied = strlen(buf);
-    
         dirReads++;
+
         return bytesCopied;
+}
+
+/* test_dir_read()
+ * description: this function tests printing out all files in the directory
+ * inputs: none
+ * outputs: none
+ */
+void test_dir_read(){
+    
+    int32_t fd = 0, cnt = 0;
+    int8_t buf[33];
+
+    printf("Testing dir_read...\n");
+    
+    //print out all files in directory
+    while(0 != (cnt = dir_read(fd,buf,32))){
+        printf("%s\n",buf);
+    }
 }

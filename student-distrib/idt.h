@@ -14,6 +14,7 @@
 #define KEYBOARD_IDT   0x21
 #define RTC_IDT        0x28
 #define MOUSE_IDT	   0x2C
+#define SYSCALL_IDT    0x80
 
 // 0 - Division by zero exception
 void divide_by_zero_except();
