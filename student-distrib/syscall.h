@@ -15,6 +15,8 @@
 #define MAGIC_NUM_3     0x4c
 #define MAGIC_NUM_4     0x46
 
+#define MAX_NUMBER_ARGS	32
+
 extern int32_t halt (uint8_t status);
 extern int32_t execute (const uint8_t * command);
 extern int32_t read (int32_t fd, void * buf, int32_t nbytes);
