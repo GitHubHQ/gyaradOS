@@ -11,8 +11,6 @@ void init_paging(){
 
 	uint32_t pageAddress = 0;
 	int i;
-    num_processes = 0;
-
 	/*disabling the 4kb pages in the first 4MB of the PD by setting the pages to be
 	 * Supervisor privilege, Read/Write, not present
 	 */
