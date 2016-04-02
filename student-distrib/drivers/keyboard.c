@@ -22,8 +22,8 @@ uint8_t code_to_ascii[] = {
     ASCII_PLACEHOLDER, ASCII_PLACEHOLDER
 };
 
-// array of capitalized letters
-uint8_t caps_ascii[] = {
+// array of shifted letters
+uint8_t shift_ascii[] = {
     ASCII_NULL_CHAR, ASCII_PLACEHOLDER, '!', '@', '#', '$',
     '%', '^', '&', '*', '(', ')', '_',
     '+', ASCII_PLACEHOLDER, ASCII_PLACEHOLDER, 'Q', 'W',
@@ -33,6 +33,26 @@ uint8_t caps_ascii[] = {
     'L', ':', '"', '~', ASCII_PLACEHOLDER,
     '|', 'Z', 'X', 'C', 'V', 'B', 'N',
     'M', '<', '>', '?', ASCII_PLACEHOLDER,
+    ASCII_KP_ASTERISK, ASCII_PLACEHOLDER, ASCII_SPACE, ASCII_PLACEHOLDER,
+    ASCII_PLACEHOLDER, ASCII_PLACEHOLDER, ASCII_PLACEHOLDER, ASCII_PLACEHOLDER,
+    ASCII_PLACEHOLDER, ASCII_PLACEHOLDER, ASCII_PLACEHOLDER, ASCII_PLACEHOLDER,
+    ASCII_PLACEHOLDER, ASCII_PLACEHOLDER, ASCII_PLACEHOLDER, ASCII_PLACEHOLDER,
+    '7', '8', '9', '-', '4', '5',
+    '6', '+', '1', '2', '3', '0',
+    '.', ASCII_NULL_CHAR, ASCII_NULL_CHAR, ASCII_NULL_CHAR,
+    ASCII_PLACEHOLDER, ASCII_PLACEHOLDER
+};
+
+uint8_t caps_ascii[] = {
+    ASCII_NULL_CHAR, ASCII_PLACEHOLDER, '1', '2', '3', '4',
+    '5', '6', '7', '8', '9', '0', '-',
+    '=', ASCII_PLACEHOLDER, ASCII_PLACEHOLDER, 'Q', 'W',
+    'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P',
+    '{', '}', ASCII_PLACEHOLDER, ASCII_PLACEHOLDER,
+    'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K',
+    'L', ':', '"', '~', ASCII_PLACEHOLDER,
+    '|', 'Z', 'X', 'C', 'V', 'B', 'N',
+    'M', ',', '.', '/', ASCII_PLACEHOLDER,
     ASCII_KP_ASTERISK, ASCII_PLACEHOLDER, ASCII_SPACE, ASCII_PLACEHOLDER,
     ASCII_PLACEHOLDER, ASCII_PLACEHOLDER, ASCII_PLACEHOLDER, ASCII_PLACEHOLDER,
     ASCII_PLACEHOLDER, ASCII_PLACEHOLDER, ASCII_PLACEHOLDER, ASCII_PLACEHOLDER,
@@ -241,9 +261,12 @@ void handle_keypress() {
                     default:
                         break;
                 }
-            } else if ((caps_on || shift_l_on || shift_r_on) && !(caps_on & (shift_l_on || shift_r_on))) {
+            } else if (caps_on && !(shift_l_on || shift_r_on)) {
                 // print caps version
                 key_ascii = caps_ascii[key_code];
+                add_char_to_buffer(key_ascii);
+            } else if (!caps_on && (shift_l_on || shift_r_on)) {
+                key_ascii = shift_ascii[key_code];
                 add_char_to_buffer(key_ascii);
             } else {
                 // print char normally
