@@ -49,7 +49,7 @@ void init_paging(){
     
 }
 
-int init_new_process(process_num){
+int init_new_process(uint32_t process_num){
       if(process_num > MAX_PROCESSES || process_num < 0){
         return -1;
       }
