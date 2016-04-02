@@ -19,6 +19,8 @@
 #define SET_OFF                 0x2
 #define SET_DEFAULT_MASK        0xFFFFF000
 #define SET_4MB_USER_PRESENT    0x87
+
+#define MAX_PROCESSES           10
 /* The page directory */
 uint32_t pageDirectory[PAGE_DIRECTORY_SIZE] __attribute__((aligned(PAGE_SIZE)));
 

@@ -1,6 +1,5 @@
 #include "paging.h"
 
-int32_t num_processes;
 /* void init_paging()
  * Description: initialize video memory page in 0-4mb range, and kernel memory
  * from 4-8mb
@@ -52,17 +51,17 @@ void init_paging(){
     
 }
 
-int init_new_process(){
-      if(num_processes > 10 || num_processes < 0){
+int init_new_process(process_num){
+      if(process_num > MAX_PROCESSES || process_num < 0){
         return -1;
       }
       //get address and index
-      uint32_t address = PROCESS_START_ADDR + num_processes*PAGE_SIZE_LARGE;
+      uint32_t address = PROCESS_START_ADDR + process_num*PAGE_SIZE_LARGE;
       uint32_t idx = address/PAGE_SIZE_LARGE;
 
       //enable the given page;
       pageDirectory[idx] = address | SET_4MB_USER_PRESENT;
-      num_processes++;
+      
       return 0;
 }
 
