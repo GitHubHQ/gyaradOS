@@ -56,12 +56,12 @@ int32_t execute (const uint8_t * command) {
     strcpy((int8_t *) file_name, (int8_t *) data[0]);
 
     // read the first four bytes of the file
-    if(-1 == fs_read((int8_t*) file_name, magic_nums, NUM_BYTES_STATS)) {
+    if(-1 == fs_read((int8_t*) file_name, buf, NUM_BYTES_STATS)) {
         return -1;
     }
 
     // check to see if its executable
-    if(0 != strncmp((int8_t *) magic_nums, (int8_t *) magic_nums, NUM_MAGIC_NUMS)) {
+    if(0 != strncmp((int8_t *) buf, (int8_t *) magic_nums, NUM_MAGIC_NUMS)) {
         return -1;
     }
 
