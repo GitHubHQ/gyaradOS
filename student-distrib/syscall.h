@@ -4,6 +4,8 @@
 
 #include "libs/types.h"
 #include "fs/files.h"
+#include "drivers/rtc.h"
+#include "drivers/keyboard.h"
 #include "user.h"
 
 // null-terminating character for strings
@@ -18,10 +20,28 @@
 
 #define MAX_NUMBER_ARGS	  32
 
+#define OPEN  			   0
+#define READ  			   1
+#define WRITE  			   2
+#define CLOSE  			   3
+
+#define IN_USE			   1
+#define NOT_USE			   0
+
+#define MAX_FILES		   8
+
+typedef struct {
+	uint32_t * operations_pointer;
+	inode_t * inode;
+	uint32_t file_position;
+	uint32_t flags;
+} file_array;
+
 #define NUM_BYTES_STATS   28
 #define ENTRY_POINT_START 23
 
 #define PROGRAM_EXEC_ADDR 0x8048000
+
 
 extern int32_t halt (uint8_t status);
 extern int32_t execute (const uint8_t * command);
