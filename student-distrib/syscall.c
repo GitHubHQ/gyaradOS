@@ -1,12 +1,12 @@
 #include "syscall.h"
 
-files_array files_array[MAX_FILES];
+file_array files_array[MAX_FILES];
 
-uint32_t stdin_ops_table[4] = {NULL, (uint32_t *) terminal_read, NULL, NULL};
-uint32_t stdout_ops_table[4] = {NULL, NULL, (uint32_t *) terminal_write, NULL};
-uint32_t rtc_ops_table[4] = {rtc_open, rtc_read, rtc_write, rtc_close};
-uint32_t dir_ops_table[4] = {dir_open, dir_read, dir_write, dir_close};
-uint32_t files_ops_table[4] = {fs_open, fs_read, fs_write, fs_close};
+uint32_t* stdin_ops_table[4] = {NULL, (uint32_t *) terminal_read, NULL, NULL};
+uint32_t* stdout_ops_table[4] = {NULL, NULL, (uint32_t *) terminal_write, NULL};
+uint32_t* rtc_ops_table[4] = {(uint32_t *) rtc_open, (uint32_t *) rtc_read, (uint32_t *) rtc_write, (uint32_t *) rtc_close};
+uint32_t* dir_ops_table[4] = {(uint32_t *) dir_open, (uint32_t *) dir_read, (uint32_t *) dir_write, (uint32_t *) dir_close};
+uint32_t* files_ops_table[4] = {(uint32_t *) fs_open, (uint32_t *) fs_read, (uint32_t *) fs_write, (uint32_t *) fs_close};
 
 
 uint32_t files_in_use = 2;

@@ -6,7 +6,6 @@ uint32_t read_location;
 
 dentry_t * dentries;
 inode_t * inodes;
-files_t file;
 uint32_t data_blocks;
 uint32_t dirReads;
 

@@ -33,7 +33,7 @@ typedef struct {
 	inode_t * inode;
 	uint32_t file_position;
 	uint32_t flags;
-} files_array;
+} file_array;
 
 #define MAX_NUMBER_ARGS	32
 
