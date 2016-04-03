@@ -85,6 +85,7 @@ int32_t execute (const uint8_t * command) {
     // save things
     
     // jump to the file to execute it
+    user_exec(entry_point_addr);
 
     return 0;
 }

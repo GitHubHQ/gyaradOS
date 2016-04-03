@@ -4,6 +4,7 @@
 
 #include "libs/types.h"
 #include "fs/files.h"
+#include "user.h"
 
 // null-terminating character for strings
 #define NULL_CHAR       '\0'
