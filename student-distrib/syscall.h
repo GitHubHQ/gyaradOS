@@ -16,7 +16,7 @@
 #define MAGIC_NUM_3     0x4c
 #define MAGIC_NUM_4     0x46
 
-#define MAX_NUMBER_ARGS	32
+#define MAX_NUMBER_ARGS	  32
 
 #define NUM_BYTES_STATS   28
 #define ENTRY_POINT_START 23
