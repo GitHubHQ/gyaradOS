@@ -4,6 +4,8 @@
 
 #include "libs/types.h"
 #include "fs/files.h"
+#include "drivers/rtc.h"
+#include "drivers/keyboard.h"
 
 // null-terminating character for strings
 #define NULL_CHAR       '\0'
@@ -14,6 +16,23 @@
 #define MAGIC_NUM_2     0x45
 #define MAGIC_NUM_3     0x4c
 #define MAGIC_NUM_4     0x46
+
+#define OPEN  			   0
+#define READ  			   1
+#define WRITE  			   2
+#define CLOSE  			   3
+
+#define IN_USE			   1
+#define NOT_USE			   0
+
+#define MAX_FILES		   8
+
+typedef struct {
+	uint32_t * operations_pointer;
+	inode_t * inode;
+	uint32_t file_position;
+	uint32_t flags;
+} files_array;
 
 extern int32_t halt (uint8_t status);
 extern int32_t execute (const uint8_t * command);

@@ -6,6 +6,7 @@ uint32_t read_location;
 
 dentry_t * dentries;
 inode_t * inodes;
+files_t file;
 uint32_t data_blocks;
 uint32_t dirReads;
 
@@ -21,6 +22,7 @@ void fs_init(uint32_t addrs) {
     inodes = (inode_t *) (b_block_addrs + BLOCK_SIZE);
     data_blocks = b_block_addrs + b.n_inodes * BLOCK_SIZE + BLOCK_SIZE;
 
+    dirReads = 0;
     read_location = 0;
 }
 
@@ -29,7 +31,7 @@ void fs_init(uint32_t addrs) {
  * nbytes
  * ouputs: return number of bytes read into the buffer for output
  */
-int32_t fs_read(int8_t* fd, uint8_t * buf, int32_t nbytes) {
+int32_t fs_read(int32_t fd, uint8_t * buf, int32_t nbytes) {
     dentry_t temp;
 
     if(0 != read_dentry_by_name((uint8_t*)fd, &temp)) {
@@ -49,7 +51,7 @@ int32_t fs_read(int8_t* fd, uint8_t * buf, int32_t nbytes) {
  * inputs: none
  * ouputs: none return -1 because read only
  */
-int32_t fs_write(int8_t* fd, uint8_t * buf, int32_t nbytes) {
+int32_t fs_write(int32_t fd, const uint8_t * buf, int32_t nbytes) {
     return -1;
 }
 
@@ -57,15 +59,16 @@ int32_t fs_write(int8_t* fd, uint8_t * buf, int32_t nbytes) {
  * inputs: none
  * ouputs: none return 0
  */
-int32_t fs_open(){
-    return 0;
+int32_t fs_open(const uint8_t* filename){
+    
+    return 0; 
 }
 
 /* fs_close()
  * inputs: none
  * ouputs: none return 0
  */
-int32_t fs_close(){
+int32_t fs_close(int32_t fd){
     return 0;
 }
 
@@ -222,7 +225,7 @@ void test_fs() {
  * inputs: none
  * ouputs: none return 0
  */
-int32_t dir_open(){
+int32_t dir_open(const uint8_t* filename){
     return 0;
 }
 
@@ -230,7 +233,7 @@ int32_t dir_open(){
  * inputs: none
  * ouputs: none return 0
  */
-int32_t dir_close(){
+int32_t dir_close(int32_t fd){
     return 0;
 }
 
@@ -238,7 +241,7 @@ int32_t dir_close(){
  * inputs: none
  * outputs: return -1 because read only
  */
-int32_t dir_write(){
+int32_t dir_write(int32_t fd, const int8_t * buf, int32_t nbytes){
     return -1;
 }
 
