@@ -95,7 +95,7 @@ int32_t read_dentry_by_name (const uint8_t* fname, dentry_t* dentry) {
             dentry->inode_num = dentries[i].inode_num;
             return 0;
         }
-     }
+    }
 
     //reached end of entries
     return -1;
@@ -162,6 +162,27 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t * buf, uint32_t leng
     }
 
     return num_reads;
+}
+
+int32_t copy_file_to_addr(uint8_t* fname, uint32_t addr) {
+    dentry_t temp_dentry;
+
+    if(0 != read_dentry_by_name(fname, &temp_dentry)) {
+        return -1;
+    }
+
+    uint32_t file_size = inodes[temp_dentry.inode_num].file_size;
+    uint8_t buf[file_size];
+    
+    uint32_t amount_to_copy = read_data(temp_dentry.inode_num, 0, buf, file_size);
+
+    if(amount_to_copy == -1) {
+        return -1;
+    }
+
+    memcpy((uint32_t *) addr, buf, amount_to_copy);
+
+    return 0;
 }
 
 /* test_fs()
@@ -251,19 +272,19 @@ int32_t dir_write(int32_t fd, const int8_t * buf, int32_t nbytes){
  * outputs: copies filename into buf and returns the number of bytes copied
  */
 int32_t dir_read(int32_t fd, int8_t * buf, int32_t length){
-        //check if reached end       
-        if(dirReads >= b.n_dentries){
-            dirReads = 0;
-            return 0;
-        }
-        //copy name into buf
-        strcpy(buf, dentries[dirReads].file_name);
-        
-        //get number of bytes and increment the directory read counter
-        int bytesCopied = strlen(buf);
-        dirReads++;
+    //check if reached end       
+    if(dirReads >= b.n_dentries){
+        dirReads = 0;
+        return 0;
+    }
+    //copy name into buf
+    strcpy(buf, dentries[dirReads].file_name);
+    
+    //get number of bytes and increment the directory read counter
+    int bytesCopied = strlen(buf);
+    dirReads++;
 
-        return bytesCopied;
+    return bytesCopied;
 }
 
 /* test_dir_read()
@@ -271,8 +292,7 @@ int32_t dir_read(int32_t fd, int8_t * buf, int32_t length){
  * inputs: none
  * outputs: none
  */
-void test_dir_read(){
-    
+void test_dir_read() {
     int32_t fd = 0, cnt = 0;
     int8_t buf[33];
 

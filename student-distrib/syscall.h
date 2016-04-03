@@ -6,6 +6,7 @@
 #include "fs/files.h"
 #include "drivers/rtc.h"
 #include "drivers/keyboard.h"
+#include "user.h"
 
 // null-terminating character for strings
 #define NULL_CHAR       '\0'
@@ -33,6 +34,14 @@ typedef struct {
 	uint32_t file_position;
 	uint32_t flags;
 } files_array;
+
+#define MAX_NUMBER_ARGS	32
+
+#define NUM_BYTES_STATS   28
+#define ENTRY_POINT_START 23
+
+#define PROGRAM_EXEC_ADDR 0x8048000
+
 
 extern int32_t halt (uint8_t status);
 extern int32_t execute (const uint8_t * command);
