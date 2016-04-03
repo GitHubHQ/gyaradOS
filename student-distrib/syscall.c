@@ -162,6 +162,12 @@ int32_t open (const uint8_t * filename) {
 }
 
 int32_t close (int32_t fd) {
+    if(fd >= 2 && fd <= 7)
+    {
+        files_array[fd].flags = NOT_USE;
+        files_in_use--;
+        return 0;
+    }
     return -1;
 }
 
