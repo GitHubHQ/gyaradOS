@@ -463,8 +463,12 @@ void init_idt() {
         // present in memory
         idt[i].present = 1;
 
-        // set device priveledge level to be kernel
-        idt[i].dpl = 0;
+        // set device priveledge level to be user if a syscall, or kernel otherwise
+        if(i == SYSCALL_IDT) {
+            idt[i].dpl = 3;
+        } else {
+            idt[i].dpl = 0;
+        }
 
         // select the proper segment
         idt[i].seg_selector = KERNEL_CS;
