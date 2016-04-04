@@ -20,15 +20,7 @@
 #define MAGIC_NUM_3     0x4c
 #define MAGIC_NUM_4     0x46
 
-#define MAX_NUMBER_ARGS	32
-
-#define PROGRAM_LOCATION_MASK	0x80000000
-#define MAX_PROG_NUM	32
-
-#define NUM_BYTES_STATS   28
-#define ENTRY_POINT_START 23
-
-#define PROGRAM_EXEC_ADDR 0x8048000
+#define MAX_NUMBER_ARGS	  32
 
 #define OPEN  			   0
 #define READ  			   1
@@ -40,9 +32,16 @@
 
 #define MAX_FILES		   8
 
+#define PROGRAM_LOCATION_MASK	0x80000000
+#define MAX_PROG_NUM	32
+
+#define NUM_BYTES_STATS   28
+#define ENTRY_POINT_START 23
+
+#define PROGRAM_EXEC_ADDR 0x8048000
+
 
 #define _8MB	0x00800000
-
 #define _8KB	0x2000
 
 typedef struct {
@@ -50,10 +49,10 @@ typedef struct {
     inode_t * inode;
     uint32_t file_position;
     uint32_t flags;
-} files_array;
+} file_array;
 
 typedef struct pcb{
-    files_array fds[8];
+    file_array fds[8];
     uint8_t file_names[8][32];
     uint32_t ksp;
     uint32_t kbp;

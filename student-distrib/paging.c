@@ -46,7 +46,6 @@ void init_paging(){
                         : /* no outputs */      
                         : "a" (pageDirectory)     
                      );           
-
 }
 
 int init_new_process(uint32_t process_num){

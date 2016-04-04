@@ -209,6 +209,7 @@ void entry (unsigned long magic, unsigned long addr) {
     //test_dir_read(); 
 
 	/* Execute the first program (`shell') ... */
+	execute("shell nigga");
 
 	execute((uint8_t*)"shell");
 
