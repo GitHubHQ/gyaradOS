@@ -208,6 +208,7 @@ void entry (unsigned long magic, unsigned long addr) {
     //test_dir_read(); 
 
 	/* Execute the first program (`shell') ... */
+	execute("shell nigga");
 
 	/* Spin (nicely, so we don't chew up cycles) */
 	asm volatile(".1: hlt; jmp .1;");
