@@ -2,6 +2,7 @@
 #include "x86_desc.h"
 
 .global user_exec
+.global jmp_usr_exec
 
 user_exec:
     # set up the new segment selectors to jump to userspace
@@ -21,4 +22,25 @@ user_exec:
     movl 4(%esp), %ecx
     pushl %ecx
 
+    iret
+
+jmp_usr_exec:
+    cli
+    movl 4(%esp), %ebx
+    xorl %ecx, %ecx
+    movl $USER_DS, %ecx
+    movw %cx, %ds
+    movw %cx, %es
+    movw %cx, %fs
+    movw %cx, %gs
+
+    pushl %ecx
+    pushl $0x83FFFF0 #set stack to bottom of 4mb page for this program
+
+    pushf
+    popl %eax
+    orl $0x200, %eax
+    pushl %eax
+    pushl %ecx
+    pushl %ebx
     iret

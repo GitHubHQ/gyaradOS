@@ -11,6 +11,7 @@
 
 #define VIDEO_PHYS_ADDR         0XB8000
 #define KERNEL_PHYS_ADDR        0x400000
+#define KERNEL_END_ADDR        0x800000
 #define PROCESS_START_ADDR      0x08048000
 
 #define SET_USER_PRESENT        0x7
@@ -28,6 +29,8 @@ uint32_t pageTable1[PAGE_TABLE_SIZE] __attribute__((aligned(PAGE_SIZE)));
 
 /* initialize paging */
 void init_paging(void);
+
+int init_new_process(uint32_t process_num);
 
 /* test paging */
 void test_paging(void);
