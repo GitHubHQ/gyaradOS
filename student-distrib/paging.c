@@ -59,7 +59,14 @@ int init_new_process(uint32_t process_num){
 
         //enable the given page;
         pageDirectory[idx] = address | SET_4MB_USER_PRESENT;
-
+        
+        //write to cr3
+        asm volatile (
+                        //moving the address of PD to cr3
+                        "mov %%eax, %%cr3 				\n" 
+                        : /* no outputs */			
+                        : "a" (pageDirectory)			
+                     );						
         return 0;
 }
 
