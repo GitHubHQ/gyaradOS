@@ -1,5 +1,7 @@
+![GyaradOS](http://i.imgur.com/zhu6S93.png)
+<!---
 ![GyaradOS](http://i.imgur.com/keh86ho.png)
-
+--->
 #ECE391 MP3 - Package contents
 
 
