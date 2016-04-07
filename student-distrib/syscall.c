@@ -88,13 +88,13 @@ int32_t execute (const uint8_t * command) {
     printf("%s %d\n", "PROCESS NUMBER FOUND: ", curr_proc->proc_num);
 
     // get entry point into program
-    entry_point_addr |= (buf[curr_read_entry_point] << (3 * 8));
-    curr_read_entry_point++;
-    entry_point_addr |= (buf[curr_read_entry_point] << (2 * 8));
+    entry_point_addr |= (buf[curr_read_entry_point]);
     curr_read_entry_point++;
     entry_point_addr |= (buf[curr_read_entry_point] << (1 * 8));
     curr_read_entry_point++;
-    entry_point_addr |= (buf[curr_read_entry_point]);
+    entry_point_addr |= (buf[curr_read_entry_point] << (2 * 8));
+    curr_read_entry_point++;
+    entry_point_addr |= (buf[curr_read_entry_point] << (3 * 8));
     curr_read_entry_point++;
 
     printf("%s\n", "ENTRY POINT SET");
