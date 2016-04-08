@@ -139,11 +139,13 @@ int32_t execute (const uint8_t * command) {
 }
 
 int32_t read (int32_t fd, void * buf, int32_t nbytes) {
-    return -1;
+    terminal_read ( fd,  buf, nbytes);
+    return 0;
 }
 
 int32_t write (int32_t fd, const void * buf, int32_t nbytes) {
-    return -1;
+    terminal_write (fd, buf, nbytes);
+    return 0;
 }
 
 int32_t open (const uint8_t * filename) {
