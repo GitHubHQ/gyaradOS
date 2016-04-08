@@ -20,7 +20,7 @@ jmp_usr_exec:
 
     pushl %edi
 
-    pushl $0x83FFFF0 #set stack to bottom of 4mb page for this program
+    pushl $0x83FFFFC #set stack to bottom of 4mb page for this program
 
     sti
 

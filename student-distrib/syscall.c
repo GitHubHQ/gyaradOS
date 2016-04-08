@@ -14,16 +14,15 @@ uint32_t* rtc_ops_table[4] = {(uint32_t *) rtc_open, (uint32_t *) rtc_read, (uin
 uint32_t* dir_ops_table[4] = {(uint32_t *) dir_open, (uint32_t *) dir_read, (uint32_t *) dir_write, (uint32_t *) dir_close};
 uint32_t* files_ops_table[4] = {(uint32_t *) fs_open, (uint32_t *) fs_read, (uint32_t *) fs_write, (uint32_t *) fs_close};
 
-
 uint32_t files_in_use = 2;
 
 int32_t halt (uint8_t status) {
+    while(1);
     return -1;
 }
 
 
 int32_t execute (const uint8_t * command) {
-
     /* Used to hold the first 32 bytes of the file
         These 32 bytes will contain the exec information
         and the entry point of the file
@@ -52,8 +51,8 @@ int32_t execute (const uint8_t * command) {
     printf("First 4 bytes: ");
     printf("0x%x 0x%x 0x%x 0x%x\n", f_init_data[0], f_init_data[1], f_init_data[2], f_init_data[3]);
     if (!((f_init_data[0] == MAGIC_NUM_1) && (f_init_data[1] == MAGIC_NUM_2) && (f_init_data[2] == MAGIC_NUM_3) && (f_init_data[3] == MAGIC_NUM_4))) {
-        return -1;
         printf("%s\n", "Non-Runnable file!");
+        return -1;
     }
     printf("%s\n", "Runnable file!");
 
@@ -81,7 +80,6 @@ int32_t execute (const uint8_t * command) {
     if (i == (MAX_PROG_NUM -1)) {
         return -1;
     }
-
 
     // Create a page directory for the program
     init_new_process(curr_proc_id);
@@ -133,16 +131,18 @@ int32_t execute (const uint8_t * command) {
     proc_ctrl_blk->fds[1].inode = NULL;
     proc_ctrl_blk->fds[1].flags = IN_USE;
 
-    jmp_usr_exec(entrypoint + PROGRAM_EXEC_ADDR);
+    jmp_usr_exec(entrypoint);
 
     return 0;
 }
 
 int32_t read (int32_t fd, void * buf, int32_t nbytes) {
+    printf("Read");
     return -1;
 }
 
 int32_t write (int32_t fd, const void * buf, int32_t nbytes) {
+    printf("Write");
     return -1;
 }
 
