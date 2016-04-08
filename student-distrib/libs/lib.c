@@ -19,6 +19,9 @@ static int screen_x;
 static int screen_y;
 static char* video_mem = (char *)VIDEO;
 
+uint8_t * args;
+uint32_t index = 0;
+
 /*
 * void clear(void);
 *   Inputs: void
@@ -304,6 +307,54 @@ void splash_screen(void) {
 	clear_screen();
 }
 
+void copy_args(const uint8_t* input, uint32_t nbytes) {
+        if(input[0] == ' ') {
+            args = NULL;
+            return;
+        }
+
+        uint32_t i = 0;
+        uint32_t arg_length = 0;
+
+        for(i = index + 1; i < nbytes; i++) {
+            args[i - index - 1] = input[i];
+            arg_length++;
+        }
+        args[arg_length] = '\0';
+}
+
+/**
+ * Returns the first word of the input string
+ * @param  input String to find first word of
+ * @return       Pointer to the first word of the string
+ */
+uint8_t* strtok(const uint8_t* input) {
+    uint32_t len = strlen((int8_t*) input);
+    uint8_t* output = (uint8_t*)"PLACEHOLDERPLACEHOLDERPLACEHOLDER";
+    //No Length string
+    if(len == 0) {
+        output = NULL;
+        return output;
+    } else if(input == NULL) {  // NULL input
+        output = NULL;
+        return output;
+    } else if(input[0] == ' ') { // Blank input start
+        output = NULL;
+        return output;
+    } else {
+        uint32_t i = 0;
+        for(i = 0; i < len+1; i++) {
+            if(input[i] == ' ' || input[i] == '\n' || input[i] == '\0') {
+                break;
+            }
+            output[i] = input[i];
+        }
+        output[i] = '\0';
+        index = i;
+    }
+    return output;
+}
+
 /*
 * int8_t* itoa(uint32_t value, int8_t* buf, int32_t radix);
 *   Inputs: uint32_t value = number to convert
@@ -382,67 +433,6 @@ uint32_t strlen(const int8_t* s) {
 		len++;
 
 	return len;
-}
-
-/**
- * Breaks a string into pieces based on the given delimiter
- * @param  str   String to break
- * @param  delim Text to break on
- * @return       Pointer to last token found, NULL if complete
- */
-char * strtok(char * str, char *delim) {
-	// Declare statics (for multiple runs)
-    static uint32_t pos;
-    static char *s;
-    // Locals
-    uint32_t i =0;
-    uint32_t j = 0;
-    uint32_t start = pos;
-
-    // Copying the string for further calls of strtok
-    if(str!=NULL) {
-        s = str;
-    }
-    
-    // Wouldn't work without this, don't know why
-    i = 0;
-
-    // Do until string end.
-    while(s[pos] != '\0') {
-        j = 0;
-        // Essentially brute force the string
-        while(delim[j] != '\0') {
-            // Move the position forwared
-            if(s[pos] == delim[j]) {
-                // Replace the delimter by "\0" to break the string
-                s[pos] = '\0';
-                pos = pos+1;
-                // Edge case check for no delimeter before the rest of string
-                if(s[start] != '\0') {
-                    return (&s[start]);
-                } else {
-                    // Move to the next string after the delimiter
-                    start = pos;
-
-                    // Decrementing as it will be incremented at the end of the while loop (for the general case)
-                    pos--;
-                    break;
-                }
-            }
-            j++;
-        }
-        pos++;      
-    }
-    // Still null terminate for other functions to parse correctly.
-    s[pos] = '\0';
-
-    // Parsed the whole string, we are done
-    if(s[start] == '\0') {
-        return NULL;
-    } else {
-    	// Return the word
-        return &s[start];
-    }
 }
 
 /*

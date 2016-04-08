@@ -15,7 +15,6 @@ int32_t puts(int8_t *s);
 int8_t *itoa(uint32_t value, int8_t* buf, int32_t radix);
 int8_t *strrev(int8_t* s);
 uint32_t strlen(const int8_t* s);
-char * strtok(char * str, char *delim);
 void clear(void);
 void draw_full_block(int32_t x, int32_t y, int8_t color);
 
@@ -27,6 +26,8 @@ void* memmove(void* dest, const void* src, uint32_t n);
 int32_t strncmp(const int8_t* s1, const int8_t* s2, uint32_t n);
 int8_t* strcpy(int8_t* dest, const int8_t*src);
 int8_t* strncpy(int8_t* dest, const int8_t*src, uint32_t n);
+uint8_t* strtok(const uint8_t* input);
+void copy_args(const uint8_t* input, uint32_t nbytes);
 
 /* VGA text-mode input helpers */
 void update_cursor(int row, int col);

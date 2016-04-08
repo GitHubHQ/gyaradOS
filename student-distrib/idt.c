@@ -301,6 +301,12 @@ void page_fault_except() {
 
     // print the interrupt type
     printf("\nEXCEPTION: Page fault!\n");
+
+    // get the address of where it's trying to access
+    uint32_t fault_addr;
+    asm volatile("movl %%cr2, %0": "=r" (fault_addr));
+    printf("Tried to access memory at 0x%#x\n", fault_addr);
+
     while(1);
 
     // unblock interrupts (to be used when loop is removed)
@@ -463,8 +469,12 @@ void init_idt() {
         // present in memory
         idt[i].present = 1;
 
-        // set device priveledge level to be kernel
-        idt[i].dpl = 0;
+        // set device priveledge level to be user if a syscall, or kernel otherwise
+        if(i == SYSCALL_IDT) {
+            idt[i].dpl = 3;
+        } else {
+            idt[i].dpl = 0;
+        }
 
         // select the proper segment
         idt[i].seg_selector = KERNEL_CS;

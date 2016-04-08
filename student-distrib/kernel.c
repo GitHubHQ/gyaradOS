@@ -11,6 +11,7 @@
 #include "debug.h"
 #include "paging2.h"
 #include "fs/files.h"
+#include "syscall.h"
 
 /* Macros. */
 /* Check if the bit BIT in FLAGS is set. */
@@ -208,6 +209,7 @@ void entry (unsigned long magic, unsigned long addr) {
     //test_dir_read(); 
 
 	/* Execute the first program (`shell') ... */
+	execute((uint8_t*)"shell");
 
 	/* Spin (nicely, so we don't chew up cycles) */
 	asm volatile(".1: hlt; jmp .1;");

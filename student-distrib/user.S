@@ -1,24 +1,36 @@
 #define ASM 1
 #include "x86_desc.h"
 
-.global user_exec
+.global jmp_usr_exec
+.global jmp_kern_halt
 
-user_exec:
-    # set up the new segment selectors to jump to userspace
-    xorl %ecx, %ecx
-    movl $USER_CS, %ecx
-    movw %cx, %cs
+jmp_usr_exec:
+    cli
+    xorl %ebx, %ebx
+    xorl %edi, %edi
+    xorl %esi, %esi
 
-    xorl %ecx, %ecx
-    movl $USER_DS, %ecx
-    movw %cx, %cs
-    movw %cx, %es
-    movw %cx, %fs
-    movw %cx, %gs
-    movw %cx, %ss
+    movl 4(%esp), %ebx
+    movl $USER_DS, %edi
+    movl $USER_CS, %esi
 
-    xorl %ecx, %ecx
-    movl 4(%esp), %ecx
-    pushl %ecx
+    movw %di, %ds
+    movw %di, %es
+    movw %di, %fs
+    movw %di, %gs
+
+    pushl %edi
+
+    pushl $0x83FFFFC #set stack to bottom of 4mb page for this program
+
+    sti
+
+    pushf
+    pushl %esi
+    pushl %ebx
 
     iret
+
+jmp_kern_halt:
+    leave
+    ret

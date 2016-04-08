@@ -1,5 +1,9 @@
 #include "syscall.h"
 
+uint32_t curr_proc_id_mask = 0;
+uint32_t curr_proc_id = 0;
+pcb_t* curr_proc = NULL;
+
 file_array files_array[MAX_FILES];
 
 uint32_t* stdin_ops_table[4] = {NULL, (uint32_t *) terminal_read, NULL, NULL};
@@ -8,106 +12,129 @@ uint32_t* rtc_ops_table[4] = {(uint32_t *) rtc_open, (uint32_t *) rtc_read, (uin
 uint32_t* dir_ops_table[4] = {(uint32_t *) dir_open, (uint32_t *) dir_read, (uint32_t *) dir_write, (uint32_t *) dir_close};
 uint32_t* files_ops_table[4] = {(uint32_t *) fs_open, (uint32_t *) fs_read, (uint32_t *) fs_write, (uint32_t *) fs_close};
 
-
 uint32_t files_in_use = 2;
 
 int32_t halt (uint8_t status) {
-    return -1;
+    while(1);
+
+    // get previous pcb
+    pcb_t * proc_ctrl_blk;
+
+    // set process number to free
+    uint32_t free_proc_num = proc_ctrl_blk->proc_num;
+
+    jmp_kern_halt();
+    return 0;
 }
 
 int32_t execute (const uint8_t * command) {
-    // declare the data associated with the filename
-    uint8_t file_name[MAX_FILENAME_LENGTH];
+    /* Used to hold the first 32 bytes of the file
+        These 32 bytes will contain the exec information
+        and the entry point of the file
+    */
+    uint8_t f_init_data[32];
+    uint32_t entrypoint = 0;
+    uint32_t temp_process_mask = PROGRAM_LOCATION_MASK;
+    uint32_t curr_proc_id = 0;
+    uint32_t i;
 
-    // Delcare data array
-    // data[0] contain the command to execute
-    // data[n] contains arguments to the command
-    //      arguments are listed until NULL is reached
-    //      with a max of 31 arguments (1 command, 31 args)
-    uint8_t data[MAX_NUMBER_ARGS][MAX_FILENAME_LENGTH];
-
-    // Temp variable for filling up the data array
-    uint8_t * tmp; 
-
-    // declare magic numbers 
-    uint8_t buf[NUM_BYTES_STATS];
-    uint8_t magic_nums[NUM_MAGIC_NUMS] = {MAGIC_NUM_1, MAGIC_NUM_2, MAGIC_NUM_3, MAGIC_NUM_4};
-
-    uint32_t entry_point_addr = 0;
-    uint32_t curr_read_entry_point = ENTRY_POINT_START;
-
-    // Initalize the data array to null
-    int i;
-    for(i = 0; i < MAX_NUMBER_ARGS; i++) {
-        strcpy((int8_t*) data[i], '\0');
-    }
-
-    // error if command string is null
-    if(command == NULL || command == NULL_CHAR) {
+    // fail if an invalid command is specified
+    if (command == NULL || strlen(command) == 0) {
         return -1;
     }
 
-    // Default delimit by space
-    tmp = strtok((int8_t*) command, " ");
-    // Fill up the data array, leaving blank commands as NULL
-    for(i = 0; tmp != NULL; i++) {
-        strcpy((int8_t*) data[i], tmp);
-        tmp = strtok((int8_t*) command, " ");
+    // get the file name to execute
+    uint8_t * f_name = strtok(command);
+
+    // Grab the first 32 bytes of the file to see if it is runnable
+    // and find where it starts
+    if(fs_read((int32_t)f_name, &f_init_data, 32) == -1) {
+        return -1;
     }
 
-    for(i = 0; i < MAX_NUMBER_ARGS; i++) {
-        if (data[i] != NULL) {
-            printf("%s, ", *data[i]);
+    // See if the file is executeable
+    if (!((f_init_data[0] == MAGIC_NUM_1) && (f_init_data[1] == MAGIC_NUM_2) && (f_init_data[2] == MAGIC_NUM_3) && (f_init_data[3] == MAGIC_NUM_4))) {
+        printf("%s\n", "Non-Runnable file!");
+        return -1;
+    }
+
+    // Grab the entry point of the application
+    entrypoint += (uint32_t)f_init_data[27] << 24;
+    entrypoint += (uint32_t)f_init_data[26] << 16;
+    entrypoint += (uint32_t)f_init_data[25] << 8;
+    entrypoint += (uint32_t)f_init_data[24];
+
+    // Find a open spot for the program to run
+    for (i = 0; i < MAX_PROG_NUM; i++) {
+        if(!(temp_process_mask & curr_proc_id_mask)) {
+            curr_proc_id_mask |= temp_process_mask;
+            curr_proc_id = i;
+            break;
         } else {
-            printf("%s", "NULL");
+            temp_process_mask = temp_process_mask >> 1;
         }
     }
-
-    // copy over filename including null termination
-    strcpy((int8_t *) file_name, (int8_t *) data[0]);
-
-    // read the first four bytes of the file
-    if(-1 == fs_read((int8_t*) file_name, buf, NUM_BYTES_STATS)) {
+    
+    // Max number of programs reached, error out
+    if (i == (MAX_PROG_NUM -1)) {
         return -1;
     }
 
-    // check to see if its executable
-    if(0 != strncmp((int8_t *) buf, (int8_t *) magic_nums, NUM_MAGIC_NUMS)) {
-        return -1;
+    // Create a page directory for the program
+    init_new_process(curr_proc_id);
+
+    // Copy the program to the page directory
+    copy_file_to_addr(f_name, PROGRAM_EXEC_ADDR);
+
+    // Create a process control block for our program in the kernel stack
+    pcb_t * proc_ctrl_blk = (pcb_t*) (_8MB - (_8KB)*(curr_proc_id + 1));
+
+    // Grab and store the ESP and EBP in the PCB
+    uint32_t esp;
+    uint32_t ebp;
+    asm volatile("movl %%esp, %0":"=g"(esp));
+    asm volatile("movl %%ebp, %0":"=g"(ebp));
+    proc_ctrl_blk->p_ksp = esp;
+    proc_ctrl_blk->p_ksp = ebp;
+
+    // Store Proc ID
+    proc_ctrl_blk->proc_num = curr_proc_id;
+
+    // Initalize PCB file descriptors
+    for (i = 0; i < 8; ++i) {
+        proc_ctrl_blk->fds[i].operations_pointer = NULL;
+        proc_ctrl_blk->fds[i].inode = NULL;
+        proc_ctrl_blk->fds[i].file_position = 0;
+        proc_ctrl_blk->fds[i].flags = NOT_USE;
     }
 
-    // get entry point into program
-    entry_point_addr |= (buf[curr_read_entry_point] << (3 * 8));
-    curr_read_entry_point++;
-    entry_point_addr |= (buf[curr_read_entry_point] << (2 * 8));
-    curr_read_entry_point++;
-    entry_point_addr |= (buf[curr_read_entry_point] << (1 * 8));
-    curr_read_entry_point++;
-    entry_point_addr |= (buf[curr_read_entry_point]);
-    curr_read_entry_point++;
+    // Set TSS Value
+    tss.esp0 = _8MB - (_8KB) * curr_proc_id - 4;
 
-    // set up the new page directory
-    
-    // load the program into the correct starting address
-    copy_file_to_addr(data[0], PROGRAM_EXEC_ADDR);
-    
-    // assign a pcb with the new PID
-    
-    // save things
-    
-    // jump to the file to execute it
-    user_exec(entry_point_addr);
+    // Open STDIN
+    proc_ctrl_blk->fds[0].operations_pointer = stdin_ops_table;
+    proc_ctrl_blk->fds[0].flags = IN_USE;
+
+    // Open STDOUT
+    proc_ctrl_blk->fds[1].operations_pointer = stdout_ops_table;
+    proc_ctrl_blk->fds[1].inode = NULL;
+    proc_ctrl_blk->fds[1].flags = IN_USE;
+
+    jmp_usr_exec(entrypoint);
 
     return 0;
 }
 
 int32_t read (int32_t fd, void * buf, int32_t nbytes) {
-    return -1;
+    terminal_read(fd, buf, nbytes);
+    return 0;
 }
 
 int32_t write (int32_t fd, const void * buf, int32_t nbytes) {
-    return -1;
+    terminal_write(fd, buf, nbytes);
+    return 0;
 }
+
 
 int32_t open (const uint8_t * filename) {
     if(strncmp("stdin", (int8_t *) filename, 5) == 0){
@@ -156,19 +183,19 @@ int32_t open (const uint8_t * filename) {
             files_in_use++;
             return i;
         }
-    }    
+    }
 
 
     return -1;
 }
 
 int32_t close (int32_t fd) {
-    if(fd >= 2 && fd <= 7)
-    {
+    if(fd >= 2 && fd <= 7) {
         files_array[fd].flags = NOT_USE;
         files_in_use--;
         return 0;
     }
+
     return -1;
 }
 

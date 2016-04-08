@@ -30,6 +30,8 @@ uint32_t pageTable1[PAGE_TABLE_SIZE] __attribute__((aligned(PAGE_SIZE)));
 /* initialize paging */
 void init_paging(void);
 
+int init_new_process(uint32_t process_num);
+
 /* test paging */
 void test_paging(void);
 #endif
