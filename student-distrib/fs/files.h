@@ -35,6 +35,7 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t * buf, uint32_t leng
 
 /* function used for syscalls */
 int32_t copy_file_to_addr(uint8_t* fname, uint32_t addr);
+inode_t* get_inode(uint32_t inode_num);
 
 /* filesystem functions */
 void fs_init(uint32_t addrs);

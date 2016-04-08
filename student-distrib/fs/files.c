@@ -184,6 +184,9 @@ int32_t copy_file_to_addr(uint8_t* fname, uint32_t addr) {
     return 0;
 }
 
+inode_t* get_inode(uint32_t inode_num) {
+    return inodes + inode_num * BLOCK_SIZE;
+}
 /* test_fs()
  * description: tests the filesystem functions
  * input: none

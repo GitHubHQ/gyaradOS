@@ -110,14 +110,14 @@ int32_t write (int32_t fd, const void * buf, int32_t nbytes) {
 }
 
 int32_t open (const uint8_t * filename) {
-    if(strncmp("stdin", filename, 5) == 0){
-        files_array[0].operations_pointer = stdin_ops_table;
+    if(strncmp("stdin", (int8_t *) filename, 5) == 0){
+        files_array[0].operations_pointer = (uint32_t *) stdin_ops_table;
         files_array[0].inode = NULL;
         files_array[0].flags = IN_USE;
     }
 
-    if(strncmp("stdout", filename, 6) == 0){
-        files_array[1].operations_pointer = stdout_ops_table;
+    if(strncmp("stdout", (int8_t *) filename, 6) == 0){
+        files_array[1].operations_pointer = (uint32_t *) stdout_ops_table;
         files_array[1].inode = NULL;
         files_array[1].flags = IN_USE;
     }
@@ -130,23 +130,24 @@ int32_t open (const uint8_t * filename) {
         return -1;
     }
 
+    //put back calling open
     int i = 0;
     for(i = 2; i < MAX_FILES; i++) {
         if(files_array[i].flags == NOT_USE) {
             switch(file_info.file_type) {
                 case 0:
-                    files_array[i].operations_pointer = rtc_ops_table;
+                    files_array[i].operations_pointer = (uint32_t *) rtc_ops_table;
                     files_array[i].inode = NULL;
                     files_array[i].file_position = 0;
                     break;
                 case 1:
-                    files_array[i].operations_pointer = dir_ops_table;
+                    files_array[i].operations_pointer = (uint32_t *) dir_ops_table;
                     files_array[i].inode = NULL;
                     files_array[i].file_position = 0;
                     break;
                 case 2:
-                    files_array[i].operations_pointer = files_ops_table;
-                    files_array[i].inode = file_info.inode_num;
+                    files_array[i].operations_pointer = (uint32_t *) files_ops_table;
+                    files_array[i].inode = get_inode(file_info.inode_num);
                     files_array[i].file_position = 0;
                     break;
             }
