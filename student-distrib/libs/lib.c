@@ -19,6 +19,9 @@ static int screen_x;
 static int screen_y;
 static char* video_mem = (char *)VIDEO;
 
+uint8_t * args;
+uint32_t index = 0;
+
 /*
 * void clear(void);
 *   Inputs: void
@@ -302,6 +305,54 @@ void splash_screen(void) {
 	sound_bootup();
 	
 	clear_screen();
+}
+
+void copy_args(const uint8_t* input, uint32_t nbytes) {
+        if(input[0] == ' ') {
+            args = NULL;
+            return;
+        }
+
+        uint32_t i = 0;
+        uint32_t arg_length = 0;
+
+        for(i = index + 1; i < nbytes; i++) {
+            args[i - index - 1] = input[i];
+            arg_length++;
+        }
+        args[arg_length] = '\0';
+}
+
+/**
+ * Returns the first word of the input string
+ * @param  input String to find first word of
+ * @return       Pointer to the first word of the string
+ */
+uint8_t* strtok(const uint8_t* input) {
+    uint32_t len = strlen((int8_t*) input);
+    uint8_t* output = (uint8_t*)"PLACEHOLDERPLACEHOLDERPLACEHOLDER";
+    //No Length string
+    if(len == 0) {
+        output = NULL;
+        return output;
+    } else if(input == NULL) {  // NULL input
+        output = NULL;
+        return output;
+    } else if(input[0] == ' ') { // Blank input start
+        output = NULL;
+        return output;
+    } else {
+        uint32_t i = 0;
+        for(i = 0; i < len+1; i++) {
+            if(input[i] == ' ' || input[i] == '\n' || input[i] == '\0') {
+                break;
+            }
+            output[i] = input[i];
+        }
+        output[i] = '\0';
+        index = i;
+    }
+    return output;
 }
 
 /*

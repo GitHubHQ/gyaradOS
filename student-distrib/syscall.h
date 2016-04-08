@@ -74,7 +74,4 @@ extern int32_t vidmap (uint8_t ** screen_start);
 extern int32_t set_handler (int32_t signum, void * handler_address);
 extern int32_t sigreturn (void);
 
-uint8_t* simple_strtok(const uint8_t* input);
-void copy_args(const uint8_t* input, uint32_t nbytes);
-
 #endif /* _SYSCALL_H */
