@@ -301,6 +301,12 @@ void page_fault_except() {
 
     // print the interrupt type
     printf("\nEXCEPTION: Page fault!\n");
+
+    // get the address of where it's trying to access
+    uint32_t fault_addr;
+    asm volatile("movl %%cr2, %0": "=r" (fault_addr));
+    printf("Tried to access memory at 0x%#x\n", fault_addr);
+
     while(1);
 
     // unblock interrupts (to be used when loop is removed)

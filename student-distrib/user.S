@@ -1,24 +1,31 @@
 #define ASM 1
 #include "x86_desc.h"
 
-.global user_exec
 .global jmp_usr_exec
 
 jmp_usr_exec:
     cli
+    xorl %ebx, %ebx
+    xorl %edi, %edi
+    xorl %esi, %esi
+
     movl 4(%esp), %ebx
-    xorl %eax, %eax
-    movw $USER_DS, %ax
-    movw %ax, %ds
-    movw %ax, %es
-    movw %ax, %fs
-    movw %ax, %gs
+    movl $USER_DS, %edi
+    movl $USER_CS, %esi
 
-    pushl $USER_DS
-    pushl $0x083FFFFC #set stack to bottom of 4mb page for this program
+    movw %di, %ds
+    movw %di, %es
+    movw %di, %fs
+    movw %di, %gs
 
-    pushfl
-    orl $0x200, (%esp)
-    pushl $USER_CS
+    pushl %edi
+
+    pushl $0x83FFFF0 #set stack to bottom of 4mb page for this program
+
+    sti
+
+    pushf
+    pushl %esi
     pushl %ebx
+
     iret

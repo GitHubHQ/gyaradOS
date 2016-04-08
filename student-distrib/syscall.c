@@ -82,6 +82,7 @@ int32_t execute (const uint8_t * command) {
         return -1;
     }
 
+
     // Create a page directory for the program
     init_new_process(curr_proc_id);
     printf("Paging done?\n");
