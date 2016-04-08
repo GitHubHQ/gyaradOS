@@ -24,128 +24,115 @@ int32_t halt (uint8_t status) {
 
 int32_t execute (const uint8_t * command) {
 
-    pcb_t* prev_proc = curr_proc;
-
-    // declare the data associated with the filename
-    uint8_t file_name[MAX_FILENAME_LENGTH];
-
-    // Holder for program name
-    uint8_t * cmd_name = simple_strtok(command);
-
-
-    // declare magic numbers 
-    uint8_t buf[NUM_BYTES_STATS];
-    uint8_t magic_nums[NUM_MAGIC_NUMS] = {MAGIC_NUM_1, MAGIC_NUM_2, MAGIC_NUM_3, MAGIC_NUM_4};
-
-    uint32_t entry_point_addr = 0;
-    uint32_t curr_read_entry_point = ENTRY_POINT_START;
-
-    // Counter variable
+    /* Used to hold the first 32 bytes of the file
+        These 32 bytes will contain the exec information
+        and the entry point of the file
+    */
+    uint8_t f_init_data[32];
+    uint32_t entrypoint = 0;
+    uint32_t temp_process_mask = PROGRAM_LOCATION_MASK;
+    uint32_t curr_proc_id = 0;
     uint32_t i;
-    // mask used to search for next available procId
-    uint32_t proc_search_mask = PROGRAM_LOCATION_MASK;
 
-    // error if command string is null
-    if(command == NULL || command == NULL_CHAR) { 
+    if (command == NULL) {
         return -1;
     }
+    uint8_t * f_name = simple_strtok(command);
+    printf("DEBUG (PROGRAM NAME): %s\n", f_name);
 
-    // copy over filename including null termination
-    strcpy((int8_t *) file_name, (int8_t *) cmd_name);
-
-    // read the first four bytes of the file
-    if(-1 == fs_read((int8_t*) file_name, buf, NUM_BYTES_STATS)) {
+    // Grab the first 32 bytes of the file to see if it is runnable
+    // and find where it starts
+    if(fs_read((int32_t)f_name, &f_init_data, 32) == -1) {
         return -1;
+        printf("%s\n", "FS_READ FAILED!");
     }
+    printf("%s\n", "FS_READ PASSED");
 
-    // check to see if its executable
-    if(0 != strncmp((int8_t *) buf, (int8_t *) magic_nums, NUM_MAGIC_NUMS)) {
+    // See if the file is executeable
+    printf("First 4 bytes: ");
+    printf("0x%x 0x%x 0x%x 0x%x\n", f_init_data[0], f_init_data[1], f_init_data[2], f_init_data[3]);
+    if (!((f_init_data[0] == MAGIC_NUM_1) && (f_init_data[1] == MAGIC_NUM_2) && (f_init_data[2] == MAGIC_NUM_3) && (f_init_data[3] == MAGIC_NUM_4))) {
         return -1;
+        printf("%s\n", "Non-Runnable file!");
     }
+    printf("%s\n", "Runnable file!");
 
-    printf("%s\n", "ERROR CHECK COMPLETE");
+    // Grab the entry point of the application
+    entrypoint += (uint32_t)f_init_data[27] << 24;
+    entrypoint += (uint32_t)f_init_data[26] << 16;
+    entrypoint += (uint32_t)f_init_data[25] << 8;
+    entrypoint += (uint32_t)f_init_data[24];
+    printf("0x%x\n", entrypoint);
 
-    // Get a free process number
-    for(i = 0; i < MAX_PROG_NUM; i++) {
-        printf("LOOP NUMBER: %d\n", i);
-        if(!(proc_search_mask & curr_proc_id_mask)) {
-            curr_proc_id_mask |= proc_search_mask;
+    // Find a open spot for the program to run
+    for (i = 0; i < MAX_PROG_NUM; i++) {
+        if(!(temp_process_mask & curr_proc_id_mask)) {
+            curr_proc_id_mask |= temp_process_mask;
             curr_proc_id = i;
             break;
         } else {
-            proc_search_mask = proc_search_mask >> 1;
+            temp_process_mask = temp_process_mask >> 1;
         }
     }
 
-    curr_proc = (pcb_t*)(_8MB - (_8KB)*(i+1));
-
-    printf("%s\n", "PROC NUM PRE");
-
-    if(i == MAX_PROG_NUM) {
+    printf("Process ID found: %d\n", curr_proc_id);
+    
+    // Max number of programs reached, error out
+    if (i == (MAX_PROG_NUM -1)) {
         return -1;
     }
 
-    printf("%s %d\n", "PROCESS NUMBER FOUND: ", curr_proc->proc_num);
+    // Create a page directory for the program
+    init_new_process(curr_proc_id);
+    printf("Paging done?\n");
 
-    // get entry point into program
-    entry_point_addr |= (buf[curr_read_entry_point] << (3 * 8));
-    curr_read_entry_point++;
-    entry_point_addr |= (buf[curr_read_entry_point] << (2 * 8));
-    curr_read_entry_point++;
-    entry_point_addr |= (buf[curr_read_entry_point] << (1 * 8));
-    curr_read_entry_point++;
-    entry_point_addr |= (buf[curr_read_entry_point]);
-    curr_read_entry_point++;
-
-    printf("%s\n", "ENTRY POINT SET");
-
-    // set up the new page directory
-    init_new_process(curr_proc->proc_num);
-    printf("%s\n", "PAGING ENABLED");
-    
-    // Set up PCB
-    curr_proc->proc_num = i;
-    // Should only happen when spawning a initial shell
-    if(prev_proc == NULL){
-        curr_proc->parent = NULL;
+    // Copy the program to the page directory
+    copy_file_to_addr(f_name, PROGRAM_EXEC_ADDR);
+    uint8_t* z = (uint8_t*) PROGRAM_EXEC_ADDR;
+    printf("Data Copied\n");
+    for(i = 0; i < 32; i++) {
+        printf("0x%x, ", *(z + i));
     }
 
-    // Otherwise actually do the setup for the PCB when spawning a proc from the shell
-    curr_proc->parent = prev_proc;
+    // Create a process control block for our program in the kernel stack
+    pcb_t * proc_ctrl_blk = (pcb_t*) (_8MB - (_8KB)*(curr_proc_id + 1));
 
-    // Initalize file array to empty and null, then set
-    for(i = 0; i < 8; i++) {
-        curr_proc->fds[i].operations_pointer = NULL;
-        curr_proc->fds[i].inode = NULL;
-        curr_proc->fds[i].file_position = 0;
-        curr_proc->fds[i].flags = 0;
+    // Grab and store the ESP and EBP in the PCB
+    uint32_t esp;
+    uint32_t ebp;
+
+    asm volatile("movl %%esp, %0":"=g"(esp));
+    asm volatile("movl %%ebp, %0":"=g"(ebp));
+
+    printf("ESP: %d, EBP: %d\n", esp, ebp);
+
+    proc_ctrl_blk->p_ksp = esp;
+    proc_ctrl_blk->p_ksp = ebp;
+
+    // Store Proc ID
+    proc_ctrl_blk->proc_num = curr_proc_id;
+
+    // Initalize PCB file descriptors
+    for (i = 0; i < 8; ++i) {
+        proc_ctrl_blk->fds[i].operations_pointer = NULL;
+        proc_ctrl_blk->fds[i].inode = NULL;
+        proc_ctrl_blk->fds[i].file_position = 0;
+        proc_ctrl_blk->fds[i].flags = NOT_USE;
     }
 
-    // Save current pointers here too
-    asm volatile("movl %%esp, %0" : "=r" (curr_proc->ksp) );
-    asm volatile("movl %%ebp, %0" : "=r" (curr_proc->kbp) );
+    // Set TSS Value
+    tss.esp0 = _8MB - (_8KB) * curr_proc_id - 4;
 
-    // Enable STDIN and STDOUT
-    curr_proc->fds[0].operations_pointer = stdin_ops_table[READ];
-    curr_proc->fds[0].flags= IN_USE;
+    // Open STDIN
+    proc_ctrl_blk->fds[0].operations_pointer = stdin_ops_table;
+    proc_ctrl_blk->fds[0].flags = IN_USE;
 
-    curr_proc->fds[1].operations_pointer = stdout_ops_table[WRITE];
-    curr_proc->fds[1].flags = IN_USE;
+    // Open STDOUT
+    proc_ctrl_blk->fds[1].operations_pointer = stdout_ops_table;
+    proc_ctrl_blk->fds[1].inode = NULL;
+    proc_ctrl_blk->fds[1].flags = IN_USE;
 
-    printf("%s\n", "PCB SETUP");
-
-    // load the program into the correct starting address
-    copy_file_to_addr(cmd_name, PROGRAM_EXEC_ADDR);
-
-    printf("%s\n", "PROGRAM COPIED TO MEMORY");
-
-    tss.esp0 = _8MB - _8KB * curr_proc_id - 4;
-    tss.ss0 = KERNEL_DS;
-
-    printf("%s\n", "TSS SETUP");
-    
-    // jump to the file to execute it
-    jmp_usr_exec(entry_point_addr);
+    jmp_usr_exec(entrypoint + PROGRAM_EXEC_ADDR);
 
     return 0;
 }
@@ -204,7 +191,7 @@ int32_t open (const uint8_t * filename) {
             files_in_use++;
             return i;
         }
-    }    
+    }
 
 
     return -1;
@@ -236,7 +223,7 @@ int32_t sigreturn (void) {
     return -1;
 }
 
-void copy_args(const uint8_t* input, uint32_t nbytes) {       
+void copy_args(const uint8_t* input, uint32_t nbytes) {
         if(input[0] == ' ') {
             args = NULL;
             return;
@@ -252,6 +239,11 @@ void copy_args(const uint8_t* input, uint32_t nbytes) {
         args[arg_length] = '\0';
 }
 
+/**
+ * Returns the first word of the input string
+ * @param  input String to find first word of
+ * @return       Pointer to the first word of the string
+ */
 uint8_t* simple_strtok(const uint8_t* input) {
     uint32_t len = strlen((int8_t*) input);
     uint8_t* output = (uint8_t*)"PLACEHOLDERPLACEHOLDERPLACEHOLDER";
@@ -268,7 +260,7 @@ uint8_t* simple_strtok(const uint8_t* input) {
     } else {
         uint32_t i = 0;
         for(i = 0; i < len+1; i++) {
-            if(input[i] == ' ' || input[i] == '\n' || input[i] == '\0') { 
+            if(input[i] == ' ' || input[i] == '\n' || input[i] == '\0') {
                 break;
             }
             output[i] = input[i];

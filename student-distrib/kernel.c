@@ -209,8 +209,6 @@ void entry (unsigned long magic, unsigned long addr) {
     //test_dir_read(); 
 
 	/* Execute the first program (`shell') ... */
-	execute("shell nigga");
-
 	execute((uint8_t*)"shell");
 
 	/* Spin (nicely, so we don't chew up cycles) */
