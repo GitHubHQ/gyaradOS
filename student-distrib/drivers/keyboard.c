@@ -82,6 +82,8 @@ int caps_on = 0;
 int shift_l_on = 0;
 int shift_r_on = 0;
 
+int read_buf_ready = 0;
+
 int32_t terminal_open (const uint8_t * filename) {
     clear_screen();
 
@@ -92,6 +94,7 @@ int32_t terminal_open (const uint8_t * filename) {
     }
 
     num_chars_in_buf = 0;
+    read_buf_ready = 0;
 
     return 0;
 }
@@ -104,15 +107,18 @@ int32_t terminal_read (int32_t fd, uint8_t * buf, int32_t nbytes) {
     int bytes_read = 0;
     int i = 0;
 
+    while(!read_buf_ready);
+
     for(i = 0; i < nbytes; i++) {
         buf[i] = keyboard_buf[i];
         keyboard_buf[i] = NULL;
         bytes_read++;
     }
 
-    num_chars_in_buf = 0;
-
     new_line();
+
+    num_chars_in_buf = 0;
+    read_buf_ready = 0;
 
     return bytes_read;
 }
@@ -161,7 +167,8 @@ void handle_enter() {
 
     uint8_t buf[MAX_CHARS_IN_BUF + 1];
     int32_t nbytes = MAX_CHARS_IN_BUF + 1;
-    terminal_read(NULL, buf, nbytes);
+
+    read_buf_ready = 1;
 
     if(TERM_TEST_READ) {
         for(i = 0; i < nbytes; i++) {
@@ -183,7 +190,7 @@ void handle_backspace() {
  * Wait for a keyboard ACK
  */
 void kbd_ack(void){ 
-  while(!(inb(KEYBOARD_D_PORT) == KEYBOARD_D_ACK));
+    while(!(inb(KEYBOARD_D_PORT) == KEYBOARD_D_ACK));
 }
 
 /**

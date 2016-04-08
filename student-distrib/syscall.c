@@ -22,16 +22,15 @@ int32_t halt (uint8_t status) {
 
     // set process number to free
     uint32_t free_proc_num = proc_ctrl_blk->proc_num;
+    curr_proc_id_mask &= ~(1 << free_proc_num);
 
     jmp_kern_halt();
     return 0;
 }
 
 int32_t execute (const uint8_t * command) {
-    /* Used to hold the first 32 bytes of the file
-        These 32 bytes will contain the exec information
-        and the entry point of the file
-    */
+    // Used to hold the first 32 bytes of the file
+    // These 32 bytes will contain the exec information and the entry point of the file
     uint8_t f_init_data[32];
     uint32_t entrypoint = 0;
     uint32_t temp_process_mask = PROGRAM_LOCATION_MASK;
