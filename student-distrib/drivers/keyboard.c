@@ -106,7 +106,7 @@ int32_t terminal_close (int32_t fd) {
 int32_t terminal_read (int32_t fd, uint8_t * buf, int32_t nbytes) {
     int bytes_read = 0;
     int i = 0;
-
+    sti();
     while(!read_buf_ready);
 
     for(i = 0; i < nbytes; i++) {
@@ -132,6 +132,9 @@ int32_t terminal_write (int32_t fd, const uint8_t * buf, int32_t nbytes) {
             num_printed++;
         }
     }
+
+    num_chars_in_buf = 0;
+    read_buf_ready = 0;
 
     return num_printed;
 }
