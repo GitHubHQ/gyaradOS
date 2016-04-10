@@ -1,51 +1,70 @@
 #include "paging.h"
 
-/* void init_paging()
- * Description: initialize video memory page in 0-4mb range, and kernel memory
- * from 4-8mb
- * Inputs: none
- * Ooutputs: none
- * side effects: none
- */
-void init_paging(){
+void init_paging() {
 
-        uint32_t pageAddress = 0;
-        int i;
-        /*disabling the 4kb pages in the first 4MB of the PD by setting the pages to be
+		int i;
+		/* Disabling the 4kb pages in the first 4MB of the PD by setting the pages to be
          * Supervisor privilege, Read/Write, not present
          */
-        for(i = 0; i < PAGE_TABLE_SIZE; i++){
-                pageTable1[i] = pageAddress & SET_DEFAULT_MASK; 
-                pageAddress += PAGE_SIZE;
-        }
-
+		for(i = 0; i < PAGE_TABLE_SIZE; i++) {
+				pageTable1[i].PTE_bits.page_base = i;
+				pageTable1[i].PTE_bits.present = 0;
+				pageTable1[i].PTE_bits.read_write = 0;
+				pageTable1[i].PTE_bits.user_super = 0;
+                pageTable1[i].PTE_bits.write_through = 0;
+                pageTable1[i].PTE_bits.cache_disabled = 0;
+                pageTable1[i].PTE_bits.accessed = 0;
+                pageTable1[i].PTE_bits.dirty = 0;
+                pageTable1[i].PTE_bits.page_table_attribute = 0;
+                pageTable1[i].PTE_bits.global = 0;
+                pageTable1[i].PTE_bits.avail = 0;
+		}
 
         //enabling the present and read/write and user bit for the video memory at physical location 0xB8000
-        pageTable1[VIDEO_PHYS_ADDR/PAGE_SIZE] |= SET_USER_PRESENT; 
+		pageTable1[VIDEO_PHYS_ADDR/PAGE_SIZE].PTE_bits.present = 1;
+		pageTable1[VIDEO_PHYS_ADDR/PAGE_SIZE].PTE_bits.read_write = 1;
+		pageTable1[VIDEO_PHYS_ADDR/PAGE_SIZE].PTE_bits.user_super = 1; 
 
-        //enabling bits for R/W and Present and supervisor level(0x3)
-        pageDirectory[0] = (unsigned int)pageTable1 | SET_PRESENT;
-
-        //enabling bits PS, R/W, Present (10000011)
-        pageDirectory[1] = KERNEL_PHYS_ADDR | SET_4MB_PRESENT; 
-
-        for(i = 2; i < PAGE_DIRECTORY_SIZE; i++){
-                //setting the rest of the pages to not be present, read/write, and supervisor privilege
-                pageDirectory[i] = 0 | SET_OFF; 
+        for(i = 0; i < PAGE_DIRECTORY_SIZE; i++){
+            //setting the rest of the pages to not be present, read/write, and supervisor privilege
+            pageDirectory[i].PDE_bits.page_table_base = 0;
+            pageDirectory[i].PDE_bits.present = 0;
+            pageDirectory[i].PDE_bits.read_write = 1;
+            pageDirectory[i].PDE_bits.user_super = 0;
+            pageDirectory[i].PDE_bits.write_through = 0;
+            pageDirectory[i].PDE_bits.cache_disabled = 0;
+            pageDirectory[i].PDE_bits.accessed = 0;
+            pageDirectory[i].PDE_bits.reserved = 0;
+            pageDirectory[i].PDE_bits.page_size = 0;
+            pageDirectory[i].PDE_bits.global = 0;
+            pageDirectory[i].PDE_bits.avail = 0;
         }
 
-        //Enabling paging 
+	    //enabling bits for R/W and Present and supervisor level(0x3)
+		pageDirectory[0].PDE_bits.page_table_base = (uint32_t) pageTable1 / _4KB;
+		pageDirectory[0].PDE_bits.present = 1;
+		pageDirectory[0].PDE_bits.read_write = 1;
+		pageDirectory[0].PDE_bits.page_size = 0;
+
+		//enabling bits PS, R/W, Present (10000011)
+		pageDirectory[1].PDE_bits.page_table_base = (uint32_t) KERNEL_PHYS_ADDR / _4KB;
+		pageDirectory[1].PDE_bits.page_size = 1;
+		pageDirectory[1].PDE_bits.present = 1;
+		pageDirectory[1].PDE_bits.read_write = 1;
+		pageDirectory[1].PDE_bits.user_super = 1;
+
+	    //Enabling paging 
         asm volatile (
-                        "mov %%eax, %%cr3         \n" //moving the address of PD to cr3
-                        "mov %%cr4, %%eax         \n"
-                        "or  $0x00000010, %%eax     \n" //setting PSE in cr4 for 4MB pages
-                        "mov %%eax, %%cr4       \n"
-                        "mov %%cr0, %%eax       \n" //enabling the PG flag in CR0
-                        "or  $0x80000000, %%eax     \n"
-                        "mov %%eax, %%cr0"        
-                        : /* no outputs */      
-                        : "a" (pageDirectory)     
-                     );           
+                        "mov %%eax, %%cr3 				\n" //moving the address of PD to cr3
+                        "mov %%cr4, %%eax 				\n"
+                        "or  $0x00000010, %%eax 		\n" //setting PSE in cr4 for 4MB pages
+                        "mov %%eax, %%cr4				\n"
+                        "mov %%cr0, %%eax				\n" //enabling the PG flag in CR0
+                        "or  $0x80000000, %%eax			\n"
+                        "mov %%eax, %%cr0"				
+                        : /* no outputs */			
+                        : "a" (pageDirectory)			
+                     );		
 }
 
 int init_new_process(uint32_t process_num){
@@ -57,49 +76,18 @@ int init_new_process(uint32_t process_num){
         uint32_t idx = PROCESS_START_ADDR/PAGE_SIZE_LARGE;
 
         //enable the given page;
-        pageDirectory[idx] = address | SET_4MB_USER_PRESENT;
+        pageDirectory[idx].PDE_bits.page_table_base = address / _4KB;
+        pageDirectory[idx].PDE_bits.page_size = 1;
+        pageDirectory[idx].PDE_bits.present = 1;
+        pageDirectory[idx].PDE_bits.read_write = 1;
+        pageDirectory[idx].PDE_bits.user_super = 1;
         
         //write to cr3
         asm volatile (
                         //moving the address of PD to cr3
-                        "mov %%eax, %%cr3 				\n" 
-                        : /* no outputs */			
-                        : "a" (pageDirectory)			
-                     );						
+                        "mov %%eax, %%cr3               \n" 
+                        : /* no outputs */          
+                        : "a" (pageDirectory)           
+                     );                     
         return 0;
-}
-
-/* void test_paging()
- * Description: Test access to different pages in memory. Purely for testing
- * purposes.
- * Inputs: none
- * Ooutputs: none
- * side effects: none
- */
-void test_paging(){
-
-        // test for access at 0x400000
-        uint8_t* x = (uint8_t*) KERNEL_PHYS_ADDR;
-        printf("\nkernel: %x\n",*x);
-
-        // test access from in kernel
-        uint8_t* y = (uint8_t*) 0x600000;
-        printf("\n4-8:%x\n",*y);
-
-        // test access to 0xB8000
-        uint8_t* z = (uint8_t*) VIDEO_PHYS_ADDR;
-        printf("\nvidmem: %x\n",*z);
-
-        /* The following lines are to test for page faults */
-        /*
-           uint8_t* a = (uint8_t*) 0x300000;
-           printf("\npost-vidmem: %x\n",*a);
-
-           uint8_t* b = (uint8_t*) 0xA8000;
-           printf("\npre-vidmem: %x\n",*b);
-
-
-           uint8_t* c = (uint8_t*) 0x900000;
-           printf("\npost-kernel: %x\n",*c);
-           */
 }

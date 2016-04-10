@@ -9,7 +9,7 @@
 #include "multiboot.h"
 #include "x86_desc.h"
 #include "debug.h"
-#include "paging2.h"
+#include "paging.h"
 #include "fs/files.h"
 #include "syscall.h"
 

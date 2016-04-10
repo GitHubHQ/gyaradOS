@@ -4,8 +4,6 @@ uint32_t curr_proc_id_mask = 0;
 uint32_t curr_proc_id = 0;
 pcb_t* curr_proc = NULL;
 
-file_array files_array[MAX_FILES];
-
 uint32_t* stdin_ops_table[4] = {NULL, (uint32_t *) terminal_read, NULL, NULL};
 uint32_t* stdout_ops_table[4] = {NULL, NULL, (uint32_t *) terminal_write, NULL};
 uint32_t* rtc_ops_table[4] = {(uint32_t *) rtc_open, (uint32_t *) rtc_read, (uint32_t *) rtc_write, (uint32_t *) rtc_close};
@@ -120,35 +118,32 @@ int32_t execute (const uint8_t * command) {
     proc_ctrl_blk->fds[1].inode = NULL;
     proc_ctrl_blk->fds[1].flags = IN_USE;
 
+    curr_proc = proc_ctrl_blk;
     jmp_usr_exec(entrypoint);
 
     return 0;
 }
 
 int32_t read (int32_t fd, void * buf, int32_t nbytes) {
-    terminal_read(fd, buf, nbytes);
-    return 0;
+    int32_t (*func_ptr)(int32_t fd, void * buf, int32_t nbytes);
+    func_ptr = curr_proc->fds[fd].operations_pointer[READ];
+    if(func_ptr == NULL)
+        return -1;
+    else
+        return func_ptr(fd, buf, nbytes);
 }
 
 int32_t write (int32_t fd, const void * buf, int32_t nbytes) {
-    terminal_write(fd, buf, nbytes);
-    return 0;
+    int32_t (*func_ptr)(int32_t fd, void * buf, int32_t nbytes);
+    func_ptr = curr_proc->fds[fd].operations_pointer[WRITE];
+    if(func_ptr == NULL)
+        return -1;
+    else
+        return func_ptr(fd, buf, nbytes);
 }
 
 
 int32_t open (const uint8_t * filename) {
-    if(strncmp("stdin", (int8_t *) filename, 5) == 0){
-        files_array[0].operations_pointer = (uint32_t *) stdin_ops_table;
-        files_array[0].inode = NULL;
-        files_array[0].flags = IN_USE;
-    }
-
-    if(strncmp("stdout", (int8_t *) filename, 6) == 0){
-        files_array[1].operations_pointer = (uint32_t *) stdout_ops_table;
-        files_array[1].inode = NULL;
-        files_array[1].flags = IN_USE;
-    }
-
     dentry_t file_info;
     int32_t check = read_dentry_by_name(filename, &file_info);
 
@@ -160,26 +155,26 @@ int32_t open (const uint8_t * filename) {
     //put back calling open
     int i = 0;
     for(i = 2; i < MAX_FILES; i++) {
-        if(files_array[i].flags == NOT_USE) {
+        if(curr_proc->fds[i].flags == NOT_USE) {
             switch(file_info.file_type) {
                 case 0:
-                    files_array[i].operations_pointer = (uint32_t *) rtc_ops_table;
-                    files_array[i].inode = NULL;
-                    files_array[i].file_position = 0;
+                    curr_proc->fds[i].operations_pointer = (uint32_t *) rtc_ops_table;
+                    curr_proc->fds[i].inode = NULL;
+                    curr_proc->fds[i].file_position = 0;
                     break;
                 case 1:
-                    files_array[i].operations_pointer = (uint32_t *) dir_ops_table;
-                    files_array[i].inode = NULL;
-                    files_array[i].file_position = 0;
+                    curr_proc->fds[i].operations_pointer = (uint32_t *) dir_ops_table;
+                    curr_proc->fds[i].inode = NULL;
+                    curr_proc->fds[i].file_position = 0;
                     break;
                 case 2:
-                    files_array[i].operations_pointer = (uint32_t *) files_ops_table;
-                    files_array[i].inode = get_inode(file_info.inode_num);
-                    files_array[i].file_position = 0;
+                    curr_proc->fds[i].operations_pointer = (uint32_t *) files_ops_table;
+                    curr_proc->fds[i].inode = get_inode(file_info.inode_num);
+                    curr_proc->fds[i].file_position = 0;
                     break;
             }
 
-            files_array[i].flags = IN_USE;
+            curr_proc->fds[i].flags = IN_USE;
             files_in_use++;
             return i;
         }
@@ -191,7 +186,7 @@ int32_t open (const uint8_t * filename) {
 
 int32_t close (int32_t fd) {
     if(fd >= 2 && fd <= 7) {
-        files_array[fd].flags = NOT_USE;
+        curr_proc->fds[fd].flags = NOT_USE;
         files_in_use--;
         return 0;
     }
