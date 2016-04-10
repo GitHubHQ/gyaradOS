@@ -67,7 +67,7 @@ int32_t fs_open(const uint8_t* filename){
  * inputs: none
  * ouputs: none return 0
  */
-int32_t fs_close(int32_t fd){
+int32_t fs_close(void){
     return 0;
 }
 
@@ -184,6 +184,9 @@ int32_t copy_file_to_addr(uint8_t* fname, uint32_t addr) {
     return 0;
 }
 
+inode_t* get_inode(uint32_t inode_num) {
+    return inodes + inode_num * BLOCK_SIZE;
+}
 /* test_fs()
  * description: tests the filesystem functions
  * input: none
@@ -253,7 +256,7 @@ int32_t dir_open(const uint8_t* filename){
  * inputs: none
  * ouputs: none return 0
  */
-int32_t dir_close(int32_t fd){
+int32_t dir_close(void){
     return 0;
 }
 
