@@ -13,16 +13,59 @@ uint32_t* files_ops_table[4] = {(uint32_t *) fs_open, (uint32_t *) fs_read, (uin
 uint32_t files_in_use = 2;
 
 int32_t halt (uint8_t status) {
-    while(1);
-
-    // get previous pcb
+    // TODO get previous pcb
     pcb_t * proc_ctrl_blk;
 
-    // set process number to free
+    // get the process number to free
     uint32_t free_proc_num = proc_ctrl_blk->proc_num;
+    if(free_proc_num == 0) {
+        // restart this process since its the first process
+        // we can hardcode this to shell since that is the first process every time
+        uint8_t f_init_data[32];
+        uint32_t entrypoint = 0;
+
+        // Grab the first 32 bytes of the file to see if it is runnable
+        // and find where it starts
+        if(fs_read(((int32_t) "shell"), &f_init_data, 32) == -1) {
+            return -1;
+        }
+
+        // Grab the entry point of the application
+        entrypoint += (uint32_t)f_init_data[27] << 24;
+        entrypoint += (uint32_t)f_init_data[26] << 16;
+        entrypoint += (uint32_t)f_init_data[25] << 8;
+        entrypoint += (uint32_t)f_init_data[24];
+
+        // jump back to the beginning of the executable
+        jmp_usr_exec(entrypoint);
+    }
+
+    // Close STDIN
+    proc_ctrl_blk->fds[0].operations_pointer = NULL;
+    proc_ctrl_blk->fds[0].flags = NOT_USE;
+
+    // Close STDOUT
+    proc_ctrl_blk->fds[1].operations_pointer = NULL;
+    proc_ctrl_blk->fds[1].inode = NULL;
+    proc_ctrl_blk->fds[1].flags = NOT_USE;
+
+    // TODO set the tss esp0
+    tss.esp0 = 0;
+
+    // switch back pd
+    switch_pd(proc_ctrl_blk->p_proc_num);
+
+    // if it's not the first process, then we can continue the program exit
     curr_proc_id_mask &= ~(1 << free_proc_num);
 
-    jmp_kern_halt();
+    // perform the stack switch
+    asm volatile("movl %0, %%esp" : "=g"(proc_ctrl_blk->p_ksp));
+    asm volatile("movl %0, %%ebp" : "=g"(proc_ctrl_blk->p_kbp));
+
+    // leave and ret back to the syscall handler with no return value
+    asm ("leave");
+    asm ("ret");
+
     return 0;
 }
 

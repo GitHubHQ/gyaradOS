@@ -91,3 +91,9 @@ int init_new_process(uint32_t process_num){
                      );                     
         return 0;
 }
+
+int switch_pd(uint8_t process_num) {
+    // TODO switches the page directory to the one specified by the process number
+
+    return 0;
+}

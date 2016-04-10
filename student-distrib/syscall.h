@@ -41,7 +41,7 @@
 #define PROGRAM_EXEC_ADDR 0x8048000
 
 
-#define _8MB	0x00800000
+#define _8MB	0x800000
 #define _8KB	0x2000
 
 typedef struct {

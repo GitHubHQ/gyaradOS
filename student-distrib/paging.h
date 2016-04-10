@@ -52,7 +52,8 @@ typedef union PTE {
 PDE_t pageDirectory[PAGE_DIRECTORY_SIZE] __attribute__((aligned(PAGE_SIZE)));
 PTE_t pageTable1[PAGE_TABLE_SIZE] __attribute__((aligned(PAGE_SIZE)));
 
-void init_paging();
-int init_new_process(uint32_t process_num);
+extern void init_paging();
+extern int init_new_process(uint32_t process_num);
+extern int switch_pd(uint8_t process_num);
 
 #endif
