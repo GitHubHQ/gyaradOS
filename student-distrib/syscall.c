@@ -20,16 +20,15 @@ int32_t halt (uint8_t status) {
 
     // set process number to free
     uint32_t free_proc_num = proc_ctrl_blk->proc_num;
+    curr_proc_id_mask &= ~(1 << free_proc_num);
 
     jmp_kern_halt();
     return 0;
 }
 
 int32_t execute (const uint8_t * command) {
-    /* Used to hold the first 32 bytes of the file
-        These 32 bytes will contain the exec information
-        and the entry point of the file
-    */
+    // Used to hold the first 32 bytes of the file
+    // These 32 bytes will contain the exec information and the entry point of the file
     uint8_t f_init_data[32];
     uint32_t entrypoint = 0;
     uint32_t temp_process_mask = PROGRAM_LOCATION_MASK;
@@ -140,8 +139,8 @@ int32_t write (int32_t fd, const void * buf, int32_t nbytes) {
         return -1;
     else
         return func_ptr(fd, buf, nbytes);
+    
 }
-
 
 int32_t open (const uint8_t * filename) {
     dentry_t file_info;
@@ -161,16 +160,19 @@ int32_t open (const uint8_t * filename) {
                     curr_proc->fds[i].operations_pointer = (uint32_t *) rtc_ops_table;
                     curr_proc->fds[i].inode = NULL;
                     curr_proc->fds[i].file_position = 0;
+                    rtc_open();
                     break;
                 case 1:
                     curr_proc->fds[i].operations_pointer = (uint32_t *) dir_ops_table;
                     curr_proc->fds[i].inode = NULL;
                     curr_proc->fds[i].file_position = 0;
+                    dir_open(filename);
                     break;
                 case 2:
                     curr_proc->fds[i].operations_pointer = (uint32_t *) files_ops_table;
                     curr_proc->fds[i].inode = get_inode(file_info.inode_num);
                     curr_proc->fds[i].file_position = 0;
+                    fs_open(filename);
                     break;
             }
 
@@ -188,6 +190,8 @@ int32_t close (int32_t fd) {
     if(fd >= 2 && fd <= 7) {
         curr_proc->fds[fd].flags = NOT_USE;
         files_in_use--;
+        int32_t (*func_ptr)(void);
+        func_ptr = curr_proc->fds[fd].operations_pointer[CLOSE];
         return 0;
     }
 

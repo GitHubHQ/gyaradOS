@@ -67,7 +67,7 @@ int32_t fs_open(const uint8_t* filename){
  * inputs: none
  * ouputs: none return 0
  */
-int32_t fs_close(int32_t fd){
+int32_t fs_close(void){
     return 0;
 }
 
@@ -256,7 +256,7 @@ int32_t dir_open(const uint8_t* filename){
  * inputs: none
  * ouputs: none return 0
  */
-int32_t dir_close(int32_t fd){
+int32_t dir_close(void){
     return 0;
 }
 
