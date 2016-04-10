@@ -45,23 +45,17 @@ int32_t execute (const uint8_t * command) {
     // get the file name to execute
     uint8_t * f_name = strtok(command);
 
-    printf("%s\n", f_name);
-
     // Grab the first 32 bytes of the file to see if it is runnable
     // and find where it starts
     if(fs_read((int32_t)f_name, &f_init_data, 32) == -1) {
         return -1;
     }
 
-    printf("one");
-
     // See if the file is executeable
     if (!((f_init_data[0] == MAGIC_NUM_1) && (f_init_data[1] == MAGIC_NUM_2) && (f_init_data[2] == MAGIC_NUM_3) && (f_init_data[3] == MAGIC_NUM_4))) {
         printf("%s\n", "Non-Runnable file!");
         return -1;
     }
-
-    printf("two");
 
     // Grab the entry point of the application
     entrypoint += (uint32_t)f_init_data[27] << 24;
@@ -84,8 +78,6 @@ int32_t execute (const uint8_t * command) {
     if (i == (MAX_PROG_NUM -1)) {
         return -1;
     }
-
-    printf("three");
 
     // Create a page directory for the program
     init_new_process(curr_proc_id);

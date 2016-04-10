@@ -33,8 +33,6 @@ void fs_init(uint32_t addrs) {
 int32_t fs_read(int32_t fd, uint8_t * buf, int32_t nbytes) {
     dentry_t temp;
 
-    printf("%s\n", fd);
-
     if(0 != read_dentry_by_name((uint8_t*)fd, &temp)) {
         return -1;
     }
