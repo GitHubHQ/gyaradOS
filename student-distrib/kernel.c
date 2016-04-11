@@ -202,8 +202,8 @@ void entry (unsigned long magic, unsigned long addr) {
 	//Test RTC driver
 	//rtc_test();
 
-	//File system testing
-	//test_fs();
+	// File system testing
+	// test_fs();
     
     //dir_read testing
     //test_dir_read(); 

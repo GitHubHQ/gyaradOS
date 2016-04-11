@@ -13,6 +13,8 @@ uint32_t* files_ops_table[4] = {(uint32_t *) fs_open, (uint32_t *) fs_read, (uin
 uint32_t files_in_use = 2;
 
 int32_t halt (uint8_t status) {
+    while(1);
+
     // TODO get previous pcb
     pcb_t * proc_ctrl_blk;
 
