@@ -13,10 +13,7 @@ uint32_t* files_ops_table[4] = {(uint32_t *) fs_open, (uint32_t *) fs_read, (uin
 uint32_t files_in_use = 2;
 
 int32_t halt (uint8_t status) {
-    while(1);
-
-    // TODO get previous pcb
-    pcb_t * proc_ctrl_blk;
+    pcb_t * proc_ctrl_blk = curr_proc;
 
     // get the process number to free
     uint32_t free_proc_num = proc_ctrl_blk->proc_num;
@@ -42,6 +39,9 @@ int32_t halt (uint8_t status) {
         jmp_usr_exec(entrypoint);
     }
 
+    // set the process to free in the process buffer
+    curr_proc_id_mask &= ~(1 << free_proc_num);
+
     // Close STDIN
     proc_ctrl_blk->fds[0].operations_pointer = NULL;
     proc_ctrl_blk->fds[0].flags = NOT_USE;
@@ -51,22 +51,18 @@ int32_t halt (uint8_t status) {
     proc_ctrl_blk->fds[1].inode = NULL;
     proc_ctrl_blk->fds[1].flags = NOT_USE;
 
-    // TODO set the tss esp0
-    tss.esp0 = 0;
+    // reset the page entries
+    switch_pd(proc_ctrl_blk->p_proc_num, proc_ctrl_blk->prev_base);
+    tss.esp0 = _8MB - (_8KB) * proc_ctrl_blk->p_proc_num - 4;
 
-    // switch back pd
-    switch_pd(proc_ctrl_blk->p_proc_num);
+    // stack switch
+    asm volatile("movl %0, %%esp"::"g"(proc_ctrl_blk->p_ksp));
+    asm volatile("movl %0, %%ebp"::"g"(proc_ctrl_blk->p_kbp));
 
-    // if it's not the first process, then we can continue the program exit
-    curr_proc_id_mask &= ~(1 << free_proc_num);
+    // asm volatile("leave");
+    // asm volatile("ret");
 
-    // perform the stack switch
-    asm volatile("movl %0, %%esp" : "=g"(proc_ctrl_blk->p_ksp));
-    asm volatile("movl %0, %%ebp" : "=g"(proc_ctrl_blk->p_kbp));
-
-    // leave and ret back to the syscall handler with no return value
-    asm ("leave");
-    asm ("ret");
+    asm volatile("jmp HELLO");
 
     return 0;
 }
@@ -123,7 +119,7 @@ int32_t execute (const uint8_t * command) {
     }
 
     // Create a page directory for the program
-    init_new_process(curr_proc_id);
+    uint32_t prev_base = init_new_process(curr_proc_id);
 
     // Copy the program to the page directory
     copy_file_to_addr(f_name, PROGRAM_EXEC_ADDR);
@@ -132,15 +128,14 @@ int32_t execute (const uint8_t * command) {
     pcb_t * proc_ctrl_blk = (pcb_t*) (_8MB - (_8KB)*(curr_proc_id + 1));
 
     // Grab and store the ESP and EBP in the PCB
-    uint32_t esp;
-    uint32_t ebp;
-    asm volatile("movl %%esp, %0":"=g"(esp));
-    asm volatile("movl %%ebp, %0":"=g"(ebp));
-    proc_ctrl_blk->p_ksp = esp;
-    proc_ctrl_blk->p_ksp = ebp;
+    asm volatile("movl %%esp, %0":"=g"(proc_ctrl_blk->p_ksp));
+    asm volatile("movl %%ebp, %0":"=g"(proc_ctrl_blk->p_kbp));
 
     // Store Proc ID
     proc_ctrl_blk->proc_num = curr_proc_id;
+
+    // store Prev address
+    proc_ctrl_blk->prev_base = prev_base;
 
     // Initalize PCB file descriptors
     for (i = 0; i < 8; ++i) {
@@ -164,6 +159,8 @@ int32_t execute (const uint8_t * command) {
 
     curr_proc = proc_ctrl_blk;
     jmp_usr_exec(entrypoint);
+
+    asm volatile("HELLO:");
 
     return 0;
 }

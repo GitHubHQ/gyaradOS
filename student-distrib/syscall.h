@@ -54,13 +54,13 @@ typedef struct {
 typedef struct pcb{
     file_array fds[8];
     uint8_t file_names[8][32];
-    uint32_t ksp;
-    uint32_t kbp;
     uint32_t p_ksp;
     uint32_t p_kbp;
     uint8_t proc_num;
     uint8_t p_proc_num;
     uint8_t children;
+    uint32_t prev_base;
+    uint32_t eip;
 } pcb_t;
 
 extern int32_t halt (uint8_t status);

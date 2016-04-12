@@ -2,7 +2,6 @@
 #include "x86_desc.h"
 
 .global jmp_usr_exec
-.global jmp_kern_halt
 
 jmp_usr_exec:
     cli
@@ -29,7 +28,3 @@ jmp_usr_exec:
     pushl %ebx
 
     iret
-
-jmp_kern_halt:
-    leave
-    ret

@@ -35,7 +35,7 @@ int32_t fs_read(int32_t fd, uint8_t * buf, int32_t nbytes) {
         return -1;
     }
 
-    int bytesRead = read_data(temp.inode_num, buf, nbytes);
+    int bytesRead = read_data(temp.inode_num, 0, buf, nbytes);
 
     return bytesRead;
 }
@@ -113,12 +113,15 @@ int32_t read_dentry_by_index (uint32_t index, dentry_t* dentry) {
     return 0;
 }
 
-int32_t read_data (uint32_t inode, uint8_t * buf, uint32_t length) {
+int32_t read_data (uint32_t inode, uint32_t offset, uint8_t * buf, uint32_t length) {
     if(inode >= b.n_inodes || inode < 0)
         return -1;
 
-    int curr_block = 0;
-    int location_in_block = 0;
+    if(offset >= inodes[inode].file_size)
+        return 0;
+
+    int curr_block = offset / BLOCK_SIZE;
+    int location_in_block = offset % BLOCK_SIZE;
 
     uint8_t * curr_read_pos = (uint8_t *) (data_blocks + inodes[inode].blocks[curr_block] * BLOCK_SIZE + location_in_block);
 
@@ -132,7 +135,7 @@ int32_t read_data (uint32_t inode, uint8_t * buf, uint32_t length) {
         curr_read_pos++;
         location_in_block++;
 
-        if(num_reads > inodes[inode].file_size) {
+        if(offset + num_reads > inodes[inode].file_size) {
             return num_reads;
         }
 
@@ -164,7 +167,7 @@ int32_t copy_file_to_addr(uint8_t* fname, uint32_t addr) {
     uint32_t file_size = inodes[temp_dentry.inode_num].file_size;
     uint8_t buf[file_size];
     
-    uint32_t amount_to_copy = read_data(temp_dentry.inode_num, buf, file_size);
+    uint32_t amount_to_copy = read_data(temp_dentry.inode_num, 0, buf, file_size);
 
     if(amount_to_copy == -1) {
         return -1;
