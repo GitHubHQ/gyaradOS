@@ -252,7 +252,12 @@ int32_t getargs (uint8_t * buf, int32_t nbytes) {
 }
 
 int32_t vidmap (uint8_t ** screen_start) {
-    return -1;
+    if(screen_start < VID_MEM_START || screen_start > VID_MEM_END) {
+        return -1;
+    }
+
+    *screen_start = VIDEO;
+    return 0;
 }
 
 int32_t set_handler (int32_t signum, void * handler_address) {

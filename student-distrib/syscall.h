@@ -43,6 +43,9 @@
 #define _8MB	0x800000
 #define _8KB	0x2000
 
+#define VID_MEM_START 0x08000000
+#define VID_MEM_END   0x08400000
+
 typedef struct {
     uint32_t * operations_pointer;
     inode_t * inode;

@@ -9,6 +9,18 @@
 #include "../drivers/rtc.h"
 #include "../drivers/speaker.h"
 
+#define VIDEO 0xB8000
+#define NUM_COLS 80
+#define NUM_ROWS 25
+#define ATTRIB 0x04
+
+/* The VGA cursor ports/commands */
+#define FB_POSITION_MASK        0xFF
+#define FB_COMMAND_PORT         0x3D4
+#define FB_DATA_PORT            0x3D5
+#define FB_HIGH_BYTE_COMMAND    14
+#define FB_LOW_BYTE_COMMAND     15
+
 int32_t printf(int8_t *format, ...);
 void putc(uint8_t c);
 int32_t puts(int8_t *s);
