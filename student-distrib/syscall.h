@@ -40,7 +40,6 @@
 
 #define PROGRAM_EXEC_ADDR 0x8048000
 
-
 #define _8MB	0x800000
 #define _8KB	0x2000
 
@@ -51,16 +50,14 @@ typedef struct {
     uint32_t flags;
 } file_array;
 
-typedef struct pcb{
+typedef struct {
     file_array fds[8];
     uint8_t file_names[8][32];
+    uint8_t proc_num;
+    uint32_t base;
     uint32_t p_ksp;
     uint32_t p_kbp;
-    uint8_t proc_num;
-    uint8_t p_proc_num;
-    uint8_t children;
-    uint32_t prev_base;
-    uint32_t eip;
+    struct pcb_t * prev;
 } pcb_t;
 
 extern int32_t halt (uint8_t status);

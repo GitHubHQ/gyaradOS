@@ -1,8 +1,10 @@
 #include "syscall.h"
 
+pcb_t * curr_proc = NULL;
+pcb_t * prev_proc = NULL;
+
 uint32_t curr_proc_id_mask = 0;
 uint32_t curr_proc_id = 0;
-pcb_t* curr_proc = NULL;
 
 uint32_t* stdin_ops_table[4] = {NULL, (uint32_t *) terminal_read, NULL, NULL};
 uint32_t* stdout_ops_table[4] = {NULL, NULL, (uint32_t *) terminal_write, NULL};
@@ -52,15 +54,16 @@ int32_t halt (uint8_t status) {
     proc_ctrl_blk->fds[1].flags = NOT_USE;
 
     // reset the page entries
-    switch_pd(proc_ctrl_blk->p_proc_num, proc_ctrl_blk->prev_base);
-    tss.esp0 = _8MB - (_8KB) * proc_ctrl_blk->p_proc_num - 4;
+    switch_pd(prev_proc->proc_num, prev_proc->base);
+    tss.esp0 = _8MB - (_8KB) * prev_proc->proc_num - 4;
 
     // stack switch
     asm volatile("movl %0, %%esp"::"g"(proc_ctrl_blk->p_ksp));
     asm volatile("movl %0, %%ebp"::"g"(proc_ctrl_blk->p_kbp));
 
-    // asm volatile("leave");
-    // asm volatile("ret");
+    // swap the pcbs correctly
+    curr_proc = prev_proc;
+    prev_proc = prev_proc->prev;
 
     asm volatile("jmp HELLO");
 
@@ -119,7 +122,7 @@ int32_t execute (const uint8_t * command) {
     }
 
     // Create a page directory for the program
-    uint32_t prev_base = init_new_process(curr_proc_id);
+    uint32_t base = init_new_process(curr_proc_id);
 
     // Copy the program to the page directory
     copy_file_to_addr(f_name, PROGRAM_EXEC_ADDR);
@@ -135,7 +138,7 @@ int32_t execute (const uint8_t * command) {
     proc_ctrl_blk->proc_num = curr_proc_id;
 
     // store Prev address
-    proc_ctrl_blk->prev_base = prev_base;
+    proc_ctrl_blk->base = base;
 
     // Initalize PCB file descriptors
     for (i = 0; i < 8; ++i) {
@@ -157,7 +160,11 @@ int32_t execute (const uint8_t * command) {
     proc_ctrl_blk->fds[1].inode = NULL;
     proc_ctrl_blk->fds[1].flags = IN_USE;
 
+    prev_proc = curr_proc;
     curr_proc = proc_ctrl_blk;
+
+    curr_proc->prev = prev_proc;
+
     jmp_usr_exec(entrypoint);
 
     asm volatile("HELLO:");
