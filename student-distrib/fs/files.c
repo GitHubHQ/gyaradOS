@@ -23,7 +23,7 @@ void fs_init(uint32_t addrs) {
 
     dirReads = 0;
 
-    int i;
+    //int i;
     // for(i = 0; i < MAX_FILES; i++) {
     //     files_opened[i].read_location = 0;
     //     files_opened[i].opened = 0;
@@ -72,16 +72,17 @@ int32_t fs_write(int32_t fd, const uint8_t * buf, int32_t nbytes) {
  * ouputs: none return 0
  */
 int32_t fs_open(const uint8_t* filename){
-    int i;
-    for(i = 0; i < MAX_FILES; i++) {
-        if(files_opened[i].opened == 0) {
-            strncpy(files_opened[i].file_name, filename, 32);
-            files_opened[i].opened = 1;
-            files_opened[i].read_location = 0;
-            return 0;
-        }
-    }
-    return -1; 
+    // int i;
+    // for(i = 0; i < MAX_FILES; i++) {
+    //     if(files_opened[i].opened == 0) {
+    //         strncpy(files_opened[i].file_name, filename, 32);
+    //         files_opened[i].opened = 1;
+    //         files_opened[i].read_location = 0;
+    //         return 0;
+    //     }
+    // }
+    // return -1; 
+    return 0;
 }
 
 /* fs_close()
@@ -89,8 +90,8 @@ int32_t fs_open(const uint8_t* filename){
  * ouputs: none return 0
  */
 int32_t fs_close(int32_t fd){
-    files_opened[fd].read_location = 0;
-    files_opened[fd].opened = 0;
+    // files_opened[fd].read_location = 0;
+    // files_opened[fd].opened = 0;
     return 0;
 }
 

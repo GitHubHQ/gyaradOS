@@ -6,11 +6,11 @@ pcb_t * prev_proc = NULL;
 uint32_t curr_proc_id_mask = 0;
 uint32_t curr_proc_id = 0;
 
-uint32_t * stdin_ops_table[4] = {NULL, (uint32_t *) terminal_read, NULL, NULL};
-uint32_t * stdout_ops_table[4] = {NULL, NULL, (uint32_t *) terminal_write, NULL};
-uint32_t * rtc_ops_table[4] = {(uint32_t *) rtc_open, (uint32_t *) rtc_read, (uint32_t *) rtc_write, (uint32_t *) rtc_close};
-uint32_t * dir_ops_table[4] = {(uint32_t *) dir_open, (uint32_t *) dir_read, (uint32_t *) dir_write, (uint32_t *) dir_close};
-uint32_t * files_ops_table[4] = {(uint32_t *) fs_open, (uint32_t *) fs_read, (uint32_t *) fs_write, (uint32_t *) fs_close};
+uint32_t* stdin_ops_table[4] = {NULL, (uint32_t *) terminal_read, NULL, NULL};
+uint32_t* stdout_ops_table[4] = {NULL, NULL, (uint32_t *) terminal_write, NULL};
+uint32_t* rtc_ops_table[4] = {(uint32_t *) rtc_open, (uint32_t *) rtc_read, (uint32_t *) rtc_write, (uint32_t *) rtc_close};
+uint32_t* dir_ops_table[4] = {(uint32_t *) dir_open, (uint32_t *) dir_read, (uint32_t *) dir_write, (uint32_t *) dir_close};
+uint32_t* files_ops_table[4] = {(uint32_t *) fs_open, (uint32_t *) fs_read, (uint32_t *) fs_write, (uint32_t *) fs_close};
 
 uint32_t files_in_use = 2;
 
@@ -27,7 +27,7 @@ int32_t halt (uint8_t status) {
 
         // Grab the first 32 bytes of the file to see if it is runnable
         // and find where it starts
-        if(fs_read(((int32_t) "shell"), f_init_data, 32) == -1) {
+        if(fs_read(((int32_t) "shell"), &f_init_data, 32) == -1) {
             return -1;
         }
 
@@ -63,7 +63,7 @@ int32_t halt (uint8_t status) {
 
     // swap the pcbs correctly
     curr_proc = prev_proc;
-    prev_proc = (pcb_t *) prev_proc->prev;
+    prev_proc = prev_proc->prev;
 
     asm volatile("jmp HELLO");
 
@@ -80,7 +80,7 @@ int32_t execute (const uint8_t * command) {
     uint32_t i;
 
     // fail if an invalid command is specified
-    if (command == NULL || strlen((int8_t *) command) == 0) {
+    if (command == NULL || strlen(command) == 0) {
         return -1;
     }
 
@@ -89,7 +89,7 @@ int32_t execute (const uint8_t * command) {
 
     // Grab the first 32 bytes of the file to see if it is runnable
     // and find where it starts
-    if(fs_read((int32_t)f_name, f_init_data, 32) == -1) {
+    if(fs_read((int32_t)f_name, &f_init_data, 32) == -1) {
         return -1;
     }
 
@@ -152,18 +152,18 @@ int32_t execute (const uint8_t * command) {
     tss.esp0 = _8MB - (_8KB) * curr_proc_id - 4;
 
     // Open STDIN
-    proc_ctrl_blk->fds[0].operations_pointer = (uint32_t *) stdin_ops_table;
+    proc_ctrl_blk->fds[0].operations_pointer = stdin_ops_table;
     proc_ctrl_blk->fds[0].flags = IN_USE;
 
     // Open STDOUT
-    proc_ctrl_blk->fds[1].operations_pointer = (uint32_t *) stdout_ops_table;
+    proc_ctrl_blk->fds[1].operations_pointer = stdout_ops_table;
     proc_ctrl_blk->fds[1].inode = NULL;
     proc_ctrl_blk->fds[1].flags = IN_USE;
 
     prev_proc = curr_proc;
     curr_proc = proc_ctrl_blk;
 
-    curr_proc->prev = (struct pcb_t *) prev_proc;
+    curr_proc->prev = prev_proc;
 
     jmp_usr_exec(entrypoint);
 
@@ -178,7 +178,7 @@ int32_t read (int32_t fd, void * buf, int32_t nbytes) {
     if(func_ptr == NULL)
         return -1;
     else
-        return func_ptr(fd, (void *) buf, nbytes);
+        return func_ptr(fd, buf, nbytes);
 }
 
 int32_t write (int32_t fd, const void * buf, int32_t nbytes) {
@@ -187,7 +187,8 @@ int32_t write (int32_t fd, const void * buf, int32_t nbytes) {
     if(func_ptr == NULL)
         return -1;
     else
-        return func_ptr(fd, (void *) buf, nbytes);
+        return func_ptr(fd, buf, nbytes);
+    
 }
 
 int32_t open (const uint8_t * filename) {
@@ -252,11 +253,11 @@ int32_t getargs (uint8_t * buf, int32_t nbytes) {
 }
 
 int32_t vidmap (uint8_t ** screen_start) {
-    if((uint32_t) screen_start < VID_MEM_START || (uint32_t) screen_start > VID_MEM_END) {
+    if(screen_start < VID_MEM_START || screen_start > VID_MEM_END) {
         return -1;
     }
 
-    *screen_start = (uint8_t *) VIDEO;
+    *screen_start = VIDEO;
     return 0;
 }
 

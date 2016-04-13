@@ -4,27 +4,42 @@
 .global jmp_usr_exec
 
 jmp_usr_exec:
+    # clear interrupts
     cli
+
+    # clear some registers for use
     xorl %ebx, %ebx
     xorl %edi, %edi
     xorl %esi, %esi
 
+    # get the address of the entrypoint and store it into ebx
     movl 4(%esp), %ebx
+
+    # move the segments into registers for use
     movl $USER_DS, %edi
     movl $USER_CS, %esi
 
+    # move the selector to the appropriate registers
     movw %di, %ds
     movw %di, %es
     movw %di, %fs
     movw %di, %gs
 
+    # push the data segment selector
     pushl %edi
 
-    pushl $0x83FFFFC #set stack to bottom of 4mb page for this program
+    # set stack to bottom of 4mb page for this program
+    pushl $0x83FFFFC
 
+    # push the flags correctly preparing for iret
     pushfl
+
+    # enable interrupts
     orl $0x200, (%esp)
+
+    # push the remaining parameters for iret
     pushl %esi
     pushl %ebx
 
+    # iret to the correct context
     iret
