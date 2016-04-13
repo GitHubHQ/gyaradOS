@@ -106,10 +106,11 @@ int32_t terminal_close (int32_t fd) {
 int32_t terminal_read (int32_t fd, uint8_t * buf, int32_t nbytes) {
     int bytes_read = 0;
     int i = 0;
+
     sti();
     while(!read_buf_ready);
 
-    for(i = 0; i < 128; i++) {
+    for(i = 0; i <= MAX_CHARS_IN_BUF; i++) {
         buf[i] = keyboard_buf[i];
         keyboard_buf[i] = NULL;
         bytes_read++;
@@ -128,7 +129,9 @@ int32_t terminal_write (int32_t fd, const uint8_t * buf, int32_t nbytes) {
     int i = 0;
 
     for(i = 0; i < nbytes; i++) {
-        if(add_char_to_buffer(buf[i])) {
+        if(buf[i] == '\n') {
+            new_line();
+        } else if(add_char_to_buffer(buf[i])) {
             num_printed++;
         }
     }
@@ -156,6 +159,7 @@ uint32_t add_char_to_buffer(uint8_t new_char) {
     if(num_chars_in_buf < MAX_CHARS_IN_BUF) {
         keyboard_buf[num_chars_in_buf] = new_char;
         num_chars_in_buf++;
+        
         putc(new_char);
         return 1;
     }
@@ -166,7 +170,9 @@ uint32_t add_char_to_buffer(uint8_t new_char) {
 void handle_enter() {
     int i = 0;
 
-    keyboard_buf[num_chars_in_buf] = ASCII_NEW_LINE;
+    for(i = num_chars_in_buf; i <= MAX_CHARS_IN_BUF; i++) {
+        keyboard_buf[i] = ASCII_NULL_CHAR;
+    }
 
     uint8_t buf[MAX_CHARS_IN_BUF + 1];
     int32_t nbytes = MAX_CHARS_IN_BUF + 1;

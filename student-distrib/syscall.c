@@ -1,8 +1,10 @@
 #include "syscall.h"
 
+pcb_t * curr_proc = NULL;
+pcb_t * prev_proc = NULL;
+
 uint32_t curr_proc_id_mask = 0;
 uint32_t curr_proc_id = 0;
-pcb_t* curr_proc = NULL;
 
 uint32_t* stdin_ops_table[4] = {NULL, (uint32_t *) terminal_read, NULL, NULL};
 uint32_t* stdout_ops_table[4] = {NULL, NULL, (uint32_t *) terminal_write, NULL};
@@ -13,16 +15,58 @@ uint32_t* files_ops_table[4] = {(uint32_t *) fs_open, (uint32_t *) fs_read, (uin
 uint32_t files_in_use = 2;
 
 int32_t halt (uint8_t status) {
-    while(1);
+    pcb_t * proc_ctrl_blk = curr_proc;
 
-    // get previous pcb
-    pcb_t * proc_ctrl_blk;
-
-    // set process number to free
+    // get the process number to free
     uint32_t free_proc_num = proc_ctrl_blk->proc_num;
+    if(free_proc_num == 0) {
+        // restart this process since its the first process
+        // we can hardcode this to shell since that is the first process every time
+        uint8_t f_init_data[32];
+        uint32_t entrypoint = 0;
+
+        // Grab the first 32 bytes of the file to see if it is runnable
+        // and find where it starts
+        if(fs_read(((int32_t) "shell"), &f_init_data, 32) == -1) {
+            return -1;
+        }
+
+        // Grab the entry point of the application
+        entrypoint += (uint32_t)f_init_data[27] << 24;
+        entrypoint += (uint32_t)f_init_data[26] << 16;
+        entrypoint += (uint32_t)f_init_data[25] << 8;
+        entrypoint += (uint32_t)f_init_data[24];
+
+        // jump back to the beginning of the executable
+        jmp_usr_exec(entrypoint);
+    }
+
+    // set the process to free in the process buffer
     curr_proc_id_mask &= ~(1 << free_proc_num);
 
-    jmp_kern_halt();
+    // Close STDIN
+    proc_ctrl_blk->fds[0].operations_pointer = NULL;
+    proc_ctrl_blk->fds[0].flags = NOT_USE;
+
+    // Close STDOUT
+    proc_ctrl_blk->fds[1].operations_pointer = NULL;
+    proc_ctrl_blk->fds[1].inode = NULL;
+    proc_ctrl_blk->fds[1].flags = NOT_USE;
+
+    // reset the page entries
+    switch_pd(prev_proc->proc_num, prev_proc->base);
+    tss.esp0 = _8MB - (_8KB) * prev_proc->proc_num - 4;
+
+    // stack switch
+    asm volatile("movl %0, %%esp"::"g"(proc_ctrl_blk->p_ksp));
+    asm volatile("movl %0, %%ebp"::"g"(proc_ctrl_blk->p_kbp));
+
+    // swap the pcbs correctly
+    curr_proc = prev_proc;
+    prev_proc = prev_proc->prev;
+
+    asm volatile("jmp HELLO");
+
     return 0;
 }
 
@@ -78,7 +122,7 @@ int32_t execute (const uint8_t * command) {
     }
 
     // Create a page directory for the program
-    init_new_process(curr_proc_id);
+    uint32_t base = init_new_process(curr_proc_id);
 
     // Copy the program to the page directory
     copy_file_to_addr(f_name, PROGRAM_EXEC_ADDR);
@@ -87,15 +131,14 @@ int32_t execute (const uint8_t * command) {
     pcb_t * proc_ctrl_blk = (pcb_t*) (_8MB - (_8KB)*(curr_proc_id + 1));
 
     // Grab and store the ESP and EBP in the PCB
-    uint32_t esp;
-    uint32_t ebp;
-    asm volatile("movl %%esp, %0":"=g"(esp));
-    asm volatile("movl %%ebp, %0":"=g"(ebp));
-    proc_ctrl_blk->p_ksp = esp;
-    proc_ctrl_blk->p_ksp = ebp;
+    asm volatile("movl %%esp, %0":"=g"(proc_ctrl_blk->p_ksp));
+    asm volatile("movl %%ebp, %0":"=g"(proc_ctrl_blk->p_kbp));
 
     // Store Proc ID
     proc_ctrl_blk->proc_num = curr_proc_id;
+
+    // store Prev address
+    proc_ctrl_blk->base = base;
 
     // Initalize PCB file descriptors
     for (i = 0; i < 8; ++i) {
@@ -117,8 +160,14 @@ int32_t execute (const uint8_t * command) {
     proc_ctrl_blk->fds[1].inode = NULL;
     proc_ctrl_blk->fds[1].flags = IN_USE;
 
+    prev_proc = curr_proc;
     curr_proc = proc_ctrl_blk;
+
+    curr_proc->prev = prev_proc;
+
     jmp_usr_exec(entrypoint);
+
+    asm volatile("HELLO:");
 
     return 0;
 }
@@ -204,7 +253,12 @@ int32_t getargs (uint8_t * buf, int32_t nbytes) {
 }
 
 int32_t vidmap (uint8_t ** screen_start) {
-    return -1;
+    if(screen_start < VID_MEM_START || screen_start > VID_MEM_END) {
+        return -1;
+    }
+
+    *screen_start = VIDEO;
+    return 0;
 }
 
 int32_t set_handler (int32_t signum, void * handler_address) {

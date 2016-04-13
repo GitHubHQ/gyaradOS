@@ -3,17 +3,6 @@
  */
 
 #include "lib.h"
-#define VIDEO 0xB8000
-#define NUM_COLS 80
-#define NUM_ROWS 25
-#define ATTRIB 0x04
-
-/* The VGA cursor ports/commands */
-#define FB_POSITION_MASK        0xFF
-#define FB_COMMAND_PORT         0x3D4
-#define FB_DATA_PORT            0x3D5
-#define FB_HIGH_BYTE_COMMAND    14
-#define FB_LOW_BYTE_COMMAND     15
 
 static int screen_x;
 static int screen_y;
@@ -198,7 +187,7 @@ int32_t puts(int8_t* s) {
 *	Function: Output a character to the console 
 */
 
-void putc(uint8_t c) {
+void putc(uint8_t c) {        
     if(c == '\n' || c == '\r') {
         screen_y++;
         screen_x=0;

@@ -7,7 +7,7 @@ dentry_t * dentries;
 inode_t * inodes;
 uint32_t data_blocks;
 uint32_t dirReads;
-file_t files_opened[MAX_FILES];
+//file_t files_opened[MAX_FILES];
 
 /**
  * Initializing the Boot block by getting the data from address
@@ -24,12 +24,12 @@ void fs_init(uint32_t addrs) {
     dirReads = 0;
 
     int i;
-    for(i = 0; i < MAX_FILES; i++) {
-        files_opened[i].read_location = 0;
-        files_opened[i].opened = 0;
-        if(i == 0 || i == 1)
-            files_opened[i].opened = 1;
-    }
+    // for(i = 0; i < MAX_FILES; i++) {
+    //     files_opened[i].read_location = 0;
+    //     files_opened[i].opened = 0;
+    //     if(i == 0 || i == 1)
+    //         files_opened[i].opened = 1;
+    // }
 }
 
 /* fs_read(int8_t* fd, uint8_t * buf, int32_t nbytes)
@@ -44,17 +44,18 @@ int32_t fs_read(int32_t fd, uint8_t * buf, int32_t nbytes) {
         return -1;
     }
 
-    int i;
-    for(i = 0; i < MAX_FILES; i++) {
-        if(strncmp(files_opened[i].file_name, fd, 32) == 0) {
+    // int i;
+    // for(i = 0; i < MAX_FILES; i++) {
+    //     if(strncmp(files_opened[i].file_name, fd, 32) == 0) {
 
-            int bytesRead = read_data(temp.inode_num, files_opened[i].read_location, buf, nbytes);
+    //         int bytesRead = read_data(temp.inode_num, files_opened[i].read_location, buf, nbytes);
+    int bytesRead = read_data(temp.inode_num, 0, buf, nbytes);
 
-            if(bytesRead != -1) {
-                files_opened[i].read_location += bytesRead;
-            }
-        }
-    }
+    //         if(bytesRead != -1) {
+    //             files_opened[i].read_location += bytesRead;
+    //         }
+    //     }
+    // }
     return bytesRead;
 }
 
@@ -225,7 +226,7 @@ void test_fs() {
     // uint8_t buf[10];
     // fs_read(fname, buf, 10);
     // int i = 0;
-    // while(0 !=  fs_read(fname, buf, 10))
+    // while(0 != fs_read(fname, buf, 10))
     // {
     //     for(i = 0 ; i < 10; i++){
     //         printf("%x", buf[i]);
@@ -234,20 +235,20 @@ void test_fs() {
     // }
 
     //reading a txt file
-    char * fname = "frame1.txt";
-    printf("Reading frame1.txt... \n");
-        dentry_t temp;
-    read_dentry_by_name((uint8_t*)fname, &temp);
-    printf("Size of flie: %d\n", inodes[temp.inode_num].file_size);
-    int i;
-    uint8_t buf[10];
-    while(0 !=  fs_read(fname, buf, 10))
-    {
-        for(i = 0 ; i < 10; i++){
-            printf("%c", buf[i]);
-        }
-        //printf("\n");
-    }
+    // char * fname = "frame1.txt";
+    // printf("Reading frame1.txt... \n");
+    //     dentry_t temp;
+    // read_dentry_by_name((uint8_t*)fname, &temp);
+    // printf("Size of flie: %d\n", inodes[temp.inode_num].file_size);
+    // int i;
+    // uint8_t buf[10];
+    // while(0 !=  fs_read(fname, buf, 10))
+    // {
+    //     for(i = 0 ; i < 10; i++){
+    //         printf("%c", buf[i]);
+    //     }
+    //     //printf("\n");
+    // }
 
     // reading a large file
     // char * fname = "verylargetxtwithverylongname.txt";
