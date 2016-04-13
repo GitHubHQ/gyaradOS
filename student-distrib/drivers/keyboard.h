@@ -1,8 +1,9 @@
 #ifndef _KEYBOARD_H
 #define _KEYBOARD_H
 
-#include "../libs/lib.h"
 #include "i8259.h"
+#include "../libs/lib.h"
+#include "../syscall.h"
 
 // Keyboard port
 #define KEYBOARD_D_PORT          0x60

@@ -107,7 +107,6 @@ int32_t terminal_read (int32_t fd, uint8_t * buf, int32_t nbytes) {
     int bytes_read = 0;
     int i = 0;
 
-    sti();
     while(!read_buf_ready);
 
     for(i = 0; i <= MAX_CHARS_IN_BUF; i++) {
@@ -273,6 +272,9 @@ void handle_keypress() {
                         if(TERM_TEST_WRITE) {
                             test_write();
                         }  
+                        break;
+                    case KEY_MAKE_C:
+                        halt(0);
                         break;
                     default:
                         break;
