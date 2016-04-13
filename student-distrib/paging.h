@@ -12,7 +12,7 @@
 #define VIDEO_PHYS_ADDR         0XB8000
 #define KERNEL_PHYS_ADDR        0x400000
 #define KERNEL_END_ADDR        0x800000
-#define PROCESS_START_ADDR      0x08048000
+#define PROCESS_START_ADDR      0x08000000
 
 #define _4KB                    0x1000
 #define MAX_PROCESSES           10
@@ -54,5 +54,8 @@ PTE_t pageTable1[PAGE_TABLE_SIZE] __attribute__((aligned(PAGE_SIZE)));
 
 void init_paging();
 int init_new_process(uint32_t process_num);
+void enable_global_pages();
+void enable_4mb_pages();
+void enable_paging_registers();
 
 #endif

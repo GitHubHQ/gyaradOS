@@ -57,7 +57,7 @@ void init_paging() {
         asm volatile (
                         "mov %%eax, %%cr3 				\n" //moving the address of PD to cr3
                         "mov %%cr4, %%eax 				\n"
-                        "or  $0x00000010, %%eax 		\n" //setting PSE in cr4 for 4MB pages
+                        "or  $0x00000090, %%eax 		\n" //setting PSE in cr4 for 4MB pages
                         "mov %%eax, %%cr4				\n"
                         "mov %%cr0, %%eax				\n" //enabling the PG flag in CR0
                         "or  $0x80000000, %%eax			\n"
@@ -84,10 +84,45 @@ int init_new_process(uint32_t process_num){
         
         //write to cr3
         asm volatile (
-                        //moving the address of PD to cr3
-                        "mov %%eax, %%cr3               \n" 
+                        "mov %%eax, %%cr3               \n" //moving the address of PD to cr3
+                        "mov %%cr4, %%eax               \n"
+                        "or  $0x00000090, %%eax         \n" //setting PSE in cr4 for 4MB pages
+                        "mov %%eax, %%cr4               \n"
+                        "mov %%cr0, %%eax               \n" //enabling the PG flag in CR0
+                        "or  $0x80000000, %%eax         \n"
+                        "mov %%eax, %%cr0"              
                         : /* no outputs */          
                         : "a" (pageDirectory)           
-                     );                     
+                     );                   
         return 0;
+}
+
+void enable_global_pages() {
+    asm volatile(   "movl %%cr4, %%eax      \n"
+                    "orl $0x00000080, %%eax \n"
+                    "movl %%eax, %%cr4"
+                    :
+                    :
+                    :"eax", "memory"
+                );
+}
+
+void enable_4mb_pages() {
+    asm volatile(   "movl %%cr4, %%eax      \n"
+                    "orl $0x00000010, %%eax \n"
+                    "movl %%eax, %%cr4"
+                    :
+                    :
+                    :"eax", "memory"
+                );
+}
+
+void enable_paging_registers() {
+    asm volatile(   "movl %%cr0, %%eax      \n"
+                    "orl $0x80000000, %%eax \n"
+                    "movl %%eax, %%cr0"
+                    :
+                    :
+                    :"eax", "memory"
+                );
 }

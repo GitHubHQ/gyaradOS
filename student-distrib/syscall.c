@@ -54,7 +54,7 @@ int32_t execute (const uint8_t * command) {
         printf("%s\n", "Non-Runnable file!");
         return -1;
     }
-
+    
     // Grab the entry point of the application
     entrypoint += (uint32_t)f_init_data[27] << 24;
     entrypoint += (uint32_t)f_init_data[26] << 16;
@@ -190,8 +190,9 @@ int32_t close (int32_t fd) {
     if(fd >= 2 && fd <= 7) {
         curr_proc->fds[fd].flags = NOT_USE;
         files_in_use--;
-        int32_t (*func_ptr)(void);
+        int32_t (*func_ptr)(int32_t fd);
         func_ptr = curr_proc->fds[fd].operations_pointer[CLOSE];
+        func_ptr(fd);
         return 0;
     }
 
