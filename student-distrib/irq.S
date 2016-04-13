@@ -643,6 +643,8 @@ syscall_irq:
     pushl %ecx
     pushl %ebx
 
+    sti
+
     // call the correct syscall
     call *syscall_jumptable(,%eax,4)
 

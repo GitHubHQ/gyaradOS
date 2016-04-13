@@ -188,7 +188,6 @@ int32_t write (int32_t fd, const void * buf, int32_t nbytes) {
         return -1;
     else
         return func_ptr(fd, buf, nbytes);
-    
 }
 
 int32_t open (const uint8_t * filename) {
@@ -252,11 +251,11 @@ int32_t getargs (uint8_t * buf, int32_t nbytes) {
 }
 
 int32_t vidmap (uint8_t ** screen_start) {
-    if(screen_start < VID_MEM_START || screen_start > VID_MEM_END) {
+    if((uint32_t) screen_start < VID_MEM_START || (uint32_t) screen_start > VID_MEM_END) {
         return -1;
     }
 
-    *screen_start = VIDEO;
+    *screen_start = (uint8_t *) VIDEO;
     return 0;
 }
 
