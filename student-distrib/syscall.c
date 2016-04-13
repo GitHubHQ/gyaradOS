@@ -6,11 +6,18 @@ pcb_t * prev_proc = NULL;
 uint32_t curr_proc_id_mask = 0;
 uint32_t curr_proc_id = 0;
 
-uint32_t * stdin_ops_table[4] = {NULL, (uint32_t *) terminal_read, NULL, NULL};
-uint32_t * stdout_ops_table[4] = {NULL, NULL, (uint32_t *) terminal_write, NULL};
-uint32_t * rtc_ops_table[4] = {(uint32_t *) rtc_open, (uint32_t *) rtc_read, (uint32_t *) rtc_write, (uint32_t *) rtc_close};
-uint32_t * dir_ops_table[4] = {(uint32_t *) dir_open, (uint32_t *) dir_read, (uint32_t *) dir_write, (uint32_t *) dir_close};
-uint32_t * files_ops_table[4] = {(uint32_t *) fs_open, (uint32_t *) fs_read, (uint32_t *) fs_write, (uint32_t *) fs_close};
+// uint32_t * stdin_ops_table[4] = {NULL, (uint32_t *) terminal_read, NULL, NULL};
+// uint32_t * stdout_ops_table[4] = {NULL, NULL, (uint32_t *) terminal_write, NULL};
+// uint32_t * rtc_ops_table[4] = {(uint32_t *) rtc_open, (uint32_t *) rtc_read, (uint32_t *) rtc_write, (uint32_t *) rtc_close};
+// uint32_t * dir_ops_table[4] = {(uint32_t *) dir_open, (uint32_t *) dir_read, (uint32_t *) dir_write, (uint32_t *) dir_close};
+// uint32_t * files_ops_table[4] = {(uint32_t *) fs_open, (uint32_t *) fs_read, (uint32_t *) fs_write, (uint32_t *) fs_close};
+
+func_ptr stdin_ops_table[4] = {NULL, terminal_read, NULL, NULL};
+func_ptr stdout_ops_table[4] = {NULL, NULL, terminal_write, NULL};
+func_ptr rtc_ops_table[4] = { rtc_open,  rtc_read,  rtc_write,  rtc_close};
+func_ptr dir_ops_table[4] = { dir_open,  dir_read,  dir_write,  dir_close};
+func_ptr files_ops_table[4] = { fs_open,  fs_read,  fs_write,  fs_close};
+
 
 uint32_t files_in_use = 2;
 
@@ -152,11 +159,11 @@ int32_t execute (const uint8_t * command) {
     tss.esp0 = _8MB - (_8KB) * curr_proc_id - 4;
 
     // Open STDIN
-    proc_ctrl_blk->fds[0].operations_pointer = (uint32_t *) stdin_ops_table;
+    proc_ctrl_blk->fds[0].operations_pointer = stdin_ops_table;
     proc_ctrl_blk->fds[0].flags = IN_USE;
 
     // Open STDOUT
-    proc_ctrl_blk->fds[1].operations_pointer = (uint32_t *) stdout_ops_table;
+    proc_ctrl_blk->fds[1].operations_pointer = stdout_ops_table;
     proc_ctrl_blk->fds[1].inode = NULL;
     proc_ctrl_blk->fds[1].flags = IN_USE;
 
@@ -173,21 +180,21 @@ int32_t execute (const uint8_t * command) {
 }
 
 int32_t read (int32_t fd, void * buf, int32_t nbytes) {
-    int32_t (*func_ptr)(int32_t fd, void * buf, int32_t nbytes);
-    func_ptr = curr_proc->fds[fd].operations_pointer[READ];
-    if(func_ptr == NULL)
-        return -1;
-    else
-        return func_ptr(fd, (void *) buf, nbytes);
+    //int32_t (*func_ptr)(int32_t fd, void * buf, int32_t nbytes);
+    return curr_proc->fds[fd].operations_pointer[READ](fd, buf, nbytes);
+    // if(func_ptr == NULL)
+    //     return -1;
+    // else
+    //     return func_ptr(fd, (void *) buf, nbytes);
 }
 
 int32_t write (int32_t fd, const void * buf, int32_t nbytes) {
-    int32_t (*func_ptr)(int32_t fd, void * buf, int32_t nbytes);
-    func_ptr = curr_proc->fds[fd].operations_pointer[WRITE];
-    if(func_ptr == NULL)
-        return -1;
-    else
-        return func_ptr(fd, (void *) buf, nbytes);
+    //int32_t (*func_ptr)(int32_t fd, void * buf, int32_t nbytes);
+    return curr_proc->fds[fd].operations_pointer[WRITE](fd, buf, nbytes);
+    // if(func_ptr == NULL)
+    //     return -1;
+    // else
+    //     return func_ptr(fd, (void *) buf, nbytes);
 }
 
 int32_t open (const uint8_t * filename) {
@@ -205,19 +212,19 @@ int32_t open (const uint8_t * filename) {
         if(curr_proc->fds[i].flags == NOT_USE) {
             switch(file_info.file_type) {
                 case 0:
-                    curr_proc->fds[i].operations_pointer = (uint32_t *) rtc_ops_table;
+                    curr_proc->fds[i].operations_pointer = rtc_ops_table;
                     curr_proc->fds[i].inode = NULL;
                     curr_proc->fds[i].file_position = 0;
                     rtc_open();
                     break;
                 case 1:
-                    curr_proc->fds[i].operations_pointer = (uint32_t *) dir_ops_table;
+                    curr_proc->fds[i].operations_pointer = dir_ops_table;
                     curr_proc->fds[i].inode = NULL;
                     curr_proc->fds[i].file_position = 0;
                     dir_open(filename);
                     break;
                 case 2:
-                    curr_proc->fds[i].operations_pointer = (uint32_t *) files_ops_table;
+                    curr_proc->fds[i].operations_pointer = files_ops_table;
                     curr_proc->fds[i].inode = get_inode(file_info.inode_num);
                     curr_proc->fds[i].file_position = 0;
                     fs_open(filename);
@@ -238,8 +245,8 @@ int32_t close (int32_t fd) {
     if(fd >= 2 && fd <= 7) {
         curr_proc->fds[fd].flags = NOT_USE;
         files_in_use--;
-        int32_t (*func_ptr)(void);
-        func_ptr = curr_proc->fds[fd].operations_pointer[CLOSE];
+        //func_ptr = curr_proc->fds[fd].operations_pointer[CLOSE](fd);
+        curr_proc->fds[fd].operations_pointer[CLOSE](fd);
         return 0;
     }
 

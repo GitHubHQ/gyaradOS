@@ -46,8 +46,11 @@
 #define VID_MEM_START 0x08000000
 #define VID_MEM_END   0x08400000
 
+typedef int32_t (*func_ptr)();
+
+
 typedef struct {
-    uint32_t * operations_pointer;
+    func_ptr * operations_pointer;
     inode_t * inode;
     uint32_t file_position;
     uint32_t flags;
