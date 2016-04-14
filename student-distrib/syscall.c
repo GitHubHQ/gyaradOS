@@ -6,12 +6,6 @@ pcb_t * prev_proc = NULL;
 uint32_t curr_proc_id_mask = 0;
 uint32_t curr_proc_id = 0;
 
-// uint32_t * stdin_ops_table[4] = {NULL, (uint32_t *) terminal_read, NULL, NULL};
-// uint32_t * stdout_ops_table[4] = {NULL, NULL, (uint32_t *) terminal_write, NULL};
-// uint32_t * rtc_ops_table[4] = {(uint32_t *) rtc_open, (uint32_t *) rtc_read, (uint32_t *) rtc_write, (uint32_t *) rtc_close};
-// uint32_t * dir_ops_table[4] = {(uint32_t *) dir_open, (uint32_t *) dir_read, (uint32_t *) dir_write, (uint32_t *) dir_close};
-// uint32_t * files_ops_table[4] = {(uint32_t *) fs_open, (uint32_t *) fs_read, (uint32_t *) fs_write, (uint32_t *) fs_close};
-
 func_ptr stdin_ops_table[4] = {NULL, terminal_read, NULL, NULL};
 func_ptr stdout_ops_table[4] = {NULL, NULL, terminal_write, NULL};
 func_ptr rtc_ops_table[4] = { rtc_open,  rtc_read,  rtc_write,  rtc_close};
@@ -72,7 +66,7 @@ int32_t halt (uint8_t status) {
     curr_proc = prev_proc;
     prev_proc = (pcb_t *) prev_proc->prev;
 
-    asm volatile("jmp HELLO");
+    asm volatile("jmp EXECUTE_EXIT");
 
     return 0;
 }
@@ -174,27 +168,17 @@ int32_t execute (const uint8_t * command) {
 
     jmp_usr_exec(entrypoint);
 
-    asm volatile("HELLO:");
+    asm volatile("EXECUTE_EXIT:");
 
     return 0;
 }
 
 int32_t read (int32_t fd, void * buf, int32_t nbytes) {
-    //int32_t (*func_ptr)(int32_t fd, void * buf, int32_t nbytes);
     return curr_proc->fds[fd].operations_pointer[READ](fd, buf, nbytes);
-    // if(func_ptr == NULL)
-    //     return -1;
-    // else
-    //     return func_ptr(fd, (void *) buf, nbytes);
 }
 
 int32_t write (int32_t fd, const void * buf, int32_t nbytes) {
-    //int32_t (*func_ptr)(int32_t fd, void * buf, int32_t nbytes);
     return curr_proc->fds[fd].operations_pointer[WRITE](fd, buf, nbytes);
-    // if(func_ptr == NULL)
-    //     return -1;
-    // else
-    //     return func_ptr(fd, (void *) buf, nbytes);
 }
 
 int32_t open (const uint8_t * filename) {
