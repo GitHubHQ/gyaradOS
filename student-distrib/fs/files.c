@@ -82,11 +82,13 @@ int32_t read_dentry_by_name (const uint8_t* fname, dentry_t* dentry) {
 
     //loop through dir entries until file name is found
     for(i = 0; i < b.n_dentries; i++) {
-        if(0 == strncmp((int8_t *) dentries[i].file_name, (int8_t *) fname, readBytes)) {
-            strncpy((int8_t *) dentry->file_name, (int8_t *) dentries[i].file_name, readBytes);
-            dentry->file_type = dentries[i].file_type;
-            dentry->inode_num = dentries[i].inode_num;
-            return 0;
+        if(strlen((int8_t *) fname) == strlen((int8_t *) dentries[i].file_name)) {
+            if(0 == strncmp((int8_t *) dentries[i].file_name, (int8_t *) fname, readBytes)) {
+                strncpy((int8_t *) dentry->file_name, (int8_t *) dentries[i].file_name, readBytes);
+                dentry->file_type = dentries[i].file_type;
+                dentry->inode_num = dentries[i].inode_num;
+                return 0;
+            }
         }
     }
 

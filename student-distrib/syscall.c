@@ -245,7 +245,6 @@ int32_t close (int32_t fd) {
     if(fd >= 2 && fd <= 7) {
         curr_proc->fds[fd].flags = NOT_USE;
         files_in_use--;
-        //func_ptr = curr_proc->fds[fd].operations_pointer[CLOSE](fd);
         curr_proc->fds[fd].operations_pointer[CLOSE](fd);
         return 0;
     }
