@@ -46,26 +46,6 @@
 #define VID_MEM_START 0x08000000
 #define VID_MEM_END   0x08400000
 
-typedef int32_t (*func_ptr)();
-
-
-typedef struct {
-    func_ptr * operations_pointer;
-    inode_t * inode;
-    uint32_t file_position;
-    uint32_t flags;
-} file_array;
-
-typedef struct {
-    file_array fds[8];
-    uint8_t file_names[8][32];
-    uint8_t proc_num;
-    uint32_t base;
-    uint32_t p_ksp;
-    uint32_t p_kbp;
-    struct pcb_t * prev;
-} pcb_t;
-
 extern int32_t halt (uint8_t status);
 extern int32_t execute (const uint8_t * command);
 extern int32_t read (int32_t fd, void * buf, int32_t nbytes);

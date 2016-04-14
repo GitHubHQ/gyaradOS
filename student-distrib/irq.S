@@ -612,7 +612,7 @@ general_irq:
     iret
 
 syscall_jumptable:
-    .long 0x00
+    .long divide_by_zero_except
     .long halt
     .long execute
     .long read

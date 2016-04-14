@@ -37,19 +37,14 @@ void fs_init(uint32_t addrs) {
  * nbytes
  * ouputs: return number of bytes read into the buffer for output
  */
-int32_t fs_read(int32_t fd, uint8_t * buf, int32_t nbytes) {
+int32_t fs_read(file_array* fd, uint8_t * buf, int32_t nbytes) {
     dentry_t temp;
 
-    if(0 != read_dentry_by_name((uint8_t*)fd, &temp)) {
+    if(0 != read_dentry_by_name((uint8_t*)(fd->file_name), &temp)) {
         return -1;
     }
 
-    // int i;
-    // for(i = 0; i < MAX_FILES; i++) {
-    //     if(strncmp(files_opened[i].file_name, fd, 32) == 0) {
-
-    //         int bytesRead = read_data(temp.inode_num, files_opened[i].read_location, buf, nbytes);
-    int bytesRead = read_data(temp.inode_num, 0, buf, nbytes);
+    int bytesRead = read_data(temp.inode_num, fd->file_position, buf, nbytes);
 
     //         if(bytesRead != -1) {
     //             files_opened[i].read_location += bytesRead;
@@ -112,11 +107,13 @@ int32_t read_dentry_by_name (const uint8_t* fname, dentry_t* dentry) {
 
     //loop through dir entries until file name is found
     for(i = 0; i < b.n_dentries; i++) {
-        if(0 == strncmp((int8_t *) dentries[i].file_name, (int8_t *) fname, readBytes)) {
-            strncpy((int8_t *) dentry->file_name, (int8_t *) dentries[i].file_name, readBytes);
-            dentry->file_type = dentries[i].file_type;
-            dentry->inode_num = dentries[i].inode_num;
-            return 0;
+        if(strlen((int8_t *) fname) == strlen((int8_t *) dentries[i].file_name)) {
+            if(0 == strncmp((int8_t *) dentries[i].file_name, (int8_t *) fname, readBytes)) {
+                strncpy((int8_t *) dentry->file_name, (int8_t *) dentries[i].file_name, readBytes);
+                dentry->file_type = dentries[i].file_type;
+                dentry->inode_num = dentries[i].inode_num;
+                return 0;
+            }
         }
     }
 
