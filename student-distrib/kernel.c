@@ -3,6 +3,7 @@
  */
 
 #include "drivers/i8259.h"
+#include "drivers/pit.h"
 #include "drivers/rtc.h"
 #include "drivers/speaker.h"
 #include "libs/lib.h"
@@ -164,20 +165,28 @@ void entry (unsigned long magic, unsigned long addr) {
 
 	/* Initialize devices, memory, filesystem, enable device interrupts on the
 	 * PIC, any other initialization stuff... */
-	printf("Enabling keyboard interrupts  ... ");
-	enable_irq(IRQ_KEYBOARD_CTRL);
-	printf("[ OK ]\n");
-
 	printf("Initalizing RTC               ... ");
 	rtc_init(RTC_SILENT);
+	printf("[ OK ]\n");
+
+	printf("Initalizing PIT               ... ");
+	pit_init();
 	printf("[ OK ]\n");
 
 	printf("Enabling Slave PIC interrupts ... ");
 	enable_irq(IRQ_CAS_SIG);
 	printf("[ OK ]\n");
 
+	printf("Enabling keyboard interrupts  ... ");
+	enable_irq(IRQ_KEYBOARD_CTRL);
+	printf("[ OK ]\n");
+
 	printf("Enabling RTC interrupts       ... ");
 	enable_irq(IRQ_RTC);
+	printf("[ OK ]\n");
+
+	printf("Enabling PIT interrupts  ... ");
+	enable_irq(IRQ_PIT);
 	printf("[ OK ]\n");
 
 	/* Display the splash screen */

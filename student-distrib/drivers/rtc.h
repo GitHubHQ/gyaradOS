@@ -26,7 +26,6 @@
 /* Other constants */
 #define RTC_DEFAULT_HZ   2
 
-
 /* External functions */
 void rtc_init(int mode);
 void rtc_handle_interrupt(void);

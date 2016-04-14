@@ -266,14 +266,12 @@ void handle_keypress() {
                         if(TERM_TEST_OPEN) {
                             test_open();
                         }
-
                         if(TERM_TEST_CLOSE) {
                             test_close();
-                        }  
-
+                        }
                         if(TERM_TEST_WRITE) {
                             test_write();
-                        }  
+                        }
                         break;
                     default:
                         break;

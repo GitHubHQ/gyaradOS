@@ -489,7 +489,9 @@ void init_idt() {
         idt[i].reserved1 = 1;
         idt[i].reserved0 = 0;
 
-        if(i == KEYBOARD_IDT) {
+        if(i == PIT_IDT) {
+            SET_IDT_ENTRY(idt[PIT_IDT], pit_irq);
+        } else if(i == KEYBOARD_IDT) {
             SET_IDT_ENTRY(idt[KEYBOARD_IDT], key_irq);
         } else if(i == RTC_IDT) {
             SET_IDT_ENTRY(idt[RTC_IDT], rtc_irq);

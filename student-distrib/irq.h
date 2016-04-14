@@ -67,6 +67,9 @@ extern void machine_chk_irq();
  * Interrupts
  */
 
+// handler for pit interrupts
+extern void pit_irq();
+
 // handler for keyboard interrupts
 extern void key_irq();
 
