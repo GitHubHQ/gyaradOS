@@ -89,7 +89,6 @@ int32_t execute (const uint8_t * command) {
     uint8_t space_flag = 0;
     uint8_t cmd_len;
     uint8_t temp_arg[64];
-    printf("%s\n", command);
     for( i = 0; command[i] != '\0' ; i++ ) {
         if( command[i] == ' ' && space_flag == 0 ) {
             space_flag = 1;
@@ -111,7 +110,10 @@ int32_t execute (const uint8_t * command) {
 
     // Grab the first 32 bytes of the file to see if it is runnable
     // and find where it starts
-    if(fs_read((int32_t)f_name, f_init_data, 32) == -1) {
+    file_array exec_read;
+    strcpy((int8_t*)&(exec_read.file_name),(int8_t*)f_name);
+    exec_read.file_position = 0;
+    if(fs_read(&exec_read, f_init_data, 32) == -1) {
         return -1;
     }
 
@@ -198,8 +200,11 @@ int32_t execute (const uint8_t * command) {
 }
 
 int32_t read (int32_t fd, void * buf, int32_t nbytes) {
-    int32_t b_return = curr_proc->fds[fd].operations_pointer[READ](&(curr_proc->file_names[fd]), buf, nbytes);
-    curr_proc->fds[fd].file_position += b_return;
+    int32_t b_return = curr_proc->fds[fd].operations_pointer[READ](&(curr_proc->fds[fd]), buf, nbytes);
+    printf("FPOS BEFORE: %d\n", curr_proc->fds[fd].file_position);
+    curr_proc->fds[fd].file_position = curr_proc->fds[fd].file_position + b_return;
+    printf("FPOS: %d\n", curr_proc->fds[fd].file_position);
+    printf("BRET %d\n", b_return);
     return b_return;
 }
 
@@ -225,21 +230,21 @@ int32_t open (const uint8_t * filename) {
                     curr_proc->fds[i].operations_pointer = rtc_ops_table;
                     curr_proc->fds[i].inode = NULL;
                     curr_proc->fds[i].file_position = 0;
-                    strcpy((int8_t*)&(curr_proc->file_names[i]),(int8_t*)filename);
+                    strcpy((int8_t*)&(curr_proc->fds[i].file_name),(int8_t*)filename);
                     rtc_open();
                     break;
                 case 1:
                     curr_proc->fds[i].operations_pointer = dir_ops_table;
                     curr_proc->fds[i].inode = NULL;
                     curr_proc->fds[i].file_position = 0;
-                    strcpy((int8_t*)&(curr_proc->file_names[i]),(int8_t*)filename);
+                    strcpy((int8_t*)&(curr_proc->fds[i].file_name),(int8_t*)filename);
                     dir_open(filename);
                     break;
                 case 2:
                     curr_proc->fds[i].operations_pointer = files_ops_table;
                     curr_proc->fds[i].inode = get_inode(file_info.inode_num);
                     curr_proc->fds[i].file_position = 0;
-                    strcpy((int8_t*)&(curr_proc->file_names[i]),(int8_t*)filename);
+                    strcpy((int8_t*)&(curr_proc->fds[i].file_name),(int8_t*)filename);
                     fs_open(filename);
                     break;
             }
@@ -255,6 +260,7 @@ int32_t open (const uint8_t * filename) {
 int32_t close (int32_t fd) {
     if(fd >= 2 && fd <= 7) {
         curr_proc->fds[fd].flags = NOT_USE;
+        curr_proc->fds[fd].file_position = 0;
         files_in_use--;
         curr_proc->fds[fd].operations_pointer[CLOSE](fd);
         return 0;
@@ -264,7 +270,6 @@ int32_t close (int32_t fd) {
 }
 
 int32_t getargs (uint8_t * buf, int32_t nbytes) {
-    printf("%s\n", curr_proc->args);
     strcpy((int8_t*)buf, (const int8_t*)curr_proc->args);
     return 0;
 }

@@ -28,14 +28,14 @@ void fs_init(uint32_t addrs) {
  * nbytes
  * ouputs: return number of bytes read into the buffer for output
  */
-int32_t fs_read(int32_t fd, uint8_t * buf, int32_t nbytes) {
+int32_t fs_read(file_array* fd, uint8_t * buf, int32_t nbytes) {
     dentry_t temp;
 
-    if(0 != read_dentry_by_name((uint8_t*)fd, &temp)) {
+    if(0 != read_dentry_by_name((uint8_t*)(fd->file_name), &temp)) {
         return -1;
     }
 
-    int bytesRead = read_data(temp.inode_num, 0, buf, nbytes);
+    int bytesRead = read_data(temp.inode_num, fd->file_position, buf, nbytes);
 
     return bytesRead;
 }

@@ -9,25 +9,6 @@
 #define BLOCK_SIZE 0x1000
 #define MAX_FILENAME_LENGTH 31
 
-typedef struct {
-	uint32_t file_size;
-	uint32_t blocks[1023];
-} inode_t;
-
-typedef struct {
-	int8_t file_name[32];
-	uint32_t file_type;
-	uint32_t inode_num;
-	uint8_t blocks_reserved[24];
-} dentry_t;
-
-typedef struct {
-	uint32_t n_dentries;
-	uint32_t n_inodes;
-	uint32_t n_data_blocks;
-	uint8_t blocks_reserved[52];
-} boot_block;
-
 /* filesystem read functions */
 int32_t read_dentry_by_name (const uint8_t* fname, dentry_t * dentry);
 int32_t read_dentry_by_index (uint32_t index, dentry_t * dentry);
@@ -40,7 +21,7 @@ inode_t* get_inode(uint32_t inode_num);
 /* filesystem functions */
 void fs_init(uint32_t addrs);
 int32_t fs_write(int32_t fd, const uint8_t * buf, int32_t nbytes);
-int32_t fs_read(int32_t fd, uint8_t * buf, int32_t nbytes);
+int32_t fs_read(file_array* fd, uint8_t * buf, int32_t nbytes);
 int32_t fs_open(const uint8_t* filename);
 int32_t fs_close(void);
 void test_fs();
