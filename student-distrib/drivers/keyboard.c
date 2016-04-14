@@ -82,6 +82,9 @@ int caps_on = 0;
 int shift_l_on = 0;
 int shift_r_on = 0;
 
+int alt_l_on = 0;
+int alt_r_on = 0;
+
 int read_buf_ready = 0;
 
 int32_t terminal_open (const uint8_t * filename) {
@@ -310,6 +313,24 @@ void handle_keypress() {
                 case KEY_MAKE_BKSP:
                     handle_backspace();
                     break;
+                case KEY_MAKE_ALT:
+                    alt_l_on = 1;
+                    break;
+                case KEY_MAKE_F1:
+                    if(alt_l_on || alt_r_on) {
+                        printf("TERMINAL 1");
+                    }
+                    break;
+                case KEY_MAKE_F2:
+                    if(alt_l_on || alt_r_on) {
+                        printf("TERMINAL 2");
+                    }
+                    break;
+                case KEY_MAKE_F3:
+                    if(alt_l_on || alt_r_on) {
+                        printf("TERMINAL 3");
+                    }
+                    break;
                 default:
                     break;
             }
@@ -337,6 +358,12 @@ void handle_keypress() {
                     break;
                 case KEY_MAKE_D_ARROW:
                     break;
+                case KEY_MAKE_ALT:
+                    alt_r_on = 1;
+                    break;
+                case KEY_BREAK_ALT:
+                    alt_r_on = 0;
+                    break;
                 default:
                     // we don't care about the rest of the special keys
                     // missing R ALT
@@ -353,6 +380,9 @@ void handle_keypress() {
                     break;
                 case KEY_BREAK_R_SHIFT:
                     shift_r_on = 0;
+                    break;
+                case KEY_BREAK_ALT:
+                    alt_l_on = 0;
                     break;
                 default:
                     // we don't care about the rest of the breaks

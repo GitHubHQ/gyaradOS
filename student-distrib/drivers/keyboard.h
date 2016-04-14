@@ -74,7 +74,7 @@
 #define KEY_MAKE_FORWARDS_SLASH  0x35
 #define KEY_MAKE_R_SHIFT         0x36
 #define KEY_MAKE_KP_ASTERISK     0x37
-#define KEY_MAKE_L_ALT           0x38
+#define KEY_MAKE_ALT             0x38
 #define KEY_MAKE_SPACE           0x39
 #define KEY_MAKE_CAPS            0x3A
 #define KEY_MAKE_F1              0x3B
@@ -116,7 +116,7 @@
 #define KEY_MAKE_R_CTRL          0x1D
 #define KEY_BREAK_R_CTRL         0x9D
 #define KEY_MAKE_R_ALT           0x38
-#define KEY_BREAK_R_ALT          0xB8
+#define KEY_BREAK_ALT            0xB8
 #define KEY_MAKE_L_ARROW         0x4B
 #define KEY_MAKE_R_ARROW         0x4D
 #define KEY_MAKE_U_ARROW         0x48
