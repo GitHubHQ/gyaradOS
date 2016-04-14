@@ -236,6 +236,8 @@
 // #define KEY_MAKE_NUM             0x45
 // #define KEY_MAKE_SCROLL          0x46
 
+#define NUM_TERMINALS         0x03
+
 int32_t terminal_open (const uint8_t * filename);
 int32_t terminal_close (int32_t fd);
 int32_t terminal_write (int32_t fd, const uint8_t * buf, int32_t nbytes);
