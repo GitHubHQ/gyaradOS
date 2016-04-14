@@ -85,6 +85,27 @@ int32_t execute (const uint8_t * command) {
         return -1;
     }
 
+    // Store the command args
+    uint8_t space_flag = 0;
+    uint8_t cmd_len;
+    uint8_t temp_arg[64];
+    printf("%s\n", command);
+    for( i = 0; command[i] != '\0' ; i++ ) {
+        if( command[i] == ' ' && space_flag == 0 ) {
+            space_flag = 1;
+            cmd_len = i;
+            //fname[i] = '\0';
+        } else if( space_flag == 1 ) {
+            temp_arg[i-cmd_len-1] = command[i];
+        } else {
+            if(i>=32 && space_flag == 0) {
+                return -1;
+            }
+            //fname[i] = command[i];
+        }
+    }
+    temp_arg[i-cmd_len-1] = '\0';
+
     // get the file name to execute
     uint8_t * f_name = strtok(command);
 
@@ -116,7 +137,7 @@ int32_t execute (const uint8_t * command) {
             temp_process_mask = temp_process_mask >> 1;
         }
     }
-    
+
     // Max number of programs reached, error out
     if (i == (MAX_PROG_NUM -1)) {
         return -1;
@@ -140,6 +161,9 @@ int32_t execute (const uint8_t * command) {
 
     // store Prev address
     proc_ctrl_blk->base = base;
+
+    
+    strcpy((int8_t*)proc_ctrl_blk->args, (const int8_t*)temp_arg);
 
     // Initalize PCB file descriptors
     for (i = 0; i < 8; ++i) {
@@ -174,7 +198,9 @@ int32_t execute (const uint8_t * command) {
 }
 
 int32_t read (int32_t fd, void * buf, int32_t nbytes) {
-    return curr_proc->fds[fd].operations_pointer[READ](fd, buf, nbytes);
+    int32_t b_return = curr_proc->fds[fd].operations_pointer[READ](&(curr_proc->file_names[fd]), buf, nbytes);
+    curr_proc->fds[fd].file_position += b_return;
+    return b_return;
 }
 
 int32_t write (int32_t fd, const void * buf, int32_t nbytes) {
@@ -199,18 +225,21 @@ int32_t open (const uint8_t * filename) {
                     curr_proc->fds[i].operations_pointer = rtc_ops_table;
                     curr_proc->fds[i].inode = NULL;
                     curr_proc->fds[i].file_position = 0;
+                    strcpy((int8_t*)&(curr_proc->file_names[i]),(int8_t*)filename);
                     rtc_open();
                     break;
                 case 1:
                     curr_proc->fds[i].operations_pointer = dir_ops_table;
                     curr_proc->fds[i].inode = NULL;
                     curr_proc->fds[i].file_position = 0;
+                    strcpy((int8_t*)&(curr_proc->file_names[i]),(int8_t*)filename);
                     dir_open(filename);
                     break;
                 case 2:
                     curr_proc->fds[i].operations_pointer = files_ops_table;
                     curr_proc->fds[i].inode = get_inode(file_info.inode_num);
                     curr_proc->fds[i].file_position = 0;
+                    strcpy((int8_t*)&(curr_proc->file_names[i]),(int8_t*)filename);
                     fs_open(filename);
                     break;
             }
@@ -220,9 +249,7 @@ int32_t open (const uint8_t * filename) {
             return i;
         }
     }
-
-
-    return -1;
+    return 0;
 }
 
 int32_t close (int32_t fd) {
@@ -237,7 +264,9 @@ int32_t close (int32_t fd) {
 }
 
 int32_t getargs (uint8_t * buf, int32_t nbytes) {
-    return -1;
+    printf("%s\n", curr_proc->args);
+    strcpy((int8_t*)buf, (const int8_t*)curr_proc->args);
+    return 0;
 }
 
 int32_t vidmap (uint8_t ** screen_start) {

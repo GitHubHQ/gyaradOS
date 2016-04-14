@@ -59,6 +59,7 @@ typedef struct {
 typedef struct {
     file_array fds[8];
     uint8_t file_names[8][32];
+    uint8_t args[64];
     uint8_t proc_num;
     uint32_t base;
     uint32_t p_ksp;

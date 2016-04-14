@@ -296,22 +296,6 @@ void splash_screen(void) {
 	clear_screen();
 }
 
-void copy_args(const uint8_t* input, uint32_t nbytes) {
-        if(input[0] == ' ') {
-            args = NULL;
-            return;
-        }
-
-        uint32_t i = 0;
-        uint32_t arg_length = 0;
-
-        for(i = index + 1; i < nbytes; i++) {
-            args[i - index - 1] = input[i];
-            arg_length++;
-        }
-        args[arg_length] = '\0';
-}
-
 /**
  * Returns the first word of the input string
  * @param  input String to find first word of
