@@ -19,8 +19,7 @@ void pit_handle_interrupt() {
     // Disable interrupts
     cli_and_save(flags);
 
-    printf("PIT Interruption!\n");
-
+    // Send EOI to end the interrupt
     send_eoi(IRQ_PIT);
 
     // Restore flags
