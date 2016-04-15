@@ -12,7 +12,6 @@ func_ptr rtc_ops_table[4] = { rtc_open,  rtc_read,  rtc_write,  rtc_close};
 func_ptr dir_ops_table[4] = { dir_open,  dir_read,  dir_write,  dir_close};
 func_ptr files_ops_table[4] = { fs_open,  fs_read,  fs_write,  fs_close};
 
-
 uint32_t files_in_use = 2;
 
 int32_t halt (uint8_t status) {
@@ -28,7 +27,11 @@ int32_t halt (uint8_t status) {
 
         // Grab the first 32 bytes of the file to see if it is runnable
         // and find where it starts
-        if(fs_read(((int32_t) "shell"), f_init_data, 32) == -1) {
+        file_array exec_read;
+        strcpy((int8_t*)&(exec_read.file_name),(int8_t*) "shell");
+        exec_read.file_position = 0;
+
+        if(fs_read(&exec_read, f_init_data, 32) == -1) {
             return -1;
         }
 
@@ -85,12 +88,35 @@ int32_t execute (const uint8_t * command) {
         return -1;
     }
 
+    // Store the command args
+    uint8_t space_flag = 0;
+    uint8_t cmd_len;
+    uint8_t temp_arg[64];
+    for( i = 0; command[i] != '\0' ; i++ ) {
+        if( command[i] == ' ' && space_flag == 0 ) {
+            space_flag = 1;
+            cmd_len = i;
+            //fname[i] = '\0';
+        } else if( space_flag == 1 ) {
+            temp_arg[i-cmd_len-1] = command[i];
+        } else {
+            if(i>=32 && space_flag == 0) {
+                return -1;
+            }
+            //fname[i] = command[i];
+        }
+    }
+    temp_arg[i-cmd_len-1] = '\0';
+
     // get the file name to execute
     uint8_t * f_name = strtok(command);
 
     // Grab the first 32 bytes of the file to see if it is runnable
     // and find where it starts
-    if(fs_read((int32_t)f_name, f_init_data, 32) == -1) {
+    file_array exec_read;
+    strcpy((int8_t*)&(exec_read.file_name),(int8_t*)f_name);
+    exec_read.file_position = 0;
+    if(fs_read(&exec_read, f_init_data, 32) == -1) {
         return -1;
     }
 
@@ -116,7 +142,7 @@ int32_t execute (const uint8_t * command) {
             temp_process_mask = temp_process_mask >> 1;
         }
     }
-    
+
     // Max number of programs reached, error out
     if (i == (MAX_PROG_NUM -1)) {
         return -1;
@@ -141,6 +167,9 @@ int32_t execute (const uint8_t * command) {
     // store Prev address
     proc_ctrl_blk->base = base;
 
+    // store arguments into pcb
+    strcpy((int8_t*)proc_ctrl_blk->args, (const int8_t*)temp_arg);
+
     // Initalize PCB file descriptors
     for (i = 0; i < 8; ++i) {
         proc_ctrl_blk->fds[i].operations_pointer = NULL;
@@ -161,11 +190,12 @@ int32_t execute (const uint8_t * command) {
     proc_ctrl_blk->fds[1].inode = NULL;
     proc_ctrl_blk->fds[1].flags = IN_USE;
 
+    // set pcbs correctly
     prev_proc = curr_proc;
     curr_proc = proc_ctrl_blk;
-
     curr_proc->prev = (struct pcb_t *) prev_proc;
 
+    // jump to the program to begin execution
     jmp_usr_exec(entrypoint);
 
     asm volatile("EXECUTE_EXIT:");
@@ -174,7 +204,9 @@ int32_t execute (const uint8_t * command) {
 }
 
 int32_t read (int32_t fd, void * buf, int32_t nbytes) {
-    return curr_proc->fds[fd].operations_pointer[READ](fd, buf, nbytes);
+    int32_t b_return = curr_proc->fds[fd].operations_pointer[READ](&(curr_proc->fds[fd]), buf, nbytes);
+    curr_proc->fds[fd].file_position = curr_proc->fds[fd].file_position + b_return;
+    return b_return;
 }
 
 int32_t write (int32_t fd, const void * buf, int32_t nbytes) {
@@ -199,18 +231,21 @@ int32_t open (const uint8_t * filename) {
                     curr_proc->fds[i].operations_pointer = rtc_ops_table;
                     curr_proc->fds[i].inode = NULL;
                     curr_proc->fds[i].file_position = 0;
+                    strcpy((int8_t*)&(curr_proc->fds[i].file_name),(int8_t*)filename);
                     rtc_open();
                     break;
                 case 1:
                     curr_proc->fds[i].operations_pointer = dir_ops_table;
                     curr_proc->fds[i].inode = NULL;
                     curr_proc->fds[i].file_position = 0;
+                    strcpy((int8_t*)&(curr_proc->fds[i].file_name),(int8_t*)filename);
                     dir_open(filename);
                     break;
                 case 2:
                     curr_proc->fds[i].operations_pointer = files_ops_table;
                     curr_proc->fds[i].inode = get_inode(file_info.inode_num);
                     curr_proc->fds[i].file_position = 0;
+                    strcpy((int8_t*)&(curr_proc->fds[i].file_name),(int8_t*)filename);
                     fs_open(filename);
                     break;
             }
@@ -220,14 +255,13 @@ int32_t open (const uint8_t * filename) {
             return i;
         }
     }
-
-
-    return -1;
+    return 0;
 }
 
 int32_t close (int32_t fd) {
     if(fd >= 2 && fd <= 7) {
         curr_proc->fds[fd].flags = NOT_USE;
+        curr_proc->fds[fd].file_position = 0;
         files_in_use--;
         curr_proc->fds[fd].operations_pointer[CLOSE](fd);
         return 0;
@@ -237,7 +271,8 @@ int32_t close (int32_t fd) {
 }
 
 int32_t getargs (uint8_t * buf, int32_t nbytes) {
-    return -1;
+    strcpy((int8_t*)buf, (const int8_t*)curr_proc->args);
+    return 0;
 }
 
 int32_t vidmap (uint8_t ** screen_start) {
@@ -255,4 +290,27 @@ int32_t set_handler (int32_t signum, void * handler_address) {
 
 int32_t sigreturn (void) {
     return -1;
+}
+
+/*
+ * Thanks to: https://sourceware.org/newlib/libc.html#Syscalls
+ *     (Red Hat Minimal Implementation)
+ * And to: http://code.metager.de/source/xref/hurd/viengoos/libhurd-mm/sbrk.c
+ *     (GNU Hurd Implementation)
+ */
+void * sbrk(uint32_t nbytes) {
+    static void * heap_ptr = NULL;
+    void * base;
+
+    if (heap_ptr == NULL) {
+        heap_ptr = (void *)&_end;
+    }
+
+    if ((RAMSIZE - heap_ptr) >= 0) {
+        base = heap_ptr;
+        heap_ptr += nbytes;
+        return (base);
+    } else {
+        return ((void *)-1);
+    }
 }

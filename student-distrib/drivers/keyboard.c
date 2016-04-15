@@ -68,7 +68,6 @@ uint8_t caps_ascii[] = {
 #define TERM_TEST_WRITE 0
 #define TERM_TEST_READ 0
 
-// variable designating the active terminal
 uint8_t active_terminal = 0;
 
 // variables designating the currently active buffer

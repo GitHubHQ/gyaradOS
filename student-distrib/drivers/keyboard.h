@@ -16,7 +16,7 @@
 #define MAX_MAKE_SCANCODE        0x59
 
 // max number of chars in the keyboard buffer
-#define MAX_CHARS_IN_BUF         127
+#define MAX_CHARS_IN_BUF         1023
 
 // Make keys
 #define KEY_MAKE_ESC             0x01
