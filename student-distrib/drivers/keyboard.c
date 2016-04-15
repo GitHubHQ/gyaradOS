@@ -72,7 +72,7 @@ uint8_t active_terminal = 0;
 
 // variables designating the currently active buffer
 int8_t keyboard_buf[NUM_TERMINALS][MAX_CHARS_IN_BUF];
-uint8_t num_chars_in_buf[NUM_TERMINALS] = {0, 0, 0};
+uint32_t num_chars_in_buf[NUM_TERMINALS] = {0, 0, 0};
 
 // variables designating status of special keys
 int special_key_enabled[NUM_TERMINALS] = {0, 0, 0};
