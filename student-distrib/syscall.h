@@ -20,6 +20,8 @@
 #define MAGIC_NUM_3     0x4c
 #define MAGIC_NUM_4     0x46
 
+#define RAMSIZE             (void *)0x100000
+
 #define MAX_NUMBER_ARGS	  32
 
 #define OPEN  			   0
@@ -56,5 +58,9 @@ extern int32_t getargs (uint8_t * buf, int32_t nbytes);
 extern int32_t vidmap (uint8_t ** screen_start);
 extern int32_t set_handler (int32_t signum, void * handler_address);
 extern int32_t sigreturn (void);
+extern void * sbrk(uint32_t nbytes)
+
+/* _end is set in the linker command file */
+extern void * _end;
 
 #endif /* _SYSCALL_H */

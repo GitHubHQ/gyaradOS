@@ -202,7 +202,7 @@ int32_t execute (const uint8_t * command) {
 int32_t read (int32_t fd, void * buf, int32_t nbytes) {
     int32_t b_return = curr_proc->fds[fd].operations_pointer[READ](&(curr_proc->fds[fd]), buf, nbytes);
     printf("FPOS BEFORE: %d\n", curr_proc->fds[fd].file_position);
-    curr_proc->fds[fd].file_position = curr_proc->fds[fd].file_position + b_return;
+    curr_proc->fds[fd].file_position = b_return;
     printf("FPOS: %d\n", curr_proc->fds[fd].file_position);
     printf("BRET %d\n", b_return);
     return b_return;
@@ -289,4 +289,27 @@ int32_t set_handler (int32_t signum, void * handler_address) {
 
 int32_t sigreturn (void) {
     return -1;
+}
+
+/*
+ * Thanks to: https://sourceware.org/newlib/libc.html#Syscalls
+ *     (Red Hat Minimal Implementation)
+ * And to: http://code.metager.de/source/xref/hurd/viengoos/libhurd-mm/sbrk.c
+ *     (GNU Hurd Implementation)
+ */
+void * sbrk(uint32_t nbytes) {
+  static void * heap_ptr = NULL;
+  void *        base;
+
+  if (heap_ptr == NULL) {
+    heap_ptr = (void *)&_end;
+  }
+
+  if ((RAMSIZE - heap_ptr) >= 0) {
+    base = heap_ptr;
+    heap_ptr += nbytes;
+    return (base);
+  } else {
+    return ((void *)-1);
+  }
 }
