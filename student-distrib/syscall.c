@@ -201,10 +201,10 @@ int32_t execute (const uint8_t * command) {
 
 int32_t read (int32_t fd, void * buf, int32_t nbytes) {
     int32_t b_return = curr_proc->fds[fd].operations_pointer[READ](&(curr_proc->fds[fd]), buf, nbytes);
-    printf("FPOS BEFORE: %d\n", curr_proc->fds[fd].file_position);
-    curr_proc->fds[fd].file_position = b_return;
-    printf("FPOS: %d\n", curr_proc->fds[fd].file_position);
-    printf("BRET %d\n", b_return);
+    //printf("BRET %d\n", b_return);
+    //printf("FPOS BEFORE: %d\n", curr_proc->fds[fd].file_position);
+    curr_proc->fds[fd].file_position = curr_proc->fds[fd].file_position + b_return;
+    //printf("FPOS: %d\n", curr_proc->fds[fd].file_position);
     return b_return;
 }
 
