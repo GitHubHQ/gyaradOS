@@ -70,20 +70,19 @@ uint8_t caps_ascii[] = {
 
 uint8_t active_terminal = 0;
 
-// variables designating the currently active buffer
-int8_t keyboard_buf[NUM_TERMINALS][MAX_CHARS_IN_BUF];
+uint32_t keyboard_buf[NUM_TERMINALS][MAX_CHARS_IN_BUF];
 uint32_t num_chars_in_buf[NUM_TERMINALS] = {0, 0, 0};
+int read_buf_ready[NUM_TERMINALS] = {0, 0, 0};
 
 // variables designating status of special keys
-int special_key_enabled[NUM_TERMINALS] = {0, 0, 0};
-int cntrl_l_on[NUM_TERMINALS] = {0, 0, 0};
-int cntrl_r_on[NUM_TERMINALS] = {0, 0, 0};
-int caps_on[NUM_TERMINALS] = {0, 0, 0};
-int shift_l_on[NUM_TERMINALS] = {0, 0, 0};
-int shift_r_on[NUM_TERMINALS] = {0, 0, 0};
-int alt_l_on[NUM_TERMINALS] = {0, 0, 0};
-int alt_r_on[NUM_TERMINALS] = {0, 0, 0};
-int read_buf_ready[NUM_TERMINALS] = {0, 0, 0};
+int special_key_enabled = 0;
+int cntrl_l_on = 0;
+int cntrl_r_on = 0;
+int caps_on = 0;
+int shift_l_on = 0;
+int shift_r_on = 0;
+int alt_l_on = 0;
+int alt_r_on = 0;
 
 int32_t terminal_open (const uint8_t * filename) {
     clear_screen();
@@ -254,9 +253,9 @@ void handle_keypress() {
         // make key
         uint8_t key_ascii = code_to_ascii[key_code];
 
-        if(key_ascii != ASCII_PLACEHOLDER && !special_key_enabled[active_terminal]) {
+        if(key_ascii != ASCII_PLACEHOLDER && !special_key_enabled) {
             // if its a valid char that we can print, print it
-            if(cntrl_l_on[active_terminal] || cntrl_r_on[active_terminal]) {
+            if(cntrl_l_on || cntrl_r_on) {
                 switch (key_code) {
                     case KEY_MAKE_L:
                         reset_term();
@@ -275,33 +274,33 @@ void handle_keypress() {
                     default:
                         break;
                 }
-            } else if (caps_on[active_terminal] && !(shift_l_on[active_terminal] || shift_r_on[active_terminal])) {
+            } else if (caps_on && !(shift_l_on || shift_r_on)) {
                 // print caps version
                 key_ascii = caps_ascii[key_code];
                 add_char_to_buffer(key_ascii);
-            } else if (!caps_on[active_terminal] && (shift_l_on[active_terminal] || shift_r_on[active_terminal])) {
+            } else if (!caps_on && (shift_l_on || shift_r_on)) {
                 key_ascii = shift_ascii[key_code];
                 add_char_to_buffer(key_ascii);
             } else {
                 // print char normally
                 add_char_to_buffer(key_ascii);
             }
-        } else if(special_key_enabled[active_terminal]) {
-            special_key_enabled[active_terminal] = 0;
+        } else if(special_key_enabled) {
+            special_key_enabled = 0;
         } else {
             switch(key_code) {
                 case KEY_MAKE_L_CTRL:
-                    cntrl_l_on[active_terminal] = 1;
+                    cntrl_l_on = 1;
                     break;
                 case KEY_MAKE_L_SHIFT:
-                    shift_l_on[active_terminal] = 1;
+                    shift_l_on = 1;
                     break;
                 case KEY_MAKE_R_SHIFT:
-                    shift_r_on[active_terminal] = 1;
+                    shift_r_on = 1;
                     break;
                 case KEY_MAKE_CAPS:
-                    caps_on[active_terminal] = !caps_on[active_terminal];
-                    kbd_led_handling(caps_on[active_terminal], 0, 0);
+                    caps_on = !caps_on;
+                    kbd_led_handling(caps_on, 0, 0);
                     break;
                 case KEY_MAKE_ENTER:
                     handle_enter();
@@ -310,20 +309,20 @@ void handle_keypress() {
                     handle_backspace();
                     break;
                 case KEY_MAKE_ALT:
-                    alt_l_on[active_terminal] = 1;
+                    alt_l_on = 1;
                     break;
                 case KEY_MAKE_F1:
-                    if(alt_l_on[active_terminal] || alt_r_on[active_terminal]) {
+                    if(alt_l_on || alt_r_on) {
                         active_terminal = 0;
                     }
                     break;
                 case KEY_MAKE_F2:
-                    if(alt_l_on[active_terminal] || alt_r_on[active_terminal]) {
+                    if(alt_l_on || alt_r_on) {
                         active_terminal = 1;
                     }
                     break;
                 case KEY_MAKE_F3:
-                    if(alt_l_on[active_terminal] || alt_r_on[active_terminal]) {
+                    if(alt_l_on || alt_r_on) {
                         active_terminal = 2;
                     }
                     break;
@@ -334,17 +333,17 @@ void handle_keypress() {
     } else {
         // break or special key
         if(key_code == SPECIAL_KEY) {
-            special_key_enabled[active_terminal] = 1;
+            special_key_enabled = 1;
 
             // get next code
             key_code = inb(KEYBOARD_D_PORT);
             
             switch(key_code) {
                 case KEY_MAKE_R_CTRL:
-                    cntrl_r_on[active_terminal] = 1;
+                    cntrl_r_on = 1;
                     break;
                 case KEY_BREAK_R_CTRL:
-                    cntrl_r_on[active_terminal] = 0;
+                    cntrl_r_on = 0;
                     break;
                 case KEY_MAKE_L_ARROW:
                     break;
@@ -355,10 +354,10 @@ void handle_keypress() {
                 case KEY_MAKE_D_ARROW:
                     break;
                 case KEY_MAKE_ALT:
-                    alt_r_on[active_terminal] = 1;
+                    alt_r_on = 1;
                     break;
                 case KEY_BREAK_ALT:
-                    alt_r_on[active_terminal] = 0;
+                    alt_r_on = 0;
                     break;
                 default:
                     // we don't care about the rest of the special keys
@@ -369,16 +368,16 @@ void handle_keypress() {
             // get break and set correct key status
             switch(key_code) {
                 case KEY_BREAK_L_CTRL:
-                    cntrl_l_on[active_terminal] = 0;
+                    cntrl_l_on = 0;
                     break;
                 case KEY_BREAK_L_SHIFT:
-                    shift_l_on[active_terminal] = 0;
+                    shift_l_on = 0;
                     break;
                 case KEY_BREAK_R_SHIFT:
-                    shift_r_on[active_terminal] = 0;
+                    shift_r_on = 0;
                     break;
                 case KEY_BREAK_ALT:
-                    alt_l_on[active_terminal] = 0;
+                    alt_l_on = 0;
                     break;
                 default:
                     // we don't care about the rest of the breaks

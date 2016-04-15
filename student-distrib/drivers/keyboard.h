@@ -17,6 +17,7 @@
 
 // max number of chars in the keyboard buffer
 #define MAX_CHARS_IN_BUF         1023
+#define NUM_TERMINALS               3
 
 // Make keys
 #define KEY_MAKE_ESC             0x01
@@ -235,8 +236,6 @@
 // #define KEY_MAKE_L_ALT           0x38
 // #define KEY_MAKE_NUM             0x45
 // #define KEY_MAKE_SCROLL          0x46
-
-#define NUM_TERMINALS         0x03
 
 int32_t terminal_open (const uint8_t * filename);
 int32_t terminal_close (int32_t fd);
