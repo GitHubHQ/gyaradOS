@@ -31,11 +31,11 @@ jmp_usr_exec:
     # set stack to bottom of 4mb page for this program
     pushl $0x83FFFFC
 
+    # enable interrupts
+    sti
+
     # push the flags correctly preparing for iret
     pushfl
-
-    # enable interrupts
-    orl $0x200, (%esp)
 
     # push the remaining parameters for iret
     pushl %esi
