@@ -60,7 +60,7 @@ int32_t halt (uint8_t status) {
     // Close any open FDS
     int i;
     for(i = 2; i < 8; i ++) {
-        close(2);
+        close(i);
     }
 
     // reset the page entries
@@ -267,7 +267,7 @@ int32_t close (int32_t fd) {
         curr_proc->fds[fd].flags = NOT_USE;
         curr_proc->fds[fd].file_position = 0;
         int32_t ret = curr_proc->fds[fd].operations_pointer[CLOSE](fd);
-        return 0;
+        return ret;
     }
 
     return -1;
