@@ -109,33 +109,3 @@ int switch_pd(uint8_t process_num, uint32_t prev_base) {
                  );
     return 0;
 }
-
-void enable_global_pages() {
-    asm volatile(   "movl %%cr4, %%eax      \n"
-                    "orl $0x00000080, %%eax \n"
-                    "movl %%eax, %%cr4"
-                    :
-                    :
-                    :"eax", "memory"
-                );
-}
-
-void enable_4mb_pages() {
-    asm volatile(   "movl %%cr4, %%eax      \n"
-                    "orl $0x00000010, %%eax \n"
-                    "movl %%eax, %%cr4"
-                    :
-                    :
-                    :"eax", "memory"
-                );
-}
-
-void enable_paging_registers() {
-    asm volatile(   "movl %%cr0, %%eax      \n"
-                    "orl $0x80000000, %%eax \n"
-                    "movl %%eax, %%cr0"
-                    :
-                    :
-                    :"eax", "memory"
-                );
-}

@@ -8,7 +8,6 @@
 #define DENTRY_SIZE 64
 #define BLOCK_SIZE 0x1000
 #define MAX_FILENAME_LENGTH 31
-#define MAX_FILES		   8
 
 /* filesystem read functions */
 int32_t read_dentry_by_name (const uint8_t* fname, dentry_t * dentry);
@@ -24,7 +23,7 @@ void fs_init(uint32_t addrs);
 int32_t fs_write(int32_t fd, const uint8_t * buf, int32_t nbytes);
 int32_t fs_read(file_array* fd, uint8_t * buf, int32_t nbytes);
 int32_t fs_open(const uint8_t* filename);
-int32_t fs_close(int32_t fd);
+int32_t fs_close(void);
 void test_fs();
 
 /* directory functions */
@@ -33,6 +32,5 @@ int32_t dir_write(int32_t fd, const int8_t* buf, int32_t nbytes);
 int32_t dir_read(int32_t fd, int8_t * buf, int32_t nbytes);
 int32_t dir_open(const uint8_t* filename);
 int32_t dir_close(void);
-
 
 #endif
