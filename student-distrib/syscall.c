@@ -60,7 +60,9 @@ int32_t halt (uint8_t status) {
     // Close any open FDS
     int i;
     for(i = 2; i < 8; i ++) {
-        close(i);
+        if(proc_ctrl_blk->fds[i].flags == IN_USE){
+            close(i);
+        }
     }
 
     // reset the page entries
@@ -128,7 +130,7 @@ int32_t execute (const uint8_t * command) {
 
     // See if the file is executeable
     if (!((f_init_data[0] == MAGIC_NUM_1) && (f_init_data[1] == MAGIC_NUM_2) && (f_init_data[2] == MAGIC_NUM_3) && (f_init_data[3] == MAGIC_NUM_4))) {
-        printf("%s\n", "Non-Runnable file!");
+        printf("ERROR: Non-Runnable file!\n");
         return -1;
     }
 
@@ -151,6 +153,7 @@ int32_t execute (const uint8_t * command) {
 
     // Max number of programs reached, error out
     if (i == (MAX_PROG_NUM -1)) {
+        printf("ERROR: Out of runnable program slots!\n");
         return -1;
     }
 
@@ -210,6 +213,12 @@ int32_t execute (const uint8_t * command) {
 }
 
 int32_t read (int32_t fd, void * buf, int32_t nbytes) {
+    if (buf == NULL) {
+        return -1;
+    }
+    if (fd > 7 || fd < 0) {
+        return -1;
+    }
     int32_t b_return = curr_proc->fds[fd].operations_pointer[READ](&(curr_proc->fds[fd]), buf, nbytes);
     curr_proc->fds[fd].file_position = curr_proc->fds[fd].file_position + b_return;
     return b_return;
@@ -267,7 +276,7 @@ int32_t close (int32_t fd) {
         curr_proc->fds[fd].flags = NOT_USE;
         curr_proc->fds[fd].file_position = 0;
         int32_t ret = curr_proc->fds[fd].operations_pointer[CLOSE](fd);
-        return ret;
+        return 0;
     }
 
     return -1;
