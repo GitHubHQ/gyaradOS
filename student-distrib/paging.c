@@ -30,7 +30,7 @@ void init_paging() {
         pageDirectory[i].PDE_bits.page_table_base = 0;
         pageDirectory[i].PDE_bits.present = 0;
         pageDirectory[i].PDE_bits.read_write = 1;
-        pageDirectory[i].PDE_bits.user_super = 0;
+        pageDirectory[i].PDE_bits.user_super = 1;
         pageDirectory[i].PDE_bits.write_through = 0;
         pageDirectory[i].PDE_bits.cache_disabled = 0;
         pageDirectory[i].PDE_bits.accessed = 0;
