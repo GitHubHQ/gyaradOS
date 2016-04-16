@@ -7,6 +7,7 @@ dentry_t * dentries;
 inode_t * inodes;
 uint32_t data_blocks;
 uint32_t dirReads;
+//file_t files_opened[MAX_FILES];
 
 /**
  * Initializing the Boot block by getting the data from address
@@ -21,6 +22,14 @@ void fs_init(uint32_t addrs) {
     data_blocks = b_block_addrs + b.n_inodes * BLOCK_SIZE + BLOCK_SIZE;
 
     dirReads = 0;
+
+    //int i;
+    // for(i = 0; i < MAX_FILES; i++) {
+    //     files_opened[i].read_location = 0;
+    //     files_opened[i].opened = 0;
+    //     if(i == 0 || i == 1)
+    //         files_opened[i].opened = 1;
+    // }
 }
 
 /* fs_read(int8_t* fd, uint8_t * buf, int32_t nbytes)
@@ -37,6 +46,11 @@ int32_t fs_read(file_array* fd, uint8_t * buf, int32_t nbytes) {
 
     int bytesRead = read_data(temp.inode_num, fd->file_position, buf, nbytes);
 
+    //         if(bytesRead != -1) {
+    //             files_opened[i].read_location += bytesRead;
+    //         }
+    //     }
+    // }
     return bytesRead;
 }
 
@@ -53,15 +67,26 @@ int32_t fs_write(int32_t fd, const uint8_t * buf, int32_t nbytes) {
  * ouputs: none return 0
  */
 int32_t fs_open(const uint8_t* filename){
-    
-    return 0; 
+    // int i;
+    // for(i = 0; i < MAX_FILES; i++) {
+    //     if(files_opened[i].opened == 0) {
+    //         strncpy(files_opened[i].file_name, filename, 32);
+    //         files_opened[i].opened = 1;
+    //         files_opened[i].read_location = 0;
+    //         return 0;
+    //     }
+    // }
+    // return -1; 
+    return 0;
 }
 
 /* fs_close()
  * inputs: none
  * ouputs: none return 0
  */
-int32_t fs_close(void){
+int32_t fs_close(int32_t fd){
+    // files_opened[fd].read_location = 0;
+    // files_opened[fd].opened = 0;
     return 0;
 }
 

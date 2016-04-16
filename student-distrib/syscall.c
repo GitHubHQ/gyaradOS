@@ -12,8 +12,6 @@ func_ptr rtc_ops_table[4] = { rtc_open,  rtc_read,  rtc_write,  rtc_close};
 func_ptr dir_ops_table[4] = { dir_open,  dir_read,  dir_write,  dir_close};
 func_ptr files_ops_table[4] = { fs_open,  fs_read,  fs_write,  fs_close};
 
-uint32_t files_in_use = 2;
-
 int32_t halt (uint8_t status) {
     pcb_t * proc_ctrl_blk = curr_proc;
 
@@ -75,7 +73,7 @@ int32_t halt (uint8_t status) {
 
     // swap the pcbs correctly
     curr_proc = prev_proc;
-    prev_proc = (pcb_t *) prev_proc->prev;
+    prev_proc = prev_proc->prev;
 
     asm volatile("jmp EXECUTE_EXIT");
 
@@ -92,7 +90,7 @@ int32_t execute (const uint8_t * command) {
     uint32_t i;
 
     // fail if an invalid command is specified
-    if (command == NULL || strlen((int8_t *) command) == 0) {
+    if (command == NULL || strlen(command) == 0) {
         return -1;
     }
 
@@ -133,7 +131,7 @@ int32_t execute (const uint8_t * command) {
         printf("ERROR: Non-Runnable file!\n");
         return -1;
     }
-
+    
     // Grab the entry point of the application
     entrypoint += (uint32_t)f_init_data[27] << 24;
     entrypoint += (uint32_t)f_init_data[26] << 16;
@@ -233,7 +231,7 @@ int32_t open (const uint8_t * filename) {
     int32_t check = read_dentry_by_name(filename, &file_info);
 
     //checking if the file name exists
-    if(check == -1 || files_in_use > MAX_FILES) {
+    if(check == -1) {
         return -1;
     }
 
@@ -243,21 +241,21 @@ int32_t open (const uint8_t * filename) {
         if(curr_proc->fds[i].flags == NOT_USE) {
             switch(file_info.file_type) {
                 case 0:
-                    curr_proc->fds[i].operations_pointer = rtc_ops_table;
+                    curr_proc->fds[i].operations_pointer = (uint32_t *) rtc_ops_table;
                     curr_proc->fds[i].inode = NULL;
                     curr_proc->fds[i].file_position = 0;
                     strcpy((int8_t*)&(curr_proc->fds[i].file_name),(int8_t*)filename);
                     rtc_open();
                     break;
                 case 1:
-                    curr_proc->fds[i].operations_pointer = dir_ops_table;
+                    curr_proc->fds[i].operations_pointer = (uint32_t *) dir_ops_table;
                     curr_proc->fds[i].inode = NULL;
                     curr_proc->fds[i].file_position = 0;
                     strcpy((int8_t*)&(curr_proc->fds[i].file_name),(int8_t*)filename);
                     dir_open(filename);
                     break;
                 case 2:
-                    curr_proc->fds[i].operations_pointer = files_ops_table;
+                    curr_proc->fds[i].operations_pointer = (uint32_t *) files_ops_table;
                     curr_proc->fds[i].inode = get_inode(file_info.inode_num);
                     curr_proc->fds[i].file_position = 0;
                     strcpy((int8_t*)&(curr_proc->fds[i].file_name),(int8_t*)filename);
@@ -288,11 +286,11 @@ int32_t getargs (uint8_t * buf, int32_t nbytes) {
 }
 
 int32_t vidmap (uint8_t ** screen_start) {
-    if((uint32_t) screen_start < VID_MEM_START || (uint32_t) screen_start > VID_MEM_END) {
+    if(screen_start < VID_MEM_START || screen_start > VID_MEM_END) {
         return -1;
     }
 
-    *screen_start = (uint8_t *) VIDEO;
+    *screen_start = VIDEO;
     return 0;
 }
 
