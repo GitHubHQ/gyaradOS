@@ -69,7 +69,7 @@ uint8_t caps_ascii[] = {
 #define TERM_TEST_READ 0
 
 int8_t keyboard_buf[MAX_CHARS_IN_BUF];
-uint8_t num_chars_in_buf = 0;
+uint32_t num_chars_in_buf = 0;
 
 // variables designating status of special keys
 int special_key_enabled = 0;
