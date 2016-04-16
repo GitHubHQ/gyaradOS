@@ -273,6 +273,9 @@ void handle_keypress() {
                             test_write();
                         }  
                         break;
+                    case KEY_MAKE_C:
+                        halt(0);
+                        break;
                     default:
                         break;
                 }
