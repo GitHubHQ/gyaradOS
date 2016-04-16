@@ -12,8 +12,6 @@ func_ptr rtc_ops_table[4] = { rtc_open,  rtc_read,  rtc_write,  rtc_close};
 func_ptr dir_ops_table[4] = { dir_open,  dir_read,  dir_write,  dir_close};
 func_ptr files_ops_table[4] = { fs_open,  fs_read,  fs_write,  fs_close};
 
-uint32_t files_in_use = 2;
-
 int32_t halt (uint8_t status) {
     pcb_t * proc_ctrl_blk = curr_proc;
 
@@ -224,7 +222,7 @@ int32_t open (const uint8_t * filename) {
     int32_t check = read_dentry_by_name(filename, &file_info);
 
     //checking if the file name exists
-    if(check == -1 || files_in_use > MAX_FILES) {
+    if(check == -1) {
         return -1;
     }
 
