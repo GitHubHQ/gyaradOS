@@ -54,6 +54,12 @@ int32_t halt (uint8_t status) {
     proc_ctrl_blk->fds[1].inode = NULL;
     proc_ctrl_blk->fds[1].flags = NOT_USE;
 
+    // Close any open FDS
+    int i;
+    for(i = 2; i < 8; i ++) {
+        close(2);
+    }
+
     // reset the page entries
     switch_pd(prev_proc->proc_num, prev_proc->base);
     tss.esp0 = _8MB - (_8KB) * prev_proc->proc_num - 4;
@@ -248,21 +254,18 @@ int32_t open (const uint8_t * filename) {
                     fs_open(filename);
                     break;
             }
-
             curr_proc->fds[i].flags = IN_USE;
-            files_in_use++;
             return i;
         }
     }
-    return 0;
+    return -1;
 }
 
 int32_t close (int32_t fd) {
     if(fd >= 2 && fd <= 7) {
         curr_proc->fds[fd].flags = NOT_USE;
         curr_proc->fds[fd].file_position = 0;
-        files_in_use--;
-        curr_proc->fds[fd].operations_pointer[CLOSE](fd);
+        int32_t ret = curr_proc->fds[fd].operations_pointer[CLOSE](fd);
         return 0;
     }
 
