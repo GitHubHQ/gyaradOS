@@ -58,9 +58,7 @@ int32_t halt (uint8_t status) {
     // Close any open FDS
     int i;
     for(i = 2; i < 8; i ++) {
-        if(proc_ctrl_blk->fds[i].flags == IN_USE){
-            close(i);
-        }
+        close(i);
     }
 
     // reset the page entries
@@ -210,11 +208,7 @@ int32_t execute (const uint8_t * command) {
 }
 
 int32_t read (int32_t fd, void * buf, int32_t nbytes) {
-    if (buf == NULL) {
-        return -1;
-    }
-
-    if (fd > 7 || fd < 0) {
+    if (buf == NULL || fd > 7 || fd < 0 || curr_proc->fds[fd].flags != IN_USE) {
         return -1;
     }
     
@@ -224,11 +218,7 @@ int32_t read (int32_t fd, void * buf, int32_t nbytes) {
 }
 
 int32_t write (int32_t fd, const void * buf, int32_t nbytes) {
-    if (buf == NULL) {
-        return -1;
-    }
-
-    if (fd > 7 || fd < 0) {
+    if (buf == NULL || fd > 7 || fd < 0 || curr_proc->fds[fd].flags != IN_USE) {
         return -1;
     }
     
@@ -279,7 +269,7 @@ int32_t open (const uint8_t * filename) {
 }
 
 int32_t close (int32_t fd) {
-    if(fd >= 2 && fd <= 7) {
+    if(fd >= 2 && fd <= 7 && (curr_proc->fds[fd].flags == IN_USE)) {
         curr_proc->fds[fd].flags = NOT_USE;
         curr_proc->fds[fd].file_position = 0;
         return curr_proc->fds[fd].operations_pointer[CLOSE](fd);
