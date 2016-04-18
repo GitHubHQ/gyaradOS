@@ -280,7 +280,7 @@ int32_t close (int32_t fd) {
 }
 
 int32_t getargs (uint8_t * buf, int32_t nbytes) {
-    if(nbytes < 0) {
+    if(nbytes < 0 || buf == NULL) {
         return -1;
     }
 
