@@ -130,6 +130,8 @@ int32_t terminal_write (int32_t fd, const uint8_t * buf, int32_t nbytes) {
     for(i = 0; i < nbytes; i++) {
         if(buf[i] == '\n') {
             new_line();
+        } else if(buf[i] == '\0') {
+            continue;
         } else if(add_char_to_buffer(buf[i])) {
             num_printed++;
         }
