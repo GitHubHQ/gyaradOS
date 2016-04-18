@@ -9,8 +9,8 @@ void init_paging() {
 	for(i = 0; i < PAGE_TABLE_SIZE; i++) {
 		pageTable1[i].PTE_bits.page_base = i;
 		pageTable1[i].PTE_bits.present = 0;
-		pageTable1[i].PTE_bits.read_write = 1;
-		pageTable1[i].PTE_bits.user_super = 1;
+		pageTable1[i].PTE_bits.read_write = 0;
+		pageTable1[i].PTE_bits.user_super = 0;
         pageTable1[i].PTE_bits.write_through = 0;
         pageTable1[i].PTE_bits.cache_disabled = 0;
         pageTable1[i].PTE_bits.accessed = 0;

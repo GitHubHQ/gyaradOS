@@ -109,7 +109,7 @@ int32_t terminal_read (int32_t fd, uint8_t * buf, int32_t nbytes) {
 
     while(!read_buf_ready);
 
-    for(i = 0; i <= MAX_CHARS_IN_BUF; i++) {
+    for(i = 0; i < nbytes; i++) {
         buf[i] = keyboard_buf[i];
         keyboard_buf[i] = NULL;
         bytes_read++;
