@@ -274,6 +274,9 @@ void handle_keypress() {
                         }  
                         break;
                     case KEY_MAKE_C:
+                        // send eoi and restore prev flags
+                        send_eoi(IRQ_KEYBOARD_CTRL);
+                        restore_flags(flags);
                         halt(0);
                         break;
                     default:
