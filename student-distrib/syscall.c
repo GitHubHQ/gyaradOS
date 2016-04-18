@@ -221,7 +221,7 @@ int32_t write (int32_t fd, const void * buf, int32_t nbytes) {
     if (buf == NULL || fd > 7 || fd <= 0 || curr_proc->fds[fd].flags != IN_USE) {
         return -1;
     }
-    
+
     return curr_proc->fds[fd].operations_pointer[WRITE](fd, buf, nbytes);
 }
 
