@@ -149,7 +149,7 @@ int32_t execute (const uint8_t * command) {
     }
 
     // Max number of programs reached, error out
-    if (i == (MAX_PROG_NUM -1)) {
+    if (i >= (MAX_PROG_NUM -1)) {
         printf("ERROR: Out of runnable program slots!\n");
         return -1;
     }
