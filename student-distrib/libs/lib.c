@@ -189,8 +189,7 @@ int32_t puts(int8_t* s) {
 
 void putc(uint8_t c) {        
     if(c == '\n' || c == '\r') {
-        screen_y++;
-        screen_x=0;
+        new_line();
     } else {
         *(uint8_t *)(video_mem + ((NUM_COLS*screen_y + screen_x) << 1)) = c;
         *(uint8_t *)(video_mem + ((NUM_COLS*screen_y + screen_x) << 1) + 1) = ATTRIB;
