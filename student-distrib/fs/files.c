@@ -167,15 +167,12 @@ int32_t copy_file_to_addr(uint8_t* fname, uint32_t addr) {
     }
 
     uint32_t file_size = inodes[temp_dentry.inode_num].file_size;
-    uint8_t buf[file_size];
     
-    uint32_t amount_to_copy = read_data(temp_dentry.inode_num, 0, buf, file_size);
+    uint32_t ret = read_data(temp_dentry.inode_num, 0, (uint8_t *) addr, file_size);
 
-    if(amount_to_copy == -1) {
+    if(ret == -1) {
         return -1;
     }
-
-    memcpy((uint32_t *) addr, buf, amount_to_copy);
 
     return 0;
 }

@@ -7,17 +7,17 @@ void init_paging() {
      * Supervisor privilege, Read/Write, not present
      */
 	for(i = 0; i < PAGE_TABLE_SIZE; i++) {
-			pageTable1[i].PTE_bits.page_base = i;
-			pageTable1[i].PTE_bits.present = 0;
-			pageTable1[i].PTE_bits.read_write = 0;
-			pageTable1[i].PTE_bits.user_super = 0;
-            pageTable1[i].PTE_bits.write_through = 0;
-            pageTable1[i].PTE_bits.cache_disabled = 0;
-            pageTable1[i].PTE_bits.accessed = 0;
-            pageTable1[i].PTE_bits.dirty = 0;
-            pageTable1[i].PTE_bits.page_table_attribute = 0;
-            pageTable1[i].PTE_bits.global = 0;
-            pageTable1[i].PTE_bits.avail = 0;
+		pageTable1[i].PTE_bits.page_base = i;
+		pageTable1[i].PTE_bits.present = 0;
+		pageTable1[i].PTE_bits.read_write = 1;
+		pageTable1[i].PTE_bits.user_super = 1;
+        pageTable1[i].PTE_bits.write_through = 0;
+        pageTable1[i].PTE_bits.cache_disabled = 0;
+        pageTable1[i].PTE_bits.accessed = 0;
+        pageTable1[i].PTE_bits.dirty = 0;
+        pageTable1[i].PTE_bits.page_table_attribute = 0;
+        pageTable1[i].PTE_bits.global = 0;
+        pageTable1[i].PTE_bits.avail = 0;
 	}
 
     //enabling the present and read/write and user bit for the video memory at physical location 0xB8000
@@ -44,6 +44,7 @@ void init_paging() {
 	pageDirectory[0].PDE_bits.page_table_base = (uint32_t) pageTable1 / _4KB;
 	pageDirectory[0].PDE_bits.present = 1;
 	pageDirectory[0].PDE_bits.read_write = 1;
+    pageDirectory[1].PDE_bits.user_super = 1;
 	pageDirectory[0].PDE_bits.page_size = 0;
 
 	//enabling bits PS, R/W, Present (10000011)
@@ -51,7 +52,7 @@ void init_paging() {
 	pageDirectory[1].PDE_bits.page_size = 1;
 	pageDirectory[1].PDE_bits.present = 1;
 	pageDirectory[1].PDE_bits.read_write = 1;
-	pageDirectory[1].PDE_bits.user_super = 1;
+	pageDirectory[1].PDE_bits.user_super = 0;
 
     //Enabling paging 
     asm volatile (
@@ -78,13 +79,13 @@ uint32_t init_new_process(uint32_t process_num){
     pageDirectory[idx].PDE_bits.present = 1;
     pageDirectory[idx].PDE_bits.read_write = 1;
     pageDirectory[idx].PDE_bits.user_super = 1;
-    
+
     //write to cr3
     asm volatile (
                     //moving the address of PD to cr3
                     "mov %%eax, %%cr3               \n" 
-                    : /* no outputs */          
-                    : "a" (pageDirectory)           
+                    : /* no outputs */
+                    : "a" (pageDirectory)
                  );
     return pageDirectory[idx].PDE_bits.page_table_base;
 }

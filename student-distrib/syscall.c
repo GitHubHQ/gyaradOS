@@ -98,20 +98,19 @@ int32_t execute (const uint8_t * command) {
     uint8_t space_flag = 0;
     uint8_t cmd_len;
     uint8_t temp_arg[64];
-    for( i = 0; command[i] != '\0' ; i++ ) {
-        if( command[i] == ' ' && space_flag == 0 ) {
+    for(i = 0; command[i] != '\0' ; i++) {
+        if(command[i] == ' ' && space_flag == 0) {
             space_flag = 1;
             cmd_len = i;
-            //fname[i] = '\0';
-        } else if( space_flag == 1 ) {
-            temp_arg[i-cmd_len-1] = command[i];
+        } else if(space_flag == 1) {
+            temp_arg[i - cmd_len - 1] = command[i];
         } else {
-            if(i>=32 && space_flag == 0) {
+            if(i >= 32 && space_flag == 0) {
                 return -1;
             }
-            //fname[i] = command[i];
         }
     }
+
     temp_arg[i-cmd_len-1] = '\0';
 
     // get the file name to execute
@@ -162,7 +161,7 @@ int32_t execute (const uint8_t * command) {
     copy_file_to_addr(f_name, PROGRAM_EXEC_ADDR);
 
     // Create a process control block for our program in the kernel stack
-    pcb_t * proc_ctrl_blk = (pcb_t*) (_8MB - (_8KB)*(curr_proc_id + 1));
+    pcb_t * proc_ctrl_blk = (pcb_t*) (_8MB - ((_8KB)*(curr_proc_id + 1)));
 
     // Grab and store the ESP and EBP in the PCB
     asm volatile("movl %%esp, %0":"=g"(proc_ctrl_blk->p_ksp));
@@ -178,7 +177,7 @@ int32_t execute (const uint8_t * command) {
     strcpy((int8_t*)proc_ctrl_blk->args, (const int8_t*)temp_arg);
 
     // Initalize PCB file descriptors
-    for (i = 0; i < 8; ++i) {
+    for (i = 0; i < 8; i++) {
         proc_ctrl_blk->fds[i].operations_pointer = NULL;
         proc_ctrl_blk->fds[i].inode = NULL;
         proc_ctrl_blk->fds[i].file_position = 0;
@@ -214,9 +213,11 @@ int32_t read (int32_t fd, void * buf, int32_t nbytes) {
     if (buf == NULL) {
         return -1;
     }
+
     if (fd > 7 || fd < 0) {
         return -1;
     }
+    
     int32_t b_return = curr_proc->fds[fd].operations_pointer[READ](&(curr_proc->fds[fd]), buf, nbytes);
     curr_proc->fds[fd].file_position = curr_proc->fds[fd].file_position + b_return;
     return b_return;
@@ -294,11 +295,11 @@ int32_t vidmap (uint8_t ** screen_start) {
 }
 
 int32_t set_handler (int32_t signum, void * handler_address) {
-    return -1;
+    return 0;
 }
 
 int32_t sigreturn (void) {
-    return -1;
+    return 0;
 }
 
 /*
