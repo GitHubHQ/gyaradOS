@@ -211,17 +211,13 @@ int32_t read (int32_t fd, void * buf, int32_t nbytes) {
     if (buf == NULL || fd > 7 || fd < 0 || fd == 1 || curr_proc->fds[fd].flags != IN_USE) {
         return -1;
     }
-    
-    int32_t b_return = curr_proc->fds[fd].operations_pointer[READ](&(curr_proc->fds[fd]), buf, nbytes);
-    curr_proc->fds[fd].file_position = curr_proc->fds[fd].file_position + b_return;
-    return b_return;
+    return curr_proc->fds[fd].operations_pointer[READ](&(curr_proc->fds[fd]), buf, nbytes);
 }
 
 int32_t write (int32_t fd, const void * buf, int32_t nbytes) {
     if (buf == NULL || fd > 7 || fd <= 0 || curr_proc->fds[fd].flags != IN_USE) {
         return -1;
     }
-
     return curr_proc->fds[fd].operations_pointer[WRITE](fd, buf, nbytes);
 }
 
@@ -284,7 +280,7 @@ int32_t close (int32_t fd) {
 }
 
 int32_t getargs (uint8_t * buf, int32_t nbytes) {
-    if(nbytes < 0) {
+    if(nbytes < 0 || buf == NULL) {
         return -1;
     }
 
