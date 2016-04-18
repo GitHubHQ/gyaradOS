@@ -222,6 +222,11 @@ int32_t write (int32_t fd, const void * buf, int32_t nbytes) {
 }
 
 int32_t open (const uint8_t * filename) {
+    // fail if an invalid filename is specified
+    if (filename == NULL || strlen((int8_t *) filename) == 0) {
+        return -1;
+    }
+
     dentry_t file_info;
     int32_t check = read_dentry_by_name(filename, &file_info);
 
@@ -275,7 +280,11 @@ int32_t close (int32_t fd) {
 }
 
 int32_t getargs (uint8_t * buf, int32_t nbytes) {
-    strcpy((int8_t*)buf, (const int8_t*)curr_proc->args);
+    if(nbytes < 0) {
+        return -1;
+    }
+
+    strncpy((int8_t*)buf, (const int8_t*)curr_proc->args, nbytes);
     return 0;
 }
 
