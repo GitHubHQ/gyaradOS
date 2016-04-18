@@ -6,11 +6,11 @@ pcb_t * prev_proc = NULL;
 uint32_t curr_proc_id_mask = 0;
 uint32_t curr_proc_id = 0;
 
-func_ptr stdin_ops_table[4] = {NULL, terminal_read, NULL, NULL};
-func_ptr stdout_ops_table[4] = {NULL, NULL, terminal_write, NULL};
-func_ptr rtc_ops_table[4] = {rtc_open, rtc_read, rtc_write, rtc_close};
-func_ptr dir_ops_table[4] = {dir_open, dir_read, dir_write, dir_close};
-func_ptr files_ops_table[4] = {fs_open, fs_read, fs_write, fs_close};
+static func_ptr stdin_ops_table[4] = {NULL, terminal_read, NULL, NULL};
+static func_ptr stdout_ops_table[4] = {NULL, NULL, terminal_write, NULL};
+static func_ptr rtc_ops_table[4] = {rtc_open, rtc_read, rtc_write, rtc_close};
+static func_ptr dir_ops_table[4] = {dir_open, dir_read, dir_write, dir_close};
+static func_ptr files_ops_table[4] = {fs_open, fs_read, fs_write, fs_close};
 
 int32_t halt (uint8_t status) {
     pcb_t * proc_ctrl_blk = curr_proc;
