@@ -128,7 +128,7 @@ int32_t execute (const uint8_t * command) {
         printf("ERROR: Non-Runnable file!\n");
         return -1;
     }
-    
+
     // Grab the entry point of the application
     entrypoint += (uint32_t)f_init_data[27] << 24;
     entrypoint += (uint32_t)f_init_data[26] << 16;
