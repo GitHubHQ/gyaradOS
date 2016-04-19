@@ -128,9 +128,7 @@ int32_t terminal_write (int32_t fd, const uint8_t * buf, int32_t nbytes) {
     int i = 0;
 
     for(i = 0; i < nbytes; i++) {
-        if(buf[i] == '\n') {
-            new_line();
-        } else if(add_char_to_buffer(buf[i])) {
+        if(add_char_to_buffer(buf[i])) {
             num_printed++;
         }
     }
@@ -155,11 +153,20 @@ void reset_term() {
 
 uint32_t add_char_to_buffer(uint8_t new_char) {
     // if we haven't reached the buffer limit, add the char to the buffer and print the key
-    if(num_chars_in_buf[active_terminal] < MAX_CHARS_IN_BUF) {
-        keyboard_buf[active_terminal][num_chars_in_buf[active_terminal]] = new_char;
-        num_chars_in_buf[active_terminal]++;
-        
-        putc(new_char);
+    if(num_chars_in_buf < MAX_CHARS_IN_BUF) {
+        switch(new_char) {
+            case '\n':
+                new_line();
+                break;
+            case '\0':
+                return 1;
+                break;
+            default:
+                keyboard_buf[num_chars_in_buf] = new_char;
+                num_chars_in_buf++;
+                putc(new_char);
+                break;
+        }
         return 1;
     }
 

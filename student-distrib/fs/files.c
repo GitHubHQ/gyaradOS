@@ -288,13 +288,13 @@ int32_t dir_read(file_array* fd, int8_t * buf, int32_t length){
  * outputs: none
  */
 void test_dir_read() {
-    int32_t fd = 0, cnt = 0;
-    int8_t buf[33];
+    // int32_t fd = 0, cnt = 0;
+    // int8_t buf[33];
 
-    printf("Testing dir_read...\n");
+    // printf("Testing dir_read...\n");
     
-    //print out all files in directory
-    while(0 != (cnt = dir_read(fd,buf,32))){
-        printf("%s\n",buf);
-    }
+    // //print out all files in directory
+    // while(0 != (cnt = dir_read(fd,buf,32))){
+    //     printf("%s\n",buf);
+    // }
 }

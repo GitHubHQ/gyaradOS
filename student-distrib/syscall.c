@@ -128,7 +128,7 @@ int32_t execute (const uint8_t * command) {
         printf("ERROR: Non-Runnable file!\n");
         return -1;
     }
-    
+
     // Grab the entry point of the application
     entrypoint += (uint32_t)f_init_data[27] << 24;
     entrypoint += (uint32_t)f_init_data[26] << 16;
@@ -240,21 +240,21 @@ int32_t open (const uint8_t * filename) {
     for(i = 2; i < MAX_FILES; i++) {
         if(curr_proc->fds[i].flags == NOT_USE) {
             switch(file_info.file_type) {
-                case 0:
+                case RTC_TYPE:
                     curr_proc->fds[i].operations_pointer = rtc_ops_table;
                     curr_proc->fds[i].inode = NULL;
                     curr_proc->fds[i].file_position = 0;
                     strcpy((int8_t*)&(curr_proc->fds[i].file_name),(int8_t*)filename);
                     rtc_open();
                     break;
-                case 1:
+                case DIR_TYPE:
                     curr_proc->fds[i].operations_pointer = dir_ops_table;
                     curr_proc->fds[i].inode = NULL;
                     curr_proc->fds[i].file_position = 0;
                     strcpy((int8_t*)&(curr_proc->fds[i].file_name),(int8_t*)filename);
                     dir_open(filename);
                     break;
-                case 2:
+                case FILE_TYPE:
                     curr_proc->fds[i].operations_pointer = files_ops_table;
                     curr_proc->fds[i].inode = get_inode(file_info.inode_num);
                     curr_proc->fds[i].file_position = 0;
