@@ -32,6 +32,10 @@
 #define IN_USE			   1
 #define NOT_USE			   0
 
+#define RTC_TYPE           0
+#define DIR_TYPE           1
+#define FILE_TYPE          2
+
 #define MAX_FILES		   8
 
 #define PROGRAM_LOCATION_MASK	0x80000000
