@@ -11,6 +11,7 @@
 
 #define NUM_EXCEPTIONS 0x20
 
+#define PIT_IDT        0x20
 #define KEYBOARD_IDT   0x21
 #define RTC_IDT        0x28
 #define MOUSE_IDT	   0x2C

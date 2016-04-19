@@ -22,6 +22,7 @@
 .global machine_chk_irq
 
 // interrupts
+.global pit_irq
 .global key_irq
 .global rtc_irq
 .global mouse_irq
@@ -510,6 +511,31 @@ machine_chk_irq:
 /**
  * Interrupts
  */
+
+/*
+ * pit_irq()
+ *
+ * Description: Calls the PIT handler function and then exits the interrupt cleanly using iret
+ * Inputs: none
+ * Outputs: none
+ * Returns: none
+ */
+pit_irq:
+    // save caller saved registers
+    pushl %eax
+    pushl %ecx
+    pushl %edx
+
+    // call the function
+    call pit_handle_interrupt
+
+    // restore caller saved registers
+    popl %edx
+    popl %ecx
+    popl %eax
+
+    // return to the interrupt handler
+    iret
 
 /*
  * key_irq()
