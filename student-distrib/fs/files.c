@@ -6,7 +6,7 @@ uint32_t b_block_addrs;
 dentry_t * dentries;
 inode_t * inodes;
 uint32_t data_blocks;
-uint32_t dirReads;
+//file_t files_opened[MAX_FILES];
 
 /**
  * Initializing the Boot block by getting the data from address
@@ -19,8 +19,6 @@ void fs_init(uint32_t addrs) {
     dentries = (dentry_t *)(b_block_addrs + BOOT_BLOCK_SIZE);
     inodes = (inode_t *) (b_block_addrs + BLOCK_SIZE);
     data_blocks = b_block_addrs + b.n_inodes * BLOCK_SIZE + BLOCK_SIZE;
-
-    dirReads = 0;
 }
 
 /* fs_read(int8_t* fd, uint8_t * buf, int32_t nbytes)
@@ -37,6 +35,8 @@ int32_t fs_read(file_array* fd, uint8_t * buf, int32_t nbytes) {
 
     int bytesRead = read_data(temp.inode_num, fd->file_position, buf, nbytes);
 
+    fd->file_position += bytesRead;
+
     return bytesRead;
 }
 
@@ -52,16 +52,15 @@ int32_t fs_write(int32_t fd, const uint8_t * buf, int32_t nbytes) {
  * inputs: none
  * ouputs: none return 0
  */
-int32_t fs_open(const uint8_t* filename){
-    
-    return 0; 
+int32_t fs_open(const uint8_t* filename) {
+    return 0;
 }
 
 /* fs_close()
  * inputs: none
  * ouputs: none return 0
  */
-int32_t fs_close(void){
+int32_t fs_close(void) {
     return 0;
 }
 
@@ -167,15 +166,12 @@ int32_t copy_file_to_addr(uint8_t* fname, uint32_t addr) {
     }
 
     uint32_t file_size = inodes[temp_dentry.inode_num].file_size;
-    uint8_t buf[file_size];
     
-    uint32_t amount_to_copy = read_data(temp_dentry.inode_num, 0, buf, file_size);
+    uint32_t ret = read_data(temp_dentry.inode_num, 0, (uint8_t *) addr, file_size);
 
-    if(amount_to_copy == -1) {
+    if(ret == -1) {
         return -1;
     }
-
-    memcpy((uint32_t *) addr, buf, amount_to_copy);
 
     return 0;
 }
@@ -260,7 +256,7 @@ int32_t dir_close(void){
  * inputs: none
  * outputs: return -1 because read only
  */
-int32_t dir_write(int32_t fd, const int8_t * buf, int32_t nbytes){
+int32_t dir_write(file_array* fd, const int8_t * buf, int32_t nbytes){
     return -1;
 }
 
@@ -269,18 +265,19 @@ int32_t dir_write(int32_t fd, const int8_t * buf, int32_t nbytes){
  * inputs: file descriptor, buffer for output, and length for bytes to copy
  * outputs: copies filename into buf and returns the number of bytes copied
  */
-int32_t dir_read(int32_t fd, int8_t * buf, int32_t length){
+int32_t dir_read(file_array* fd, int8_t * buf, int32_t length){
     //check if reached end       
-    if(dirReads >= b.n_dentries){
-        dirReads = 0;
+    if(fd->file_position >= b.n_dentries){
+        fd->file_position = 0;
         return 0;
     }
     //copy name into buf
-    strcpy(buf, dentries[dirReads].file_name);
+    strcpy(buf, dentries[fd->file_position].file_name);
     
     //get number of bytes and increment the directory read counter
     int bytesCopied = strlen(buf);
-    dirReads++;
+
+    fd->file_position++;
 
     return bytesCopied;
 }

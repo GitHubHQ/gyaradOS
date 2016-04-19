@@ -6,13 +6,11 @@ pcb_t * prev_proc = NULL;
 uint32_t curr_proc_id_mask = 0;
 uint32_t curr_proc_id = 0;
 
-func_ptr stdin_ops_table[4] = {NULL, terminal_read, NULL, NULL};
-func_ptr stdout_ops_table[4] = {NULL, NULL, terminal_write, NULL};
-func_ptr rtc_ops_table[4] = { rtc_open,  rtc_read,  rtc_write,  rtc_close};
-func_ptr dir_ops_table[4] = { dir_open,  dir_read,  dir_write,  dir_close};
-func_ptr files_ops_table[4] = { fs_open,  fs_read,  fs_write,  fs_close};
-
-uint32_t files_in_use = 2;
+static func_ptr stdin_ops_table[4] = {NULL, terminal_read, NULL, NULL};
+static func_ptr stdout_ops_table[4] = {NULL, NULL, terminal_write, NULL};
+static func_ptr rtc_ops_table[4] = {rtc_open, rtc_read, rtc_write, rtc_close};
+static func_ptr dir_ops_table[4] = {dir_open, dir_read, dir_write, dir_close};
+static func_ptr files_ops_table[4] = {fs_open, fs_read, fs_write, fs_close};
 
 int32_t halt (uint8_t status) {
     pcb_t * proc_ctrl_blk = curr_proc;
@@ -57,6 +55,12 @@ int32_t halt (uint8_t status) {
     proc_ctrl_blk->fds[1].inode = NULL;
     proc_ctrl_blk->fds[1].flags = NOT_USE;
 
+    // Close any open FDS
+    int i;
+    for(i = 2; i < 8; i ++) {
+        close(i);
+    }
+
     // reset the page entries
     switch_pd(prev_proc->proc_num, prev_proc->base);
     tss.esp0 = _8MB - (_8KB) * prev_proc->proc_num - 4;
@@ -92,20 +96,19 @@ int32_t execute (const uint8_t * command) {
     uint8_t space_flag = 0;
     uint8_t cmd_len;
     uint8_t temp_arg[64];
-    for( i = 0; command[i] != '\0' ; i++ ) {
-        if( command[i] == ' ' && space_flag == 0 ) {
+    for(i = 0; command[i] != '\0' ; i++) {
+        if(command[i] == ' ' && space_flag == 0) {
             space_flag = 1;
             cmd_len = i;
-            //fname[i] = '\0';
-        } else if( space_flag == 1 ) {
-            temp_arg[i-cmd_len-1] = command[i];
+        } else if(space_flag == 1) {
+            temp_arg[i - cmd_len - 1] = command[i];
         } else {
-            if(i>=32 && space_flag == 0) {
+            if(i >= 32 && space_flag == 0) {
                 return -1;
             }
-            //fname[i] = command[i];
         }
     }
+
     temp_arg[i-cmd_len-1] = '\0';
 
     // get the file name to execute
@@ -122,10 +125,10 @@ int32_t execute (const uint8_t * command) {
 
     // See if the file is executeable
     if (!((f_init_data[0] == MAGIC_NUM_1) && (f_init_data[1] == MAGIC_NUM_2) && (f_init_data[2] == MAGIC_NUM_3) && (f_init_data[3] == MAGIC_NUM_4))) {
-        printf("%s\n", "Non-Runnable file!");
+        printf("ERROR: Non-Runnable file!\n");
         return -1;
     }
-
+    
     // Grab the entry point of the application
     entrypoint += (uint32_t)f_init_data[27] << 24;
     entrypoint += (uint32_t)f_init_data[26] << 16;
@@ -144,7 +147,8 @@ int32_t execute (const uint8_t * command) {
     }
 
     // Max number of programs reached, error out
-    if (i == (MAX_PROG_NUM -1)) {
+    if (i >= (MAX_PROG_NUM -1)) {
+        printf("ERROR: Out of runnable program slots!\n");
         return -1;
     }
 
@@ -155,7 +159,7 @@ int32_t execute (const uint8_t * command) {
     copy_file_to_addr(f_name, PROGRAM_EXEC_ADDR);
 
     // Create a process control block for our program in the kernel stack
-    pcb_t * proc_ctrl_blk = (pcb_t*) (_8MB - (_8KB)*(curr_proc_id + 1));
+    pcb_t * proc_ctrl_blk = (pcb_t*) (_8MB - ((_8KB)*(curr_proc_id + 1)));
 
     // Grab and store the ESP and EBP in the PCB
     asm volatile("movl %%esp, %0":"=g"(proc_ctrl_blk->p_ksp));
@@ -171,7 +175,7 @@ int32_t execute (const uint8_t * command) {
     strcpy((int8_t*)proc_ctrl_blk->args, (const int8_t*)temp_arg);
 
     // Initalize PCB file descriptors
-    for (i = 0; i < 8; ++i) {
+    for (i = 0; i < 8; i++) {
         proc_ctrl_blk->fds[i].operations_pointer = NULL;
         proc_ctrl_blk->fds[i].inode = NULL;
         proc_ctrl_blk->fds[i].file_position = 0;
@@ -204,21 +208,30 @@ int32_t execute (const uint8_t * command) {
 }
 
 int32_t read (int32_t fd, void * buf, int32_t nbytes) {
-    int32_t b_return = curr_proc->fds[fd].operations_pointer[READ](&(curr_proc->fds[fd]), buf, nbytes);
-    curr_proc->fds[fd].file_position = curr_proc->fds[fd].file_position + b_return;
-    return b_return;
+    if (buf == NULL || fd > 7 || fd < 0 || fd == 1 || curr_proc->fds[fd].flags != IN_USE) {
+        return -1;
+    }
+    return curr_proc->fds[fd].operations_pointer[READ](&(curr_proc->fds[fd]), buf, nbytes);
 }
 
 int32_t write (int32_t fd, const void * buf, int32_t nbytes) {
+    if (buf == NULL || fd > 7 || fd <= 0 || curr_proc->fds[fd].flags != IN_USE) {
+        return -1;
+    }
     return curr_proc->fds[fd].operations_pointer[WRITE](fd, buf, nbytes);
 }
 
 int32_t open (const uint8_t * filename) {
+    // fail if an invalid filename is specified
+    if (filename == NULL || strlen((int8_t *) filename) == 0) {
+        return -1;
+    }
+
     dentry_t file_info;
     int32_t check = read_dentry_by_name(filename, &file_info);
 
     //checking if the file name exists
-    if(check == -1 || files_in_use > MAX_FILES) {
+    if(check == -1) {
         return -1;
     }
 
@@ -249,29 +262,29 @@ int32_t open (const uint8_t * filename) {
                     fs_open(filename);
                     break;
             }
-
             curr_proc->fds[i].flags = IN_USE;
-            files_in_use++;
             return i;
         }
     }
-    return 0;
+    return -1;
 }
 
 int32_t close (int32_t fd) {
-    if(fd >= 2 && fd <= 7) {
+    if(fd >= 2 && fd <= 7 && (curr_proc->fds[fd].flags == IN_USE)) {
         curr_proc->fds[fd].flags = NOT_USE;
         curr_proc->fds[fd].file_position = 0;
-        files_in_use--;
-        curr_proc->fds[fd].operations_pointer[CLOSE](fd);
-        return 0;
+        return curr_proc->fds[fd].operations_pointer[CLOSE](fd);
     }
 
     return -1;
 }
 
 int32_t getargs (uint8_t * buf, int32_t nbytes) {
-    strcpy((int8_t*)buf, (const int8_t*)curr_proc->args);
+    if(nbytes < 0 || buf == NULL) {
+        return -1;
+    }
+
+    strncpy((int8_t*)buf, (const int8_t*)curr_proc->args, nbytes);
     return 0;
 }
 
@@ -285,11 +298,11 @@ int32_t vidmap (uint8_t ** screen_start) {
 }
 
 int32_t set_handler (int32_t signum, void * handler_address) {
-    return -1;
+    return 0;
 }
 
 int32_t sigreturn (void) {
-    return -1;
+    return 0;
 }
 
 /*

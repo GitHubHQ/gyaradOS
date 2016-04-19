@@ -16,8 +16,8 @@ jmp_usr_exec:
     movl 4(%esp), %ebx
 
     # move the segments into registers for use
-    movl $USER_DS, %edi
     movl $USER_CS, %esi
+    movl $USER_DS, %edi
 
     # move the selector to the appropriate registers
     movw %di, %ds
