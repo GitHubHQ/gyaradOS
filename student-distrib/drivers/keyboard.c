@@ -325,19 +325,19 @@ void handle_keypress() {
                     alt_l_on = 1;
                     break;
                 case KEY_MAKE_F1:
-                    if(alt_l_on || alt_r_on) {
+                    // if(alt_l_on || alt_r_on) {
                         active_terminal = 0;
-                    }
+                    // }
                     break;
                 case KEY_MAKE_F2:
-                    if(alt_l_on || alt_r_on) {
+                    // if(alt_l_on || alt_r_on) {
                         active_terminal = 1;
-                    }
+                    // }
                     break;
                 case KEY_MAKE_F3:
-                    if(alt_l_on || alt_r_on) {
+                    // if(alt_l_on || alt_r_on) {
                         active_terminal = 2;
-                    }
+                    // }
                     break;
                 default:
                     break;
