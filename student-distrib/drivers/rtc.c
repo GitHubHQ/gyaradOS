@@ -6,7 +6,16 @@ int32_t init_mode;
 
 volatile int32_t intr_occ = 0;
 
-int32_t rtc_error_check(int32_t frequency) {
+/**
+ * Sets the frequency divisor for the RTC clock
+ * @param frequency A value between 2 and 1024 inclusive to set the rate to
+ */
+int32_t rtc_set_frequency(int32_t frequency) {
+	float rateVal = logBase2(frequency);
+	unsigned long flags;
+
+	int32_t rate;
+
 	// Error checking
 	if (frequency < 2 || frequency > 1024)
 	{
@@ -18,20 +27,6 @@ int32_t rtc_error_check(int32_t frequency) {
 		return -1;
 	}
 
-	return 0;
-}
-
-/**
- * Sets the frequency divisor for the RTC clock
- * @param frequency A value between 2 and 1024 inclusive to set the rate to
- */
-int32_t rtc_set_frequency(int32_t frequency) {
-	float rateVal = logBase2(frequency);
-	unsigned long flags;
-	int32_t rate;
-
-	rtc_error_check(frequency);
-
 	// Be nice to the user, round up for down for them if they don't give a power of 2
 	// NOTE: This is not used if a power of 2 check is enabled
 	if( ((int)((int)(rateVal * 10) % 10)) > 5) {
@@ -39,6 +34,8 @@ int32_t rtc_set_frequency(int32_t frequency) {
 	} else {
 		rate = floor(rateVal);
 	}
+
+
 
 	// Get the actual divider
 	rate = 16 - rate;
@@ -149,7 +146,7 @@ int32_t rtc_close(void) {
  * @param  nbytes Not used
  * @return        0 on interrupt
  */
-int32_t rtc_read(file_array* fd, uint8_t* buf, int32_t nbytes) {
+int32_t rtc_read(int32_t fd, uint8_t* buf, int32_t nbytes) {
 	while(!intr_occ) {
 		/* Do nothing */
 	}
@@ -166,7 +163,7 @@ int32_t rtc_read(file_array* fd, uint8_t* buf, int32_t nbytes) {
  * @param  nbytes Size of buf
  * @return        0 on success, -1 on failure
  */
-int32_t rtc_write(file_array* fd, const int32_t* buf, int32_t nbytes) {
+int32_t rtc_write(int32_t fd, const int32_t* buf, int32_t nbytes) {
 	if (nbytes != 4) {
 		return -1;
 	}
@@ -175,15 +172,11 @@ int32_t rtc_write(file_array* fd, const int32_t* buf, int32_t nbytes) {
 		return -1;
 	}
 	int32_t frequency = *buf;
-	if(!rtc_error_check(frequency)) {
-		fd->file_position = frequency;
-		return 0;
-	}
-	return -1;
+	return rtc_set_frequency(frequency);
 }
 
 /**
- * Tests the RTC functions
+ * Tets the RTC functions
  */
 void rtc_test(void) {
 	// RTC Testing

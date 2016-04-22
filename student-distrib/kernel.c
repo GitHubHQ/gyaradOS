@@ -6,7 +6,6 @@
 #include "drivers/pit.h"
 #include "drivers/rtc.h"
 #include "drivers/speaker.h"
-#include "drivers/mouse.h"
 #include "libs/lib.h"
 #include "multiboot.h"
 #include "x86_desc.h"
@@ -170,9 +169,9 @@ void entry (unsigned long magic, unsigned long addr) {
 	rtc_init(RTC_SILENT);
 	printf("[ OK ]\n");
 
-	// printf("Initalizing PIT               ... ");
-	// pit_init();
-	// printf("[ OK ]\n");
+	printf("Initalizing PIT               ... ");
+	pit_init();
+	printf("[ OK ]\n");
 
 	printf("Enabling Slave PIC interrupts ... ");
 	enable_irq(IRQ_CAS_SIG);
@@ -190,13 +189,6 @@ void entry (unsigned long magic, unsigned long addr) {
 	enable_irq(IRQ_PIT);
 	printf("[ OK ]\n");
 
-	printf("Enabling Mouse interrupts  ... ");
-	enable_irq(IRQ_MOUSE_PS2);
-	mouse_init();
-	printf("[ OK ]\n");
-
-
-
 	/* Display the splash screen */
 	// splash_screen();
 
@@ -211,7 +203,6 @@ void entry (unsigned long magic, unsigned long addr) {
 
 	/* Initialize filesystem */
 	fs_init(fs_start);
-
 
 	// Clear the screen for use
 	clear_screen();
