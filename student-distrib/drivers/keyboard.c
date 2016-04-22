@@ -63,13 +63,11 @@ uint8_t caps_ascii[] = {
     ASCII_PLACEHOLDER, ASCII_PLACEHOLDER
 };
 
-#define TERM_TEST_OPEN 0
-#define TERM_TEST_CLOSE 0
-#define TERM_TEST_WRITE 0
-#define TERM_TEST_READ 0
+uint8_t active_terminal = 0;
 
-int8_t keyboard_buf[MAX_CHARS_IN_BUF];
-uint32_t num_chars_in_buf = 0;
+uint32_t keyboard_buf[NUM_TERMINALS][MAX_CHARS_IN_BUF];
+uint32_t num_chars_in_buf[NUM_TERMINALS] = {0, 0, 0};
+int read_buf_ready[NUM_TERMINALS] = {0, 0, 0};
 
 // variables designating status of special keys
 int special_key_enabled = 0;
@@ -110,8 +108,8 @@ int32_t terminal_read (int32_t fd, uint8_t * buf, int32_t nbytes) {
     while(!read_buf_ready);
 
     for(i = 0; i <= nbytes; i++) {
-        buf[i] = keyboard_buf[i];
-        keyboard_buf[i] = NULL;
+        buf[i] = keyboard_buf[active_terminal][i];
+        keyboard_buf[active_terminal][i] = NULL;
         bytes_read++;
     }
 
@@ -153,7 +151,7 @@ void reset_term() {
 
 uint32_t add_char_to_buffer(uint8_t new_char) {
     // if we haven't reached the buffer limit, add the char to the buffer and print the key
-    if(num_chars_in_buf < MAX_CHARS_IN_BUF) {
+    if(num_chars_in_buf[active_terminal] < MAX_CHARS_IN_BUF) {
         switch(new_char) {
             case '\n':
                 new_line();
@@ -162,8 +160,8 @@ uint32_t add_char_to_buffer(uint8_t new_char) {
                 return 1;
                 break;
             default:
-                keyboard_buf[num_chars_in_buf] = new_char;
-                num_chars_in_buf++;
+                keyboard_buf[active_terminal][num_chars_in_buf[active_terminal]] = new_char;
+                num_chars_in_buf[active_terminal]++;
                 putc(new_char);
                 break;
         }
@@ -323,6 +321,28 @@ void handle_keypress() {
                 case KEY_MAKE_BKSP:
                     handle_backspace();
                     break;
+<<<<<<< HEAD
+=======
+                case KEY_MAKE_ALT:
+                    alt_l_on = 1;
+                    break;
+                case KEY_MAKE_F1:
+                    // if(alt_l_on || alt_r_on) {
+                        printf("f1");
+                        active_terminal = 0;
+                    // }
+                    break;
+                case KEY_MAKE_F2:
+                    // if(alt_l_on || alt_r_on) {
+                        active_terminal = 1;
+                    // }
+                    break;
+                case KEY_MAKE_F3:
+                    // if(alt_l_on || alt_r_on) {
+                        active_terminal = 2;
+                    // }
+                    break;
+>>>>>>> 02710112bad74b560cc7873f7f3bbbdfc33b1090
                 default:
                     break;
             }
