@@ -31,9 +31,10 @@ void clear(void) {
  * @param y     y location to draw at
  * @param color color of the cursor
  */
-void draw_full_block(int32_t x, int32_t y, int8_t color) {
+void draw_full_block(int32_t x, int32_t y, int8_t color, char c) {
 	int32_t offset = y*NUM_COLS + x;
-  	*(uint8_t *)(video_mem + (offset<<1) + 1) = 0x01;
+	*(uint8_t *)(video_mem + (offset<<1)) = c ;
+  	*(uint8_t *)(video_mem + (offset<<1) + 1) = 0x04;
 }
 
 /* Standard printf().

@@ -58,8 +58,7 @@ void mouse_handle_interrupt() {
 			int32_t deltaX = (int8_t)mouse_byte_2;
 			int32_t deltaY = (int8_t)mouse_byte_3;
 
-			// Since we sign extended to 32 bits, we should also do this if
-			// negative to retain signedness
+			// Since we sign extended to 32 bits, we should also do this if negative to retain signedness
 			if (mouse_byte_1 & MOUSE_XS_BITM) {
 				deltaX |= MOUSE_SGN_BITM;
 			}
@@ -67,13 +66,15 @@ void mouse_handle_interrupt() {
 				deltaY |= MOUSE_SGN_BITM;
 			}
 
-			//deltaX = deltaX%3;
-			//deltaY = deltaY%2;
+			// Futile attempt to slow down mouse
+			deltaX = deltaX%2;
+			deltaY = deltaY%2;
+
+			//printf("Before Change X, Y: %d, %d\n", mouse_x, mouse_y);
 
 			// Actually move the mouse now:
-			// This draw ensures that if the movement was minimal (0)
-			// the mouse block is still drawn
-			//draw_full_block(mouse_x, mouse_y, 0x00);
+			// This draw clears the previous cursor location (TODO: Restore what was at this location)
+			draw_full_block(mouse_x, mouse_y, ATTRIB, ' ');
 
 			// Change values
 			mouse_x += deltaX;
@@ -89,21 +90,20 @@ void mouse_handle_interrupt() {
 			// Check for bounds
 			if(mouse_x < 0) {
 				mouse_x = 0;
-			}
-			if(mouse_x > 79) {
+			} else if(mouse_x > 79) {
 				mouse_x = 79;
 			}
+
 			if(mouse_y < 0) {
 				mouse_y = 0;
-			}
-			if(mouse_y > 24) {
+			} else if(mouse_y > 24) {
 				mouse_y = 24;
 			}
 
 			//printf("After check X, Y: %d, %d\n", mouse_x, mouse_y);
 
 			// New position is set, redraw the cursor
-			//draw_full_block(mouse_x, mouse_y, 0x00);
+			draw_full_block(mouse_x, mouse_y, ATTRIB, '\u2588');
 		}
 	}
 	send_eoi(IRQ_MOUSE_PS2);
