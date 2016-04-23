@@ -10,8 +10,8 @@
 #define PAGE_SIZE_LARGE         0x400000
 
 #define VIDEO_PHYS_ADDR         0XB8000
-#define VIDEO_PHYS_ADDR1        0xBC000
-#define VIDEO_PHYS_ADDR2        0xC0000
+#define VIDEO_PHYS_ADDR1        0xB9000
+#define VIDEO_PHYS_ADDR2        0xBA000
 
 #define KERNEL_PHYS_ADDR        0x400000
 #define KERNEL_END_ADDR         0x800000
