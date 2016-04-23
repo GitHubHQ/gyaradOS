@@ -70,6 +70,9 @@ uint8_t caps_ascii[] = {
 
 uint8_t active_terminal = 0;
 
+uint8_t second_term_start = 0;
+uint8_t third_term_start = 0;
+
 uint32_t keyboard_buf[NUM_TERMINALS][MAX_CHARS_IN_BUF];
 uint32_t num_chars_in_buf[NUM_TERMINALS] = {0, 0, 0};
 int read_buf_ready[NUM_TERMINALS] = {0, 0, 0};
@@ -282,6 +285,8 @@ void handle_keypress() {
                         // send eoi and restore prev flags
                         send_eoi(IRQ_KEYBOARD_CTRL);
                         restore_flags(flags);
+
+                        // call halt to terminate the current process
                         halt(0);
                         break;
                     default:
@@ -292,6 +297,7 @@ void handle_keypress() {
                 key_ascii = caps_ascii[key_code];
                 add_char_to_buffer(key_ascii);
             } else if (!caps_on && (shift_l_on || shift_r_on)) {
+                // print shift version
                 key_ascii = shift_ascii[key_code];
                 add_char_to_buffer(key_ascii);
             } else {
@@ -325,19 +331,29 @@ void handle_keypress() {
                     alt_l_on = 1;
                     break;
                 case KEY_MAKE_F1:
-                    if(alt_l_on || alt_r_on) {
+                    // if(alt_l_on || alt_r_on) {
                         active_terminal = 0;
-                    }
+                    // }
                     break;
                 case KEY_MAKE_F2:
-                    if(alt_l_on || alt_r_on) {
+                    // if(alt_l_on || alt_r_on) {
                         active_terminal = 1;
-                    }
+                        if(!second_term_start) {
+                            // start up second terminal
+                            // set the flag correctly
+                            second_term_start = 1;
+                        }
+                    // }
                     break;
                 case KEY_MAKE_F3:
-                    if(alt_l_on || alt_r_on) {
+                    // if(alt_l_on || alt_r_on) {
                         active_terminal = 2;
-                    }
+                        if(!third_term_start) {
+                            // start up third terminal
+                            // set the flag correctly
+                            third_term_start = 1;
+                        }
+                    // }
                     break;
                 default:
                     break;
@@ -374,7 +390,6 @@ void handle_keypress() {
                     break;
                 default:
                     // we don't care about the rest of the special keys
-                    // missing R ALT
                     break;
             }
         } else {
