@@ -133,4 +133,13 @@ void switch_vid(uint8_t terminal_num) {
             pageTable1[VIDEO_PHYS_ADDR/PAGE_SIZE].page_base = VIDEO_PHYS_ADDR2 / _4KB;
             break;
     }
+
+    //flushing the TLB
+    asm volatile (
+                    //moving the address of PD to cr3
+                    "mov %%eax, %%cr3               \n" 
+                    : /* no outputs */          
+                    : "a" (pageDirectory)           
+                 );
+    return 0;
 }
