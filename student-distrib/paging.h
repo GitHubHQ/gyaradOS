@@ -10,12 +10,20 @@
 #define PAGE_SIZE_LARGE         0x400000
 
 #define VIDEO_PHYS_ADDR         0XB8000
+#define VIDEO_PHYS_ADDR1        0xBC000
+#define VIDEO_PHYS_ADDR2        0xC0000
+
 #define KERNEL_PHYS_ADDR        0x400000
 #define KERNEL_END_ADDR         0x800000
 #define PROCESS_START_ADDR      0x08048000
 
 #define _4KB                    0x1000
 #define MAX_PROCESSES           10
+
+#define terminal_0              0
+#define terminal_1              1
+#define terminal_2              2
+
 
 typedef union PDE {
     struct {
@@ -55,5 +63,6 @@ PTE_t pageTable1[PAGE_TABLE_SIZE] __attribute__((aligned(PAGE_SIZE)));
 extern void init_paging();
 extern uint32_t init_new_process(uint32_t process_num);
 extern int switch_pd(uint8_t process_num, uint32_t prev_base);
+extern void switch_vid(uint8_t terminal_num);
 
 #endif
