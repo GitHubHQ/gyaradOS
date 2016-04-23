@@ -331,25 +331,33 @@ void handle_keypress() {
                     alt_l_on = 1;
                     break;
                 case KEY_MAKE_F1:
+                    printf("hello");
                     // if(alt_l_on || alt_r_on) {
+                        switch_vid(0);
                         active_terminal = 0;
                     // }
                     break;
                 case KEY_MAKE_F2:
+                    printf("it's");
                     // if(alt_l_on || alt_r_on) {
+                        switch_vid(1);
                         active_terminal = 1;
                         if(!second_term_start) {
                             // start up second terminal
+                            execute((uint8_t*) "shell");
                             // set the flag correctly
                             second_term_start = 1;
                         }
                     // }
                     break;
                 case KEY_MAKE_F3:
+                    printf("me");
                     // if(alt_l_on || alt_r_on) {
+                        switch_vid(2);
                         active_terminal = 2;
                         if(!third_term_start) {
                             // start up third terminal
+                            execute((uint8_t*) "shell");
                             // set the flag correctly
                             third_term_start = 1;
                         }

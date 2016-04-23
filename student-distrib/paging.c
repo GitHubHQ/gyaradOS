@@ -123,14 +123,14 @@ int switch_pd(uint8_t process_num, uint32_t prev_base) {
 
 void switch_vid(uint8_t terminal_num) {
     switch(terminal_num) {
-        case terminal_0:
-            pageTable1[VIDEO_PHYS_ADDR/PAGE_SIZE].page_base = VIDEO_PHYS_ADDR / _4KB;
+        case TERMINAL_0:
+            pageTable1[VIDEO_PHYS_ADDR/PAGE_SIZE].PTE_bits.page_base = VIDEO_PHYS_ADDR / _4KB;
             break;
-        case terminal_1:
-            pageTable1[VIDEO_PHYS_ADDR/PAGE_SIZE].page_base = VIDEO_PHYS_ADDR1 / _4KB;
+        case TERMINAL_1:
+            pageTable1[VIDEO_PHYS_ADDR/PAGE_SIZE].PTE_bits.page_base = VIDEO_PHYS_ADDR1 / _4KB;
             break;
-        case terminal_2:
-            pageTable1[VIDEO_PHYS_ADDR/PAGE_SIZE].page_base = VIDEO_PHYS_ADDR2 / _4KB;
+        case TERMINAL_2:
+            pageTable1[VIDEO_PHYS_ADDR/PAGE_SIZE].PTE_bits.page_base = VIDEO_PHYS_ADDR2 / _4KB;
             break;
     }
 
@@ -141,5 +141,5 @@ void switch_vid(uint8_t terminal_num) {
                     : /* no outputs */          
                     : "a" (pageDirectory)           
                  );
-    return 0;
+    return;
 }

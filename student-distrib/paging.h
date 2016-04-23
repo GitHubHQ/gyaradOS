@@ -20,9 +20,9 @@
 #define _4KB                    0x1000
 #define MAX_PROCESSES           10
 
-#define terminal_0              0
-#define terminal_1              1
-#define terminal_2              2
+#define TERMINAL_0              0
+#define TERMINAL_1              1
+#define TERMINAL_2              2
 
 
 typedef union PDE {
