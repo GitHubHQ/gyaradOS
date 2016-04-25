@@ -24,7 +24,6 @@
 #define TERMINAL_1              1
 #define TERMINAL_2              2
 
-
 typedef union PDE {
     struct {
         uint32_t present : 1;
