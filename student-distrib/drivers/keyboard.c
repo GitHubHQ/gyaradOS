@@ -342,32 +342,40 @@ void handle_keypress() {
                     // if(alt_l_on || alt_r_on && active_terminal != 1) {
                         // switch to the video memory of the second terminal
                         switch_vid(1);
-
-                        // if(!second_term_start) {
-                        //     // start up second terminal
-                        //     execute((uint8_t*) "shell");
-                        //     // set the flag correctly
-                        //     second_term_start = 1;
-                        // }
-
                         active_terminal = 1;
                         update_screen();
+
+                        // send eoi and restore prev flags
+                        send_eoi(IRQ_KEYBOARD_CTRL);
+                        restore_flags(flags);
+
+                        if(!second_term_start) {
+                            // set the flag correctly
+                            second_term_start = 1;
+
+                            // start up second terminal
+                            execute((uint8_t*) "shell");
+                        }
                     // }
                     break;
                 case KEY_MAKE_F3:
                     // if(alt_l_on || alt_r_on && active_terminal != 2) {
                         // switch to the video memory of the third terminal
                         switch_vid(2);
-
-                        // if(!third_term_start) {
-                        //     // start up third terminal
-                        //     execute((uint8_t*) "shell");
-                        //     // set the flag correctly
-                        //     third_term_start = 1;
-                        // }
-
                         active_terminal = 2;
                         update_screen();
+
+                        // send eoi and restore prev flags
+                        send_eoi(IRQ_KEYBOARD_CTRL);
+                        restore_flags(flags);
+
+                        if(!third_term_start) {
+                            // set the flag correctly
+                            third_term_start = 1;
+
+                            // start up third terminal
+                            execute((uint8_t*) "shell");
+                        }
                     // }
                     break;
                 default:
