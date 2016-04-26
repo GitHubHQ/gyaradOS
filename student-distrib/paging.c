@@ -1,5 +1,11 @@
 #include "paging.h"
 
+/* void init_paging()
+ * Description: initializes paging
+ * Inputs: none
+ * Outputs: none
+ */
+
 void init_paging() {
 	int i;
     
@@ -78,6 +84,12 @@ void init_paging() {
                  );		
 }
 
+/* uint32_t init_new_process(uint32_t process_num)
+ * Description: maps a new process to the 128MB location
+ * Inputs: process_num to allocate memory for a new process
+ * Outputs: none
+ */
+
 uint32_t init_new_process(uint32_t process_num){
     //get address and index
     uint32_t address = KERNEL_END_ADDR + process_num*PAGE_SIZE_LARGE;
@@ -100,6 +112,11 @@ uint32_t init_new_process(uint32_t process_num){
     return pageDirectory[idx].PDE_bits.page_table_base;
 }
 
+/* int switch_pd(uint8_t process_num, uint32_t prev_base)
+ * Description: switches program back to parent program
+ * Inputs: process_num and prev_base to switch back to parent process
+ * Outputs: none
+ */
 int switch_pd(uint8_t process_num, uint32_t prev_base) {
     // get address and index
     uint32_t idx = PROCESS_START_ADDR / PAGE_SIZE_LARGE;
@@ -121,8 +138,15 @@ int switch_pd(uint8_t process_num, uint32_t prev_base) {
     return 0;
 }
 
+/* void switch_vid(uint8_t terminal_num)
+ * Description: switch video memory for terminals
+ * Inputs: uint8_t terminal_num for selecting the proper video memory page
+ * Outputs: none
+ */
+
 void switch_vid(uint8_t terminal_num) {
-    switch(terminal_num) {
+        /* select video memory based on active terminal */
+        switch(terminal_num) {
         case TERMINAL_0:
             pageTable1[VIDEO_PHYS_ADDR/PAGE_SIZE].PTE_bits.page_base = VIDEO_PHYS_ADDR / _4KB;
             break;
