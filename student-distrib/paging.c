@@ -120,26 +120,3 @@ int switch_pd(uint8_t process_num, uint32_t prev_base) {
                  );
     return 0;
 }
-
-void switch_vid(uint8_t terminal_num) {
-    switch(terminal_num) {
-        case TERMINAL_0:
-            pageTable1[VIDEO_PHYS_ADDR/PAGE_SIZE].PTE_bits.page_base = VIDEO_PHYS_ADDR / _4KB;
-            break;
-        case TERMINAL_1:
-            pageTable1[VIDEO_PHYS_ADDR/PAGE_SIZE].PTE_bits.page_base = VIDEO_PHYS_ADDR1 / _4KB;
-            break;
-        case TERMINAL_2:
-            pageTable1[VIDEO_PHYS_ADDR/PAGE_SIZE].PTE_bits.page_base = VIDEO_PHYS_ADDR2 / _4KB;
-            break;
-    }
-
-    //flushing the TLB
-    asm volatile (
-                    //moving the address of PD to cr3
-                    "mov %%eax, %%cr3               \n" 
-                    : /* no outputs */          
-                    : "a" (pageDirectory)           
-                 );
-    return;
-}

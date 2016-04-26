@@ -335,25 +335,11 @@ uint8_t* strtok(const uint8_t* input) {
     return output;
 }
 
-void update_screen(void) {
-	active_terminal = get_active_terminal();
+void update_screen(uint8_t dest, uint8_t src) {
+	memcpy(term_vid_mem[src], video_mem, 0x1000);
+	memcpy(video_mem, term_vid_mem[dest], 0x1000);
 
-    switch(active_terminal) {
-        case TERMINAL_0:
-            video_mem = (uint8_t *) VIDEO_PHYS_ADDR;
-            break;
-        case TERMINAL_1:
-            video_mem = (uint8_t *) VIDEO_PHYS_ADDR1;
-            break;
-        case TERMINAL_2:
-            video_mem = (uint8_t *) VIDEO_PHYS_ADDR2;
-            break;
-        default:
-            return;
-    }
-
-	update_cursor(screen_y[active_terminal], screen_x[active_terminal]);
-
+	update_cursor(screen_y[dest], screen_x[dest]);
 	return;
 }
 
