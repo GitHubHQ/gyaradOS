@@ -292,8 +292,21 @@ int32_t vidmap (uint8_t ** screen_start) {
     if((uint32_t) screen_start < VID_MEM_START || (uint32_t) screen_start > VID_MEM_END) {
         return -1;
     }
+    
+    switch(get_active_terminal()) {
+        case TERMINAL_0:
+            *screen_start = (uint8_t *) VIDEO_PHYS_ADDR;
+            break;
+        case TERMINAL_1:
+            *screen_start = (uint8_t *) VIDEO_PHYS_ADDR1;
+            break;
+        case TERMINAL_2:
+            *screen_start = (uint8_t *) VIDEO_PHYS_ADDR2;
+            break;
+        default:
+            return -1;
+    }
 
-    *screen_start = (uint8_t *) VIDEO;
     return 0;
 }
 

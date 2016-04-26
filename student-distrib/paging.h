@@ -9,20 +9,12 @@
 #define PAGE_SIZE               4096
 #define PAGE_SIZE_LARGE         0x400000
 
-#define VIDEO_PHYS_ADDR         0XB8000
-#define VIDEO_PHYS_ADDR1        0xB9000
-#define VIDEO_PHYS_ADDR2        0xBA000
-
 #define KERNEL_PHYS_ADDR        0x400000
 #define KERNEL_END_ADDR         0x800000
 #define PROCESS_START_ADDR      0x08048000
 
 #define _4KB                    0x1000
 #define MAX_PROCESSES           10
-
-#define TERMINAL_0              0
-#define TERMINAL_1              1
-#define TERMINAL_2              2
 
 typedef union PDE {
     struct {

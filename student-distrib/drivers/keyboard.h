@@ -17,7 +17,6 @@
 
 // max number of chars in the keyboard buffer
 #define MAX_CHARS_IN_BUF         1023
-#define NUM_TERMINALS               3
 
 // Make keys
 #define KEY_MAKE_ESC             0x01
@@ -137,6 +136,7 @@ uint32_t add_char_to_buffer(uint8_t new_char);
 void handle_enter();
 void handle_backspace();
 void handle_keypress(void);
+uint8_t get_active_terminal(void);
 
 /* Tester functions */
 void test_open(void);

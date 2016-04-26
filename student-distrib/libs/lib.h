@@ -6,6 +6,7 @@
 #define _LIB_H
 
 #include "types.h"
+#include "../drivers/keyboard.h"
 #include "../drivers/rtc.h"
 #include "../drivers/speaker.h"
 
@@ -20,6 +21,16 @@
 #define FB_DATA_PORT            0x3D5
 #define FB_HIGH_BYTE_COMMAND    14
 #define FB_LOW_BYTE_COMMAND     15
+
+#define VIDEO_PHYS_ADDR         0XB8000
+#define VIDEO_PHYS_ADDR1        0xB9000
+#define VIDEO_PHYS_ADDR2        0xBA000
+
+#define TERMINAL_0              0
+#define TERMINAL_1              1
+#define TERMINAL_2              2
+
+#define NUM_TERMINALS               3
 
 int32_t printf(int8_t *format, ...);
 void putc(uint8_t c);
@@ -47,6 +58,7 @@ void new_line();
 void del_last_char();
 void clear_screen (void);
 void splash_screen(void);
+void update_screen(void);
 
 /* Userspace address-check functions */
 int32_t bad_userspace_addr(const void* addr, int32_t len);
