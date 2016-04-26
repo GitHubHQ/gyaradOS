@@ -21,6 +21,14 @@
 #define FB_HIGH_BYTE_COMMAND    14
 #define FB_LOW_BYTE_COMMAND     15
 
+#define VIDEO_PHYS_ADDR         0XB8000
+#define VIDEO_PHYS_ADDR1        0xB9000
+#define VIDEO_PHYS_ADDR2        0xBA000
+
+#define TERMINAL_0              0
+#define TERMINAL_1              1
+#define TERMINAL_2              2
+
 int32_t printf(int8_t *format, ...);
 void putc(uint8_t c);
 int32_t puts(int8_t *s);

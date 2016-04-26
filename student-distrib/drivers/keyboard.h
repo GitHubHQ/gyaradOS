@@ -137,6 +137,7 @@ uint32_t add_char_to_buffer(uint8_t new_char);
 void handle_enter();
 void handle_backspace();
 void handle_keypress(void);
+uint8_t get_active_terminal(void);
 
 /* Tester functions */
 void test_open(void);

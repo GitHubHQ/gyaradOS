@@ -431,6 +431,10 @@ void handle_keypress() {
     restore_flags(flags);
 }
 
+uint8_t get_active_terminal(void) {
+    return active_terminal;
+}
+
 void test_open(void) {
     terminal_open(NULL);
 }
