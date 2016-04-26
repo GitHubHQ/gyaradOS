@@ -25,16 +25,6 @@ void init_paging() {
 	pageTable1[VIDEO_PHYS_ADDR/PAGE_SIZE].PTE_bits.read_write = 1;
 	pageTable1[VIDEO_PHYS_ADDR/PAGE_SIZE].PTE_bits.user_super = 1; 
 
-    //enabling the present and read/write and user bit for the video memory for second terminal
-    pageTable1[VIDEO_PHYS_ADDR1/PAGE_SIZE].PTE_bits.present = 1;
-    pageTable1[VIDEO_PHYS_ADDR1/PAGE_SIZE].PTE_bits.read_write = 1;
-    pageTable1[VIDEO_PHYS_ADDR1/PAGE_SIZE].PTE_bits.user_super = 1; 
-
-    //enabling the present and read/write and user bit for the video memory for third terminal
-    pageTable1[VIDEO_PHYS_ADDR2/PAGE_SIZE].PTE_bits.present = 1;
-    pageTable1[VIDEO_PHYS_ADDR2/PAGE_SIZE].PTE_bits.read_write = 1;
-    pageTable1[VIDEO_PHYS_ADDR2/PAGE_SIZE].PTE_bits.user_super = 1; 
-
     for(i = 0; i < PAGE_DIRECTORY_SIZE; i++){
         //setting the rest of the pages to not be present, read/write, and supervisor privilege
         pageDirectory[i].PDE_bits.page_table_base = 0;
