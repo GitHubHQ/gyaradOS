@@ -312,26 +312,8 @@ int32_t sigreturn (void) {
 }
 
 int32_t switch_term(uint8_t dest) {
-    // save all the current values into curr_proc
-    // stack save
-    asm volatile("movl %%esp, %0"::"g"(curr_proc[curr_terminal]->ksp));
-    asm volatile("movl %%ebp, %0"::"g"(curr_proc[curr_terminal]->kbp));
-
     // switch terminals to the new one
     curr_terminal = dest;
-
-    if(curr_proc[curr_terminal] != NULL) {
-        // restore the values from this terminal
-        // reset the page entries
-        switch_pd(curr_proc[curr_terminal]->proc_num, curr_proc[curr_terminal]->base);
-
-        // restore esp0
-        tss.esp0 = _8MB - (_8KB) * curr_proc[curr_terminal]->proc_num - 4;
-
-        // stack switch
-        asm volatile("movl %0, %%esp"::"g"(curr_proc[curr_terminal]->ksp));
-        asm volatile("movl %0, %%ebp"::"g"(curr_proc[curr_terminal]->kbp));
-    }
 
     return 0;
 }
