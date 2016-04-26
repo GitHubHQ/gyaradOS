@@ -62,6 +62,7 @@ extern int32_t getargs (uint8_t * buf, int32_t nbytes);
 extern int32_t vidmap (uint8_t ** screen_start);
 extern int32_t set_handler (int32_t signum, void * handler_address);
 extern int32_t sigreturn (void);
+extern int32_t switch_term(uint8_t dest);
 extern void * sbrk(uint32_t nbytes);
 
 /* _end is set in the linker command file */

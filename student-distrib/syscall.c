@@ -1,7 +1,8 @@
 #include "syscall.h"
 
-pcb_t * curr_proc = NULL;
-pcb_t * prev_proc = NULL;
+pcb_t * curr_proc[] = {NULL, NULL, NULL};
+pcb_t * prev_proc[] = {NULL, NULL, NULL};
+uint8_t curr_terminal = 0;
 
 uint32_t curr_proc_id_mask = 0;
 uint32_t curr_proc_id = 0;
@@ -13,7 +14,7 @@ static func_ptr dir_ops_table[4] = {dir_open, dir_read, dir_write, dir_close};
 static func_ptr files_ops_table[4] = {fs_open, fs_read, fs_write, fs_close};
 
 int32_t halt (uint8_t status) {
-    pcb_t * proc_ctrl_blk = curr_proc;
+    pcb_t * proc_ctrl_blk = curr_proc[curr_terminal];
 
     // get the process number to free
     uint32_t free_proc_num = proc_ctrl_blk->proc_num;
@@ -43,8 +44,12 @@ int32_t halt (uint8_t status) {
         jmp_usr_exec(entrypoint);
     }
 
+    printf("0x%x \n", curr_proc_id_mask);
+
     // set the process to free in the process buffer
     curr_proc_id_mask &= ~(1 << free_proc_num);
+
+    printf("0x%x \n", curr_proc_id_mask);
 
     // Close STDIN
     proc_ctrl_blk->fds[0].operations_pointer = NULL;
@@ -62,16 +67,16 @@ int32_t halt (uint8_t status) {
     }
 
     // reset the page entries
-    switch_pd(prev_proc->proc_num, prev_proc->base);
-    tss.esp0 = _8MB - (_8KB) * prev_proc->proc_num - 4;
+    switch_pd(prev_proc[curr_terminal]->proc_num, prev_proc[curr_terminal]->base);
+    tss.esp0 = _8MB - (_8KB) * prev_proc[curr_terminal]->proc_num - 4;
 
     // stack switch
     asm volatile("movl %0, %%esp"::"g"(proc_ctrl_blk->p_ksp));
     asm volatile("movl %0, %%ebp"::"g"(proc_ctrl_blk->p_kbp));
 
     // swap the pcbs correctly
-    curr_proc = prev_proc;
-    prev_proc = (pcb_t *) prev_proc->prev;
+    curr_proc[curr_terminal] = prev_proc[curr_terminal];
+    prev_proc[curr_terminal] = (pcb_t *) prev_proc[curr_terminal]->prev;
 
     asm volatile("jmp EXECUTE_EXIT");
 
@@ -195,9 +200,9 @@ int32_t execute (const uint8_t * command) {
     proc_ctrl_blk->fds[1].flags = IN_USE;
 
     // set pcbs correctly
-    prev_proc = curr_proc;
-    curr_proc = proc_ctrl_blk;
-    curr_proc->prev = (struct pcb_t *) prev_proc;
+    prev_proc[curr_terminal] = curr_proc[curr_terminal];
+    curr_proc[curr_terminal] = proc_ctrl_blk;
+    curr_proc[curr_terminal]->prev = (struct pcb_t *) prev_proc[curr_terminal];
 
     // jump to the program to begin execution
     jmp_usr_exec(entrypoint);
@@ -208,17 +213,17 @@ int32_t execute (const uint8_t * command) {
 }
 
 int32_t read (int32_t fd, void * buf, int32_t nbytes) {
-    if (buf == NULL || fd > 7 || fd < 0 || fd == 1 || curr_proc->fds[fd].flags != IN_USE) {
+    if (buf == NULL || fd > 7 || fd < 0 || fd == 1 || curr_proc[curr_terminal]->fds[fd].flags != IN_USE) {
         return -1;
     }
-    return curr_proc->fds[fd].operations_pointer[READ](&(curr_proc->fds[fd]), buf, nbytes);
+    return curr_proc[curr_terminal]->fds[fd].operations_pointer[READ](&(curr_proc[curr_terminal]->fds[fd]), buf, nbytes);
 }
 
 int32_t write (int32_t fd, const void * buf, int32_t nbytes) {
-    if (buf == NULL || fd > 7 || fd <= 0 || curr_proc->fds[fd].flags != IN_USE) {
+    if (buf == NULL || fd > 7 || fd <= 0 || curr_proc[curr_terminal]->fds[fd].flags != IN_USE) {
         return -1;
     }
-    return curr_proc->fds[fd].operations_pointer[WRITE](fd, buf, nbytes);
+    return curr_proc[curr_terminal]->fds[fd].operations_pointer[WRITE](fd, buf, nbytes);
 }
 
 int32_t open (const uint8_t * filename) {
@@ -238,31 +243,31 @@ int32_t open (const uint8_t * filename) {
     //put back calling open
     int i = 0;
     for(i = 2; i < MAX_FILES; i++) {
-        if(curr_proc->fds[i].flags == NOT_USE) {
+        if(curr_proc[curr_terminal]->fds[i].flags == NOT_USE) {
             switch(file_info.file_type) {
                 case RTC_TYPE:
-                    curr_proc->fds[i].operations_pointer = rtc_ops_table;
-                    curr_proc->fds[i].inode = NULL;
-                    curr_proc->fds[i].file_position = 0;
-                    strcpy((int8_t*)&(curr_proc->fds[i].file_name),(int8_t*)filename);
+                    curr_proc[curr_terminal]->fds[i].operations_pointer = rtc_ops_table;
+                    curr_proc[curr_terminal]->fds[i].inode = NULL;
+                    curr_proc[curr_terminal]->fds[i].file_position = 0;
+                    strcpy((int8_t*)&(curr_proc[curr_terminal]->fds[i].file_name), (int8_t*) filename);
                     rtc_open();
                     break;
                 case DIR_TYPE:
-                    curr_proc->fds[i].operations_pointer = dir_ops_table;
-                    curr_proc->fds[i].inode = NULL;
-                    curr_proc->fds[i].file_position = 0;
-                    strcpy((int8_t*)&(curr_proc->fds[i].file_name),(int8_t*)filename);
+                    curr_proc[curr_terminal]->fds[i].operations_pointer = dir_ops_table;
+                    curr_proc[curr_terminal]->fds[i].inode = NULL;
+                    curr_proc[curr_terminal]->fds[i].file_position = 0;
+                    strcpy((int8_t*)&(curr_proc[curr_terminal]->fds[i].file_name), (int8_t*) filename);
                     dir_open(filename);
                     break;
                 case FILE_TYPE:
-                    curr_proc->fds[i].operations_pointer = files_ops_table;
-                    curr_proc->fds[i].inode = get_inode(file_info.inode_num);
-                    curr_proc->fds[i].file_position = 0;
-                    strcpy((int8_t*)&(curr_proc->fds[i].file_name),(int8_t*)filename);
+                    curr_proc[curr_terminal]->fds[i].operations_pointer = files_ops_table;
+                    curr_proc[curr_terminal]->fds[i].inode = get_inode(file_info.inode_num);
+                    curr_proc[curr_terminal]->fds[i].file_position = 0;
+                    strcpy((int8_t*)&(curr_proc[curr_terminal]->fds[i].file_name), (int8_t*) filename);
                     fs_open(filename);
                     break;
             }
-            curr_proc->fds[i].flags = IN_USE;
+            curr_proc[curr_terminal]->fds[i].flags = IN_USE;
             return i;
         }
     }
@@ -270,10 +275,10 @@ int32_t open (const uint8_t * filename) {
 }
 
 int32_t close (int32_t fd) {
-    if(fd >= 2 && fd <= 7 && (curr_proc->fds[fd].flags == IN_USE)) {
-        curr_proc->fds[fd].flags = NOT_USE;
-        curr_proc->fds[fd].file_position = 0;
-        return curr_proc->fds[fd].operations_pointer[CLOSE](fd);
+    if(fd >= 2 && fd <= 7 && (curr_proc[curr_terminal]->fds[fd].flags == IN_USE)) {
+        curr_proc[curr_terminal]->fds[fd].flags = NOT_USE;
+        curr_proc[curr_terminal]->fds[fd].file_position = 0;
+        return curr_proc[curr_terminal]->fds[fd].operations_pointer[CLOSE](fd);
     }
 
     return -1;
@@ -284,7 +289,7 @@ int32_t getargs (uint8_t * buf, int32_t nbytes) {
         return -1;
     }
 
-    strncpy((int8_t*)buf, (const int8_t*)curr_proc->args, nbytes);
+    strncpy((int8_t*) buf, (const int8_t*) curr_proc[curr_terminal]->args, nbytes);
     return 0;
 }
 
@@ -303,6 +308,31 @@ int32_t set_handler (int32_t signum, void * handler_address) {
 }
 
 int32_t sigreturn (void) {
+    return 0;
+}
+
+int32_t switch_term(uint8_t dest) {
+    // save all the current values into curr_proc
+    // stack save
+    asm volatile("movl %%esp, %0"::"g"(curr_proc[curr_terminal]->ksp));
+    asm volatile("movl %%ebp, %0"::"g"(curr_proc[curr_terminal]->kbp));
+
+    // switch terminals to the new one
+    curr_terminal = dest;
+
+    if(curr_proc[curr_terminal] != NULL) {
+        // restore the values from this terminal
+        // reset the page entries
+        switch_pd(curr_proc[curr_terminal]->proc_num, curr_proc[curr_terminal]->base);
+
+        // restore esp0
+        tss.esp0 = _8MB - (_8KB) * curr_proc[curr_terminal]->proc_num - 4;
+
+        // stack switch
+        asm volatile("movl %0, %%esp"::"g"(curr_proc[curr_terminal]->ksp));
+        asm volatile("movl %0, %%ebp"::"g"(curr_proc[curr_terminal]->kbp));
+    }
+
     return 0;
 }
 
@@ -327,21 +357,4 @@ void * sbrk(uint32_t nbytes) {
     } else {
         return ((void *)-1);
     }
-}
-
-
-void context_switch(pcb_t* nextproc) {
-    // esp0
-    tss.esp0 = _8MB - (_8KB) * nextproc->proc_num - 4;
-
-    //switch paging
-    switch_pd(nextproc->proc_num, nextproc->base);
-
-    // save
-    asm volatile("movl %0, %%esp"::"g"(nextproc->c_ksp));
-    asm volatile("movl %0, %%ebp"::"g"(nextproc->c_kbp));
-
-    // load
-    asm volatile("movl %0, %%esp"::"g"(nextproc->p_ksp));
-    asm volatile("movl %0, %%ebp"::"g"(nextproc->p_kbp));
 }
