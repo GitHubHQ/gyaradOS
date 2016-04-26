@@ -55,8 +55,8 @@ typedef struct {
     uint8_t args[64];
     uint8_t proc_num;
     uint32_t base;
-    uint32_t c_ksp;
-    uint32_t c_kbp;
+    uint32_t ksp;
+    uint32_t kbp;
     uint32_t p_ksp;
     uint32_t p_kbp;
     struct pcb_t * prev;
