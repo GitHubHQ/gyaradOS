@@ -334,7 +334,8 @@ void handle_keypress() {
                     // if(alt_l_on || alt_r_on && active_terminal != 0) {
                         // switch to the video memory of the first terminal
                         switch_vid(0);
-                        //active_terminal = 0;
+                        active_terminal = 0;
+                        update_screen();
                     // }
                     break;
                 case KEY_MAKE_F2:
@@ -349,7 +350,8 @@ void handle_keypress() {
                         //     second_term_start = 1;
                         // }
 
-                        // active_terminal = 1;
+                        active_terminal = 1;
+                        update_screen();
                     // }
                     break;
                 case KEY_MAKE_F3:
@@ -364,7 +366,8 @@ void handle_keypress() {
                         //     third_term_start = 1;
                         // }
 
-                        // active_terminal = 2;
+                        active_terminal = 2;
+                        update_screen();
                     // }
                     break;
                 default:

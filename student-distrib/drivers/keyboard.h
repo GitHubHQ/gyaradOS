@@ -17,7 +17,6 @@
 
 // max number of chars in the keyboard buffer
 #define MAX_CHARS_IN_BUF         1023
-#define NUM_TERMINALS               3
 
 // Make keys
 #define KEY_MAKE_ESC             0x01
