@@ -292,20 +292,8 @@ int32_t vidmap (uint8_t ** screen_start) {
     if((uint32_t) screen_start < VID_MEM_START || (uint32_t) screen_start > VID_MEM_END) {
         return -1;
     }
-    
-    switch(get_active_terminal()) {
-        case TERMINAL_0:
-            *screen_start = (uint8_t *) VIDEO_PHYS_ADDR;
-            break;
-        case TERMINAL_1:
-            *screen_start = (uint8_t *) VIDEO_PHYS_ADDR1;
-            break;
-        case TERMINAL_2:
-            *screen_start = (uint8_t *) VIDEO_PHYS_ADDR2;
-            break;
-        default:
-            return -1;
-    }
+
+    *screen_start = (uint8_t *) VIDEO_PHYS_ADDR;
 
     return 0;
 }
@@ -339,4 +327,21 @@ void * sbrk(uint32_t nbytes) {
     } else {
         return ((void *)-1);
     }
+}
+
+
+void context_switch(pcb_t* nextproc) {
+    // esp0
+    tss.esp0 = _8MB - (_8KB) * nextproc->proc_num - 4;
+
+    //switch paging
+    switch_pd(nextproc->proc_num, nextproc->base);
+
+    // save
+    asm volatile("movl %0, %%esp"::"g"(nextproc->c_ksp));
+    asm volatile("movl %0, %%ebp"::"g"(nextproc->c_kbp));
+
+    // load
+    asm volatile("movl %0, %%esp"::"g"(nextproc->p_ksp));
+    asm volatile("movl %0, %%ebp"::"g"(nextproc->p_kbp));
 }

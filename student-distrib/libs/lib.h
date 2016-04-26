@@ -6,6 +6,7 @@
 #define _LIB_H
 
 #include "types.h"
+#include "../drivers/keyboard.h"
 #include "../drivers/rtc.h"
 #include "../drivers/speaker.h"
 
@@ -28,6 +29,10 @@
 #define TERMINAL_0              0
 #define TERMINAL_1              1
 #define TERMINAL_2              2
+
+#define NUM_TERMINALS           3
+
+uint8_t term_vid_mem[NUM_TERMINALS][NUM_COLS * NUM_ROWS];
 
 int32_t printf(int8_t *format, ...);
 void putc(uint8_t c);
@@ -55,6 +60,7 @@ void new_line();
 void del_last_char();
 void clear_screen (void);
 void splash_screen(void);
+void update_screen(uint8_t dest, uint8_t src);
 
 /* Userspace address-check functions */
 int32_t bad_userspace_addr(const void* addr, int32_t len);

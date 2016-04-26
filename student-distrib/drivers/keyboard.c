@@ -333,38 +333,46 @@ void handle_keypress() {
                 case KEY_MAKE_F1:
                     // if(alt_l_on || alt_r_on && active_terminal != 0) {
                         // switch to the video memory of the first terminal
-                        switch_vid(0);
-                        //active_terminal = 0;
+                        update_screen(0, active_terminal);
+                        active_terminal = 0;
                     // }
                     break;
                 case KEY_MAKE_F2:
                     // if(alt_l_on || alt_r_on && active_terminal != 1) {
                         // switch to the video memory of the second terminal
-                        switch_vid(1);
+                        update_screen(1, active_terminal);
+                        active_terminal = 1;
 
-                        // if(!second_term_start) {
-                        //     // start up second terminal
-                        //     execute((uint8_t*) "shell");
-                        //     // set the flag correctly
-                        //     second_term_start = 1;
-                        // }
+                        // send eoi and restore prev flags
+                        send_eoi(IRQ_KEYBOARD_CTRL);
+                        restore_flags(flags);
 
-                        // active_terminal = 1;
+                        if(!second_term_start) {
+                            // set the flag correctly
+                            second_term_start = 1;
+
+                            // start up second terminal
+                            execute((uint8_t*) "shell");
+                        }
                     // }
                     break;
                 case KEY_MAKE_F3:
                     // if(alt_l_on || alt_r_on && active_terminal != 2) {
                         // switch to the video memory of the third terminal
-                        switch_vid(2);
+                        update_screen(2, active_terminal);
+                        active_terminal = 2;
 
-                        // if(!third_term_start) {
-                        //     // start up third terminal
-                        //     execute((uint8_t*) "shell");
-                        //     // set the flag correctly
-                        //     third_term_start = 1;
-                        // }
+                        // send eoi and restore prev flags
+                        send_eoi(IRQ_KEYBOARD_CTRL);
+                        restore_flags(flags);
 
-                        // active_terminal = 2;
+                        if(!third_term_start) {
+                            // set the flag correctly
+                            third_term_start = 1;
+
+                            // start up third terminal
+                            execute((uint8_t*) "shell");
+                        }
                     // }
                     break;
                 default:
