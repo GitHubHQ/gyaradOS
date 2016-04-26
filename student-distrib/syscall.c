@@ -327,3 +327,20 @@ void * sbrk(uint32_t nbytes) {
         return ((void *)-1);
     }
 }
+
+
+void context_switch(pcb_t* nextproc) {
+    // esp0
+    tss.esp0 = _8MB - (_8KB) * nextproc->proc_num - 4;
+
+    //switch paging
+    switch_pd(nextproc->proc_num, nextproc->base);
+
+    // save
+    asm volatile("movl %0, %%esp"::"g"(nextproc->c_ksp));
+    asm volatile("movl %0, %%ebp"::"g"(nextproc->c_kbp));
+
+    // load
+    asm volatile("movl %0, %%esp"::"g"(nextproc->p_ksp));
+    asm volatile("movl %0, %%ebp"::"g"(nextproc->p_kbp));
+}
