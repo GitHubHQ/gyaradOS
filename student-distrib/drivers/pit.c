@@ -2,7 +2,7 @@
 
 void pit_init() {
     // set up the pit to 30hz
-    uint32_t divider = calc_divider(30);
+    uint32_t divider = calc_divider(1);
 
     outb(PIT_SQ_MODE, PIT_CMD_PORT);
     outb((divider & DIVIDER_MASK), PIT_DATA_PORT);

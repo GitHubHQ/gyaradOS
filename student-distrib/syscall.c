@@ -330,7 +330,7 @@ int32_t sched(void) {
     pcb_t * c_running_proc = curr_proc[curr_active_p];
     pcb_t * n_running_proc = NULL;
 
-    while(n_running_proc = NULL) {
+    while(n_running_proc == NULL) {
         curr_active_p++;
         if(curr_active_p >= MAX_PROG_NUM) {
             curr_active_p = 0;
