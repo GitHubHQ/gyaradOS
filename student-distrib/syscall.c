@@ -331,14 +331,32 @@ int32_t sched(void) {
     pcb_t * n_running_proc = NULL;
 
     while(n_running_proc == NULL) {
-        curr_active_p++;
-        if(curr_active_p >= MAX_PROG_NUM) {
-            curr_active_p = 0;
-        }
-        n_running_proc = curr_proc[curr_active_p];
-    }
+        switch(curr_active_p) {
+            case 0:
+                if(curr_proc[1] != NULL) {
+                    context_switch(1);
+                    curr_active_p = 1;
+                }
+                
+                break;
+            case 1:
+                if(curr_proc[2] != NULL) {
+                    context_switch(2);
+                    curr_active_p = 2;
+                }
 
-    context_switch(curr_active_p);
+                break;
+            case 2:
+                if(curr_proc[0] != NULL) {
+                    context_switch(0);
+                    curr_active_p = 0;
+                }
+
+                break;
+            default:
+                return -1;
+        }
+    }
 
     return 0;
 }
