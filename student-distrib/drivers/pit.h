@@ -3,6 +3,7 @@
 
 #include "../libs/types.h"
 #include "../libs/lib.h"
+#include "../syscall.h"
 
 // PIT IRQ line
 #define IRQ_PIT         0

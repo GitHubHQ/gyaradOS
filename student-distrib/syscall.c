@@ -3,9 +3,12 @@
 pcb_t * curr_proc[] = {NULL, NULL, NULL};
 pcb_t * prev_proc[] = {NULL, NULL, NULL};
 uint8_t curr_terminal = 0;
+uint8_t curr_active_p = 0;
 
 uint32_t curr_proc_id_mask = 0;
 uint32_t curr_proc_id = 0;
+
+uint32_t first_program_run = 0;
 
 static func_ptr stdin_ops_table[4] = {NULL, terminal_read, NULL, NULL};
 static func_ptr stdout_ops_table[4] = {NULL, NULL, terminal_write, NULL};
@@ -84,6 +87,7 @@ int32_t halt (uint8_t status) {
 }
 
 int32_t execute (const uint8_t * command) {
+    first_program_run = 1;
     // Used to hold the first 32 bytes of the file
     // These 32 bytes will contain the exec information and the entry point of the file
     uint8_t f_init_data[32];
@@ -315,6 +319,51 @@ int32_t switch_term(uint8_t dest) {
     // switch terminals to the new one
     curr_terminal = dest;
 
+    return 0;
+}
+
+int32_t sched(void) {
+    if(!first_program_run){
+        return -1;
+    }
+
+    pcb_t * c_running_proc = curr_proc[curr_active_p];
+    pcb_t * n_running_proc = NULL;
+
+    while(n_running_proc != NULL) {
+        curr_active_p++;
+        if(curr_active_p >= MAX_PROG_NUM) {
+            curr_active_p = 0;
+        }
+        n_running_proc = curr_proc[curr_active_p];
+    }
+
+    context_switch(curr_active_p);
+
+    return 0;
+}
+
+int32_t context_switch(uint32_t s_slot) {
+    // Grab PCB for next
+    pcb_t * next_proc = curr_proc[s_slot];
+
+    //switch paging
+    switch_pd(next_proc->proc_num, next_proc->base);
+
+    // esp0
+    tss.esp0 = next_proc->ksp;
+
+    uint32_t t_esp = next_proc->ksp;
+    uint32_t t_ebp = next_proc->kbp;
+
+    // save
+    asm volatile("movl %%esp, %0":"=g"(next_proc->ksp));
+    asm volatile("movl %%ebp, %0":"=g"(next_proc->kbp));
+
+    // load
+    asm volatile("movl %0, %%esp"::"g"(t_esp));
+    asm volatile("movl %0, %%ebp"::"g"(t_ebp));
+    
     return 0;
 }
 

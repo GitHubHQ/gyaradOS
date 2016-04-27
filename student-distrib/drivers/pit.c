@@ -19,8 +19,10 @@ void pit_handle_interrupt() {
     // Disable interrupts
     cli_and_save(flags);
 
+    sched();
+
     // Send EOI to end the interrupt
-    send_eoi(IRQ_PIT);
+    send_eoi(IRQ_SYSTEM_TIMER);
 
     // Restore flags
     restore_flags(flags);
