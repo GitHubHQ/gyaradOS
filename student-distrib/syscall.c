@@ -47,12 +47,8 @@ int32_t halt (uint8_t status) {
         jmp_usr_exec(entrypoint);
     }
 
-    printf("0x%x \n", curr_proc_id_mask);
-
     // set the process to free in the process buffer
     curr_proc_id_mask &= ~(1 << free_proc_num);
-
-    printf("0x%x \n", curr_proc_id_mask);
 
     // Close STDIN
     proc_ctrl_blk->fds[0].operations_pointer = NULL;
@@ -330,33 +326,23 @@ int32_t sched(void) {
     pcb_t * c_running_proc = curr_proc[curr_active_p];
     pcb_t * n_running_proc = NULL;
 
-    while(n_running_proc == NULL) {
-        switch(curr_active_p) {
-            case 0:
-                if(curr_proc[1] != NULL) {
-                    context_switch(1);
-                    curr_active_p = 1;
-                }
-                
-                break;
-            case 1:
-                if(curr_proc[2] != NULL) {
-                    context_switch(2);
-                    curr_active_p = 2;
-                }
-
-                break;
-            case 2:
-                if(curr_proc[0] != NULL) {
-                    context_switch(0);
-                    curr_active_p = 0;
-                }
-
-                break;
-            default:
-                return -1;
+    if(curr_active_p == 0) {
+        if(curr_proc[1] != NULL) {
+            curr_active_p = 1;
         }
+    } else if(curr_active_p == 1) {
+        if(curr_proc[2] != NULL) {
+            curr_active_p = 2;
+        }
+    } else if(curr_active_p == 2) {
+        if(curr_proc[0] != NULL) {
+            curr_active_p = 0;
+        }
+    } else {
+        return -1;
     }
+
+    context_switch(curr_active_p);
 
     return 0;
 }
