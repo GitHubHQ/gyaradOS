@@ -103,7 +103,11 @@ void rtc_special_eoi() {
  * Handle a rtc interrupt based on how the RTC was initalized
  */
 void rtc_handle_interrupt(void) {
-	cli();
+    unsigned long flags;
+
+    // Disable interrupts
+    cli_and_save(flags);
+    
 	intr_occ = 1;
 	// Print based on mode
 	if(init_mode == RTC_SILENT) {
@@ -117,7 +121,8 @@ void rtc_handle_interrupt(void) {
 	send_eoi(IRQ_RTC);
 	// Send RTC EOI
     rtc_special_eoi();
-	sti();
+    // Restore flags
+    restore_flags(flags);
 }
 
 /**
