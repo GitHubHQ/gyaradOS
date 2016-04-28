@@ -69,6 +69,7 @@ uint8_t caps_ascii[] = {
 #define TERM_TEST_READ 0
 
 uint8_t active_terminal = 0;
+uint8_t prev_terminal = 0;
 
 uint8_t second_term_start = 0;
 uint8_t third_term_start = 0;
@@ -335,7 +336,9 @@ void handle_keypress() {
                         // switch to the video memory of the first terminal
                         switch_term(0);
                         update_screen(0, active_terminal);
+                        prev_terminal = active_terminal;
                         active_terminal = 0;
+                        context_switch(prev_terminal, active_terminal);
                     // }
                     break;
                 case KEY_MAKE_F2:
@@ -343,11 +346,13 @@ void handle_keypress() {
                         // switch to the video memory of the second terminal
                         switch_term(1);
                         update_screen(1, active_terminal);
+                        prev_terminal = active_terminal;
                         active_terminal = 1;
 
                         // send eoi and restore prev flags
                         send_eoi(IRQ_KEYBOARD_CTRL);
                         restore_flags(flags);
+
 
                         if(!second_term_start) {
                             // set the flag correctly
@@ -355,6 +360,8 @@ void handle_keypress() {
 
                             // start up second terminal
                             execute((uint8_t*) "shell");
+                        } else {
+                            context_switch(prev_terminal, active_terminal);
                         }
                     // }
                     break;
@@ -363,6 +370,7 @@ void handle_keypress() {
                         // switch to the video memory of the third terminal
                         switch_term(2);
                         update_screen(2, active_terminal);
+                        prev_terminal = active_terminal;
                         active_terminal = 2;
 
                         // send eoi and restore prev flags
@@ -375,6 +383,8 @@ void handle_keypress() {
 
                             // start up third terminal
                             execute((uint8_t*) "shell");
+                        } else {
+                            context_switch(prev_terminal, active_terminal);
                         }
                     // }
                     break;

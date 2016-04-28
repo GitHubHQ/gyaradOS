@@ -318,6 +318,10 @@ int32_t switch_term(uint8_t dest) {
     return 0;
 }
 
+pcb_t * get_pcb(int32_t term) {
+    return curr_proc[term];
+}
+
 int32_t sched(void) {
     if(!first_program_run){
         return -1;
@@ -326,47 +330,36 @@ int32_t sched(void) {
     pcb_t * c_running_proc = curr_proc[curr_active_p];
     pcb_t * n_running_proc = NULL;
 
-    if(curr_active_p == 0) {
-        if(curr_proc[1] != NULL) {
-            curr_active_p = 1;
-        }
-    } else if(curr_active_p == 1) {
-        if(curr_proc[2] != NULL) {
-            curr_active_p = 2;
-        }
-    } else if(curr_active_p == 2) {
-        if(curr_proc[0] != NULL) {
+    uint32_t old_proc_num = curr_active_p;
+
+    while(n_running_proc == NULL) {
+        curr_active_p++;
+        if(curr_active_p >= MAX_RUN_PROG) {
             curr_active_p = 0;
         }
-    } else {
-        return -1;
+        n_running_proc = curr_proc[curr_active_p];
     }
 
-    context_switch(curr_active_p);
+    context_switch(old_proc_num, curr_active_p);
 
     return 0;
 }
 
-int32_t context_switch(uint32_t s_slot) {
+int32_t context_switch(uint32_t o_slot, uint32_t n_slot) {
+    pcb_t * o_pcb = get_pcb(o_slot);
     // Grab PCB for next
-    pcb_t * next_proc = curr_proc[s_slot];
-
-    //switch paging
-    switch_pd(next_proc->proc_num, next_proc->base);
-
-    // esp0
-    tss.esp0 = next_proc->ksp;
-
-    uint32_t t_esp = next_proc->ksp;
-    uint32_t t_ebp = next_proc->kbp;
-
+    pcb_t * n_pcb = get_pcb(n_slot);
+                        
+    switch_pd(n_pcb->proc_num, n_pcb->base);
+    tss.ss0 = KERNEL_DS;
+    tss.esp0 = _8MB - (_8KB) * (n_pcb->proc_num) - 4;
     // save
-    asm volatile("movl %%esp, %0":"=g"(next_proc->ksp));
-    asm volatile("movl %%ebp, %0":"=g"(next_proc->kbp));
+    asm volatile("movl %%esp, %0":"=r"(o_pcb->ksp));
+    asm volatile("movl %%ebp, %0":"=r"(o_pcb->kbp));
 
     // load
-    asm volatile("movl %0, %%esp"::"g"(t_esp));
-    asm volatile("movl %0, %%ebp"::"g"(t_ebp));
+    asm volatile("movl %0, %%esp"::"r"(n_pcb->ksp));
+    asm volatile("movl %0, %%ebp"::"r"(n_pcb->kbp));
     
     return 0;
 }
