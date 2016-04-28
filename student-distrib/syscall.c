@@ -30,7 +30,7 @@ int32_t halt (uint8_t status) {
         // Grab the first 32 bytes of the file to see if it is runnable
         // and find where it starts
         file_array exec_read;
-        strcpy((int8_t*)&(exec_read.file_name),(int8_t*) "shell");
+        strcpy((int8_t*) &(exec_read.file_name), (int8_t*) "shell");
         exec_read.file_position = 0;
 
         if(fs_read(&exec_read, f_init_data, 32) == -1) {
@@ -352,6 +352,7 @@ uint8_t get_next_running_term_proc() {
 
 void set_running_proc(uint8_t proc) {
     curr_active_p = proc;
+    curr_terminal = proc;
     return;
 }
 
@@ -377,8 +378,8 @@ void context_switch(curr_proc_term_num, next_proc_term_num) {
     set_running_proc(next_proc_term_num);
 
     // stack switch
-    asm volatile("movl %0, %%esp"::"g"(next_proc->p_ksp));
-    asm volatile("movl %0, %%ebp"::"g"(next_proc->p_kbp));
+    asm volatile("movl %0, %%esp"::"g"(next_proc->p_sched_ksp));
+    asm volatile("movl %0, %%ebp"::"g"(next_proc->p_sched_kbp));
 
     // go into the next program
     asm volatile("leave");

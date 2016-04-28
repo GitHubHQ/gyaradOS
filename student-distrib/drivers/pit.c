@@ -59,19 +59,18 @@ void pit_handle_interrupt() {
     asm volatile("movl %%esp, %0":"=g"(curr_proc->p_sched_ksp));
     asm volatile("movl %%ebp, %0":"=g"(curr_proc->p_sched_kbp));
 
+    // set the correct running process
+    set_running_proc(next_proc_term_num);
+
     // change the page directory to the correct process
     switch_pd(next_proc->proc_num, next_proc->base);
 
     // set the esp0 to the correct one for the next process
     tss.esp0 = _8MB - (_8KB) * (next_proc->proc_num) - 4;
-    set_running_proc(next_proc_term_num);
-
-    // enable interrupts again
-    restore_flags(flags);
 
     // stack switch
-    asm volatile("movl %0, %%esp"::"g"(next_proc->p_ksp));
-    asm volatile("movl %0, %%ebp"::"g"(next_proc->p_kbp));
+    asm volatile("movl %0, %%esp"::"g"(next_proc->p_sched_ksp));
+    asm volatile("movl %0, %%ebp"::"g"(next_proc->p_sched_kbp));
 
     // go into the next program
     asm volatile("leave");
