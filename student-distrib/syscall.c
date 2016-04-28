@@ -83,7 +83,6 @@ int32_t halt (uint8_t status) {
 }
 
 int32_t execute (const uint8_t * command) {
-    first_program_run = 1;
     // Used to hold the first 32 bytes of the file
     // These 32 bytes will contain the exec information and the entry point of the file
     uint8_t f_init_data[32];
@@ -204,6 +203,8 @@ int32_t execute (const uint8_t * command) {
     curr_proc[curr_terminal] = proc_ctrl_blk;
     curr_proc[curr_terminal]->prev = (struct pcb_t *) prev_proc[curr_terminal];
 
+    first_program_run = 1;
+
     // jump to the program to begin execution
     jmp_usr_exec(entrypoint);
 
@@ -322,67 +323,98 @@ pcb_t * get_pcb(int32_t term) {
     return curr_proc[term];
 }
 
-int32_t sched(void) {
-    if(!first_program_run){
-        return -1;
-    }
+int32_t first_prog_run() {
+    return first_program_run;
+}
 
-    pcb_t * c_running_proc = curr_proc[curr_active_p];
-    pcb_t * n_running_proc = NULL;
+uint8_t get_curr_running_term_proc() {
+    return curr_active_p;
+}
 
-    uint32_t old_proc_num = curr_active_p;
+uint8_t get_next_running_term_proc() {
+    uint8_t n_term_num = curr_active_p;
+    uint8_t found = 0;
 
-    while(n_running_proc == NULL) {
-        curr_active_p++;
-        if(curr_active_p >= MAX_RUN_PROG) {
-            curr_active_p = 0;
+    while(!found) {
+        n_term_num++;
+
+        if(n_term_num >= MAX_RUN_PROG) {
+            n_term_num = 0;
         }
-        n_running_proc = curr_proc[curr_active_p];
+
+        if(curr_proc[n_term_num] != NULL) {
+            found = 1;
+            return n_term_num;
+        }
     }
-
-    context_switch(old_proc_num, curr_active_p);
-
-    return 0;
 }
 
-int32_t context_switch(uint32_t o_slot, uint32_t n_slot) {
-    pcb_t * o_pcb = get_pcb(o_slot);
-    // Grab PCB for next
-    pcb_t * n_pcb = get_pcb(n_slot);
+void set_running_proc(uint8_t proc) {
+    curr_active_p = proc;
+    return;
+}
+
+// int32_t sched(void) {
+//     if(!first_program_run){
+//         return -1;
+//     }
+
+//     pcb_t * c_running_proc = curr_proc[curr_active_p];
+//     pcb_t * n_running_proc = NULL;
+
+//     uint32_t old_proc_num = curr_active_p;
+
+//     while(n_running_proc == NULL) {
+//         curr_active_p++;
+//         if(curr_active_p >= MAX_RUN_PROG) {
+//             curr_active_p = 0;
+//         }
+//         n_running_proc = curr_proc[curr_active_p];
+//     }
+
+//     context_switch(old_proc_num, curr_active_p);
+
+//     return 0;
+// }
+
+// int32_t context_switch(uint32_t o_slot, uint32_t n_slot) {
+//     pcb_t * o_pcb = get_pcb(o_slot);
+//     // Grab PCB for next
+//     pcb_t * n_pcb = get_pcb(n_slot);
                         
-    switch_pd(n_pcb->proc_num, n_pcb->base);
-    tss.ss0 = KERNEL_DS;
-    tss.esp0 = _8MB - (_8KB) * (n_pcb->proc_num) - 4;
-    // save
-    asm volatile("movl %%esp, %0":"=r"(o_pcb->ksp));
-    asm volatile("movl %%ebp, %0":"=r"(o_pcb->kbp));
+//     switch_pd(n_pcb->proc_num, n_pcb->base);
+//     tss.ss0 = KERNEL_DS;
+//     tss.esp0 = _8MB - (_8KB) * (n_pcb->proc_num) - 4;
+//     // save
+//     asm volatile("movl %%esp, %0":"=r"(o_pcb->ksp));
+//     asm volatile("movl %%ebp, %0":"=r"(o_pcb->kbp));
 
-    // load
-    asm volatile("movl %0, %%esp"::"r"(n_pcb->ksp));
-    asm volatile("movl %0, %%ebp"::"r"(n_pcb->kbp));
+//     // load
+//     asm volatile("movl %0, %%esp"::"r"(n_pcb->ksp));
+//     asm volatile("movl %0, %%ebp"::"r"(n_pcb->kbp));
     
-    return 0;
-}
+//     return 0;
+// }
 
-/*
- * Thanks to: https://sourceware.org/newlib/libc.html#Syscalls
- *     (Red Hat Minimal Implementation)
- * And to: http://code.metager.de/source/xref/hurd/viengoos/libhurd-mm/sbrk.c
- *     (GNU Hurd Implementation)
- */
-void * sbrk(uint32_t nbytes) {
-    static void * heap_ptr = NULL;
-    void * base;
+// /*
+//  * Thanks to: https://sourceware.org/newlib/libc.html#Syscalls
+//  *     (Red Hat Minimal Implementation)
+//  * And to: http://code.metager.de/source/xref/hurd/viengoos/libhurd-mm/sbrk.c
+//  *     (GNU Hurd Implementation)
+//  */
+// void * sbrk(uint32_t nbytes) {
+//     static void * heap_ptr = NULL;
+//     void * base;
 
-    if (heap_ptr == NULL) {
-        heap_ptr = (void *)&_end;
-    }
+//     if (heap_ptr == NULL) {
+//         heap_ptr = (void *)&_end;
+//     }
 
-    if ((RAMSIZE - heap_ptr) >= 0) {
-        base = heap_ptr;
-        heap_ptr += nbytes;
-        return (base);
-    } else {
-        return ((void *)-1);
-    }
-}
+//     if ((RAMSIZE - heap_ptr) >= 0) {
+//         base = heap_ptr;
+//         heap_ptr += nbytes;
+//         return (base);
+//     } else {
+//         return ((void *)-1);
+//     }
+// }

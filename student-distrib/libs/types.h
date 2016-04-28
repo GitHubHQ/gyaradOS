@@ -59,6 +59,8 @@ typedef struct {
     uint32_t kbp;
     uint32_t p_ksp;
     uint32_t p_kbp;
+    uint32_t p_sched_ksp;
+    uint32_t p_sched_kbp;
     struct pcb_t * prev;
 } pcb_t;
 

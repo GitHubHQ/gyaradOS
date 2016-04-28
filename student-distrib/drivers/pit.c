@@ -1,8 +1,10 @@
 #include "pit.h"
 
+#define SCHED_ENABLED      0
+
 void pit_init() {
     // set up the pit to 30hz
-    uint32_t divider = calc_divider(5);
+    uint32_t divider = calc_divider(30);
 
     outb(PIT_SQ_MODE, PIT_CMD_PORT);
     outb((divider & DIVIDER_MASK), PIT_DATA_PORT);
@@ -21,8 +23,57 @@ void pit_handle_interrupt() {
     // Send EOI to end the interrupt
     send_eoi(IRQ_SYSTEM_TIMER);
 
-    // Restore flags
+    if(!SCHED_ENABLED) {
+        restore_flags(flags);
+        return;
+    }
+
+    // if the first program hasnt been run yet, we dont want to schedule anything!
+    if(!first_prog_run()) {
+        // Restore flags
+        restore_flags(flags);
+        return;
+    }
+
+    // get the current and next processes to run
+    uint8_t curr_proc_term_num = get_curr_running_term_proc();
+    uint8_t next_proc_term_num = get_next_running_term_proc();
+
+    // if there is only one process running in one terminal, we have nothing to schedule! return
+    if(curr_proc_term_num == next_proc_term_num) {
+        restore_flags(flags);
+        return;
+    }
+
+    // get the pcbs for the current and next processes
+    pcb_t * curr_proc = get_pcb(curr_proc_term_num);
+    pcb_t * next_proc = get_pcb(next_proc_term_num);
+
+    // if something went wrong and either are null, return silently
+    if(curr_proc == NULL || next_proc == NULL) {
+        restore_flags(flags);
+        return;
+    }
+
+    // store ksp/kbp before move to the current processes pcb
+    asm volatile("movl %%esp, %0":"=g"(curr_proc->p_sched_ksp));
+    asm volatile("movl %%ebp, %0":"=g"(curr_proc->p_sched_kbp));
+
+    // change the page directory to the correct process
+    switch_pd(next_proc->proc_num, next_proc->base);
+
+    // set the esp0 to the correct one for the next process
+    tss.esp0 = _8MB - (_8KB) * (next_proc->proc_num) - 4;
+    set_running_proc(next_proc_term_num);
+
+    // enable interrupts again
     restore_flags(flags);
 
-    sched();
+    // stack switch
+    asm volatile("movl %0, %%esp"::"g"(next_proc->p_ksp));
+    asm volatile("movl %0, %%ebp"::"g"(next_proc->p_kbp));
+
+    // go into the next program
+    asm volatile("leave");
+    asm volatile("ret");
 }

@@ -68,7 +68,8 @@ extern int32_t switch_term(uint8_t dest);
 extern int32_t sched(void);
 extern int32_t context_switch(uint32_t o_slot, uint32_t n_slot);
 extern pcb_t * get_pcb(int32_t term);
-extern void * sbrk(uint32_t nbytes);
+extern int32_t first_prog_run();
+// extern void * sbrk(uint32_t nbytes);
 
 /* _end is set in the linker command file */
 extern void * _end;

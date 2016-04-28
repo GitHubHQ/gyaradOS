@@ -338,7 +338,6 @@ void handle_keypress() {
                         update_screen(0, active_terminal);
                         prev_terminal = active_terminal;
                         active_terminal = 0;
-                        context_switch(prev_terminal, active_terminal);
                     // }
                     break;
                 case KEY_MAKE_F2:
@@ -360,8 +359,6 @@ void handle_keypress() {
 
                             // start up second terminal
                             execute((uint8_t*) "shell");
-                        } else {
-                            context_switch(prev_terminal, active_terminal);
                         }
                     // }
                     break;
@@ -383,8 +380,6 @@ void handle_keypress() {
 
                             // start up third terminal
                             execute((uint8_t*) "shell");
-                        } else {
-                            context_switch(prev_terminal, active_terminal);
                         }
                     // }
                     break;
