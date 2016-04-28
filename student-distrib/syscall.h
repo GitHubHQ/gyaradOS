@@ -64,9 +64,9 @@ extern int32_t getargs (uint8_t * buf, int32_t nbytes);
 extern int32_t vidmap (uint8_t ** screen_start);
 extern int32_t set_handler (int32_t signum, void * handler_address);
 extern int32_t sigreturn (void);
+
 extern int32_t switch_term(uint8_t dest);
 extern int32_t sched(void);
-extern int32_t context_switch(uint32_t o_slot, uint32_t n_slot);
 extern pcb_t * get_pcb(int32_t term);
 extern int32_t first_prog_run();
 // extern void * sbrk(uint32_t nbytes);

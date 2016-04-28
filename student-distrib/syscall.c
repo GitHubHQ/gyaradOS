@@ -203,6 +203,7 @@ int32_t execute (const uint8_t * command) {
     curr_proc[curr_terminal] = proc_ctrl_blk;
     curr_proc[curr_terminal]->prev = (struct pcb_t *) prev_proc[curr_terminal];
 
+    // set the flag saying that the first program was run
     first_program_run = 1;
 
     // jump to the program to begin execution
@@ -352,6 +353,36 @@ uint8_t get_next_running_term_proc() {
 void set_running_proc(uint8_t proc) {
     curr_active_p = proc;
     return;
+}
+
+void context_switch(curr_proc_term_num, next_proc_term_num) {
+    // get the pcbs for the current and next processes
+    pcb_t * curr_proc = get_pcb(curr_proc_term_num);
+    pcb_t * next_proc = get_pcb(next_proc_term_num);
+
+    // if something went wrong and either are null, return silently
+    if(curr_proc == NULL || next_proc == NULL) {
+        return;
+    }
+
+    // store ksp/kbp before move to the current processes pcb
+    asm volatile("movl %%esp, %0":"=g"(curr_proc->p_sched_ksp));
+    asm volatile("movl %%ebp, %0":"=g"(curr_proc->p_sched_kbp));
+
+    // change the page directory to the correct process
+    switch_pd(next_proc->proc_num, next_proc->base);
+
+    // set the esp0 to the correct one for the next process
+    tss.esp0 = _8MB - (_8KB) * (next_proc->proc_num) - 4;
+    set_running_proc(next_proc_term_num);
+
+    // stack switch
+    asm volatile("movl %0, %%esp"::"g"(next_proc->p_ksp));
+    asm volatile("movl %0, %%ebp"::"g"(next_proc->p_kbp));
+
+    // go into the next program
+    asm volatile("leave");
+    asm volatile("ret");
 }
 
 // int32_t sched(void) {
