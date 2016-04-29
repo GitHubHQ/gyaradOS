@@ -1,6 +1,6 @@
 #include "pit.h"
 
-#define SCHED_ENABLED      0
+#define SCHED_ENABLED   1
 
 void pit_init() {
     // set up the pit to 30hz

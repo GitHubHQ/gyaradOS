@@ -206,6 +206,10 @@ int32_t execute (const uint8_t * command) {
     // set the flag saying that the first program was run
     first_program_run = 1;
 
+    // Grab and store the ESP and EBP in the PCB
+    asm volatile("movl %%esp, %0":"=g"(proc_ctrl_blk->p_sched_ksp));
+    asm volatile("movl %%ebp, %0":"=g"(proc_ctrl_blk->p_sched_kbp));
+
     // jump to the program to begin execution
     jmp_usr_exec(entrypoint);
 
