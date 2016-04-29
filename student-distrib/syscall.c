@@ -21,7 +21,7 @@ int32_t halt (uint8_t status) {
 
     // get the process number to free
     uint32_t free_proc_num = proc_ctrl_blk->proc_num;
-    if(free_proc_num == 0) {
+    if(prev_proc[curr_terminal] == NULL) {
         // restart this process since its the first process
         // we can hardcode this to shell since that is the first process every time
         uint8_t f_init_data[32];
