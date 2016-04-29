@@ -2,7 +2,7 @@
 
 pcb_t * curr_proc[] = {NULL, NULL, NULL};
 pcb_t * prev_proc[] = {NULL, NULL, NULL};
-uint8_t curr_terminal = 0;
+
 uint8_t curr_active_p = 0;
 
 uint32_t curr_proc_id_mask = 0;
@@ -17,11 +17,11 @@ static func_ptr dir_ops_table[4] = {dir_open, dir_read, dir_write, dir_close};
 static func_ptr files_ops_table[4] = {fs_open, fs_read, fs_write, fs_close};
 
 int32_t halt (uint8_t status) {
-    pcb_t * proc_ctrl_blk = curr_proc[curr_terminal];
+    pcb_t * proc_ctrl_blk = curr_proc[curr_active_p];
 
     // get the process number to free
     uint32_t free_proc_num = proc_ctrl_blk->proc_num;
-    if(prev_proc[curr_terminal] == NULL) {
+    if(prev_proc[curr_active_p] == NULL) {
         // restart this process since its the first process
         // we can hardcode this to shell since that is the first process every time
         uint8_t f_init_data[32];
@@ -66,16 +66,16 @@ int32_t halt (uint8_t status) {
     }
 
     // reset the page entries
-    switch_pd(prev_proc[curr_terminal]->proc_num, prev_proc[curr_terminal]->base);
-    tss.esp0 = _8MB - (_8KB) * prev_proc[curr_terminal]->proc_num - 4;
+    switch_pd(prev_proc[curr_active_p]->proc_num, prev_proc[curr_active_p]->base);
+    tss.esp0 = _8MB - (_8KB) * prev_proc[curr_active_p]->proc_num - 4;
 
     // stack switch
     asm volatile("movl %0, %%esp"::"g"(proc_ctrl_blk->p_ksp));
     asm volatile("movl %0, %%ebp"::"g"(proc_ctrl_blk->p_kbp));
 
     // swap the pcbs correctly
-    curr_proc[curr_terminal] = prev_proc[curr_terminal];
-    prev_proc[curr_terminal] = (pcb_t *) prev_proc[curr_terminal]->prev;
+    curr_proc[curr_active_p] = prev_proc[curr_active_p];
+    prev_proc[curr_active_p] = (pcb_t *) prev_proc[curr_active_p]->prev;
 
     asm volatile("jmp EXECUTE_EXIT");
 
@@ -199,9 +199,9 @@ int32_t execute (const uint8_t * command) {
     proc_ctrl_blk->fds[1].flags = IN_USE;
 
     // set pcbs correctly
-    prev_proc[curr_terminal] = curr_proc[curr_terminal];
-    curr_proc[curr_terminal] = proc_ctrl_blk;
-    curr_proc[curr_terminal]->prev = (struct pcb_t *) prev_proc[curr_terminal];
+    prev_proc[curr_active_p] = curr_proc[curr_active_p];
+    curr_proc[curr_active_p] = proc_ctrl_blk;
+    curr_proc[curr_active_p]->prev = (struct pcb_t *) prev_proc[curr_active_p];
 
     // set the flag saying that the first program was run
     first_program_run = 1;
@@ -219,17 +219,17 @@ int32_t execute (const uint8_t * command) {
 }
 
 int32_t read (int32_t fd, void * buf, int32_t nbytes) {
-    if (buf == NULL || fd > 7 || fd < 0 || fd == 1 || curr_proc[curr_terminal]->fds[fd].flags != IN_USE) {
+    if (buf == NULL || fd > 7 || fd < 0 || fd == 1 || curr_proc[curr_active_p]->fds[fd].flags != IN_USE) {
         return -1;
     }
-    return curr_proc[curr_terminal]->fds[fd].operations_pointer[READ](&(curr_proc[curr_terminal]->fds[fd]), buf, nbytes);
+    return curr_proc[curr_active_p]->fds[fd].operations_pointer[READ](&(curr_proc[curr_active_p]->fds[fd]), buf, nbytes);
 }
 
 int32_t write (int32_t fd, const void * buf, int32_t nbytes) {
-    if (buf == NULL || fd > 7 || fd <= 0 || curr_proc[curr_terminal]->fds[fd].flags != IN_USE) {
+    if (buf == NULL || fd > 7 || fd <= 0 || curr_proc[curr_active_p]->fds[fd].flags != IN_USE) {
         return -1;
     }
-    return curr_proc[curr_terminal]->fds[fd].operations_pointer[WRITE](fd, buf, nbytes);
+    return curr_proc[curr_active_p]->fds[fd].operations_pointer[WRITE](fd, buf, nbytes);
 }
 
 int32_t open (const uint8_t * filename) {
@@ -249,31 +249,31 @@ int32_t open (const uint8_t * filename) {
     //put back calling open
     int i = 0;
     for(i = 2; i < MAX_FILES; i++) {
-        if(curr_proc[curr_terminal]->fds[i].flags == NOT_USE) {
+        if(curr_proc[curr_active_p]->fds[i].flags == NOT_USE) {
             switch(file_info.file_type) {
                 case RTC_TYPE:
-                    curr_proc[curr_terminal]->fds[i].operations_pointer = rtc_ops_table;
-                    curr_proc[curr_terminal]->fds[i].inode = NULL;
-                    curr_proc[curr_terminal]->fds[i].file_position = 0;
-                    strcpy((int8_t*)&(curr_proc[curr_terminal]->fds[i].file_name), (int8_t*) filename);
+                    curr_proc[curr_active_p]->fds[i].operations_pointer = rtc_ops_table;
+                    curr_proc[curr_active_p]->fds[i].inode = NULL;
+                    curr_proc[curr_active_p]->fds[i].file_position = 0;
+                    strcpy((int8_t*)&(curr_proc[curr_active_p]->fds[i].file_name), (int8_t*) filename);
                     rtc_open();
                     break;
                 case DIR_TYPE:
-                    curr_proc[curr_terminal]->fds[i].operations_pointer = dir_ops_table;
-                    curr_proc[curr_terminal]->fds[i].inode = NULL;
-                    curr_proc[curr_terminal]->fds[i].file_position = 0;
-                    strcpy((int8_t*)&(curr_proc[curr_terminal]->fds[i].file_name), (int8_t*) filename);
+                    curr_proc[curr_active_p]->fds[i].operations_pointer = dir_ops_table;
+                    curr_proc[curr_active_p]->fds[i].inode = NULL;
+                    curr_proc[curr_active_p]->fds[i].file_position = 0;
+                    strcpy((int8_t*)&(curr_proc[curr_active_p]->fds[i].file_name), (int8_t*) filename);
                     dir_open(filename);
                     break;
                 case FILE_TYPE:
-                    curr_proc[curr_terminal]->fds[i].operations_pointer = files_ops_table;
-                    curr_proc[curr_terminal]->fds[i].inode = get_inode(file_info.inode_num);
-                    curr_proc[curr_terminal]->fds[i].file_position = 0;
-                    strcpy((int8_t*)&(curr_proc[curr_terminal]->fds[i].file_name), (int8_t*) filename);
+                    curr_proc[curr_active_p]->fds[i].operations_pointer = files_ops_table;
+                    curr_proc[curr_active_p]->fds[i].inode = get_inode(file_info.inode_num);
+                    curr_proc[curr_active_p]->fds[i].file_position = 0;
+                    strcpy((int8_t*)&(curr_proc[curr_active_p]->fds[i].file_name), (int8_t*) filename);
                     fs_open(filename);
                     break;
             }
-            curr_proc[curr_terminal]->fds[i].flags = IN_USE;
+            curr_proc[curr_active_p]->fds[i].flags = IN_USE;
             return i;
         }
     }
@@ -281,10 +281,10 @@ int32_t open (const uint8_t * filename) {
 }
 
 int32_t close (int32_t fd) {
-    if(fd >= 2 && fd <= 7 && (curr_proc[curr_terminal]->fds[fd].flags == IN_USE)) {
-        curr_proc[curr_terminal]->fds[fd].flags = NOT_USE;
-        curr_proc[curr_terminal]->fds[fd].file_position = 0;
-        return curr_proc[curr_terminal]->fds[fd].operations_pointer[CLOSE](fd);
+    if(fd >= 2 && fd <= 7 && (curr_proc[curr_active_p]->fds[fd].flags == IN_USE)) {
+        curr_proc[curr_active_p]->fds[fd].flags = NOT_USE;
+        curr_proc[curr_active_p]->fds[fd].file_position = 0;
+        return curr_proc[curr_active_p]->fds[fd].operations_pointer[CLOSE](fd);
     }
 
     return -1;
@@ -295,7 +295,7 @@ int32_t getargs (uint8_t * buf, int32_t nbytes) {
         return -1;
     }
 
-    strncpy((int8_t*) buf, (const int8_t*) curr_proc[curr_terminal]->args, nbytes);
+    strncpy((int8_t*) buf, (const int8_t*) curr_proc[curr_active_p]->args, nbytes);
     return 0;
 }
 
@@ -314,14 +314,6 @@ int32_t set_handler (int32_t signum, void * handler_address) {
 }
 
 int32_t sigreturn (void) {
-    return 0;
-}
-
-int32_t switch_term(uint8_t dest) {
-    // switch terminals to the new one
-    curr_terminal = dest;
-    curr_active_p = dest;
-
     return 0;
 }
 
@@ -353,15 +345,16 @@ uint8_t get_next_running_term_proc() {
             return n_term_num;
         }
     }
+
+    return -1;
 }
 
 void set_running_proc(uint8_t proc) {
     curr_active_p = proc;
-    curr_terminal = proc;
     return;
 }
 
-void context_switch(curr_proc_term_num, next_proc_term_num) {
+void context_switch(uint8_t curr_proc_term_num, uint8_t next_proc_term_num) {
     // get the pcbs for the current and next processes
     pcb_t * curr_proc = get_pcb(curr_proc_term_num);
     pcb_t * next_proc = get_pcb(next_proc_term_num);
@@ -391,67 +384,25 @@ void context_switch(curr_proc_term_num, next_proc_term_num) {
     asm volatile("ret");
 }
 
-// int32_t sched(void) {
-//     if(!first_program_run){
-//         return -1;
-//     }
+/*
+ * Thanks to: https://sourceware.org/newlib/libc.html#Syscalls
+ *     (Red Hat Minimal Implementation)
+ * And to: http://code.metager.de/source/xref/hurd/viengoos/libhurd-mm/sbrk.c
+ *     (GNU Hurd Implementation)
+ */
+void * sbrk(uint32_t nbytes) {
+    static void * heap_ptr = NULL;
+    void * base;
 
-//     pcb_t * c_running_proc = curr_proc[curr_active_p];
-//     pcb_t * n_running_proc = NULL;
+    if (heap_ptr == NULL) {
+        heap_ptr = (void *)&_end;
+    }
 
-//     uint32_t old_proc_num = curr_active_p;
-
-//     while(n_running_proc == NULL) {
-//         curr_active_p++;
-//         if(curr_active_p >= MAX_RUN_PROG) {
-//             curr_active_p = 0;
-//         }
-//         n_running_proc = curr_proc[curr_active_p];
-//     }
-
-//     context_switch(old_proc_num, curr_active_p);
-
-//     return 0;
-// }
-
-// int32_t context_switch(uint32_t o_slot, uint32_t n_slot) {
-//     pcb_t * o_pcb = get_pcb(o_slot);
-//     // Grab PCB for next
-//     pcb_t * n_pcb = get_pcb(n_slot);
-                        
-//     switch_pd(n_pcb->proc_num, n_pcb->base);
-//     tss.ss0 = KERNEL_DS;
-//     tss.esp0 = _8MB - (_8KB) * (n_pcb->proc_num) - 4;
-//     // save
-//     asm volatile("movl %%esp, %0":"=r"(o_pcb->ksp));
-//     asm volatile("movl %%ebp, %0":"=r"(o_pcb->kbp));
-
-//     // load
-//     asm volatile("movl %0, %%esp"::"r"(n_pcb->ksp));
-//     asm volatile("movl %0, %%ebp"::"r"(n_pcb->kbp));
-    
-//     return 0;
-// }
-
-// /*
-//  * Thanks to: https://sourceware.org/newlib/libc.html#Syscalls
-//  *     (Red Hat Minimal Implementation)
-//  * And to: http://code.metager.de/source/xref/hurd/viengoos/libhurd-mm/sbrk.c
-//  *     (GNU Hurd Implementation)
-//  */
-// void * sbrk(uint32_t nbytes) {
-//     static void * heap_ptr = NULL;
-//     void * base;
-
-//     if (heap_ptr == NULL) {
-//         heap_ptr = (void *)&_end;
-//     }
-
-//     if ((RAMSIZE - heap_ptr) >= 0) {
-//         base = heap_ptr;
-//         heap_ptr += nbytes;
-//         return (base);
-//     } else {
-//         return ((void *)-1);
-//     }
-// }
+    if ((RAMSIZE - heap_ptr) >= 0) {
+        base = heap_ptr;
+        heap_ptr += nbytes;
+        return (base);
+    } else {
+        return ((void *)-1);
+    }
+}

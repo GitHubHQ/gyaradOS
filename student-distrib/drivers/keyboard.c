@@ -335,7 +335,7 @@ void handle_keypress() {
                 case KEY_MAKE_F1:
                     // if(alt_l_on || alt_r_on && active_terminal != 0) {
                         // switch to the video memory of the first terminal
-                        switch_term(0);
+                        set_running_proc(0);
                         update_screen(0, active_terminal);
                         prev_terminal = active_terminal;
                         active_terminal = 0;
@@ -356,14 +356,10 @@ void handle_keypress() {
                 case KEY_MAKE_F2:
                     // if(alt_l_on || alt_r_on && active_terminal != 1) {
                         // switch to the video memory of the second terminal
-                        switch_term(1);
+                        set_running_proc(1);
                         update_screen(1, active_terminal);
                         prev_terminal = active_terminal;
                         active_terminal = 1;
-
-                        // send eoi and restore prev flags
-                        send_eoi(IRQ_KEYBOARD_CTRL);
-                        restore_flags(flags);
 
                         prev_pcb = get_pcb(prev_terminal);
                         asm volatile("movl %%esp, %0":"=g"(prev_pcb->p_sched_ksp));
@@ -389,14 +385,10 @@ void handle_keypress() {
                 case KEY_MAKE_F3:
                     // if(alt_l_on || alt_r_on && active_terminal != 2) {
                         // switch to the video memory of the third terminal
-                        switch_term(2);
+                        set_running_proc(2);
                         update_screen(2, active_terminal);
                         prev_terminal = active_terminal;
                         active_terminal = 2;
-
-                        // send eoi and restore prev flags
-                        send_eoi(IRQ_KEYBOARD_CTRL);
-                        restore_flags(flags);
 
                         prev_pcb = get_pcb(prev_terminal);
                         asm volatile("movl %%esp, %0":"=g"(prev_pcb->p_sched_ksp));
