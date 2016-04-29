@@ -259,6 +259,7 @@ void handle_keypress() {
 
     // get scan code
     uint8_t key_code = inb(KEYBOARD_D_PORT);
+    pcb_t * prev_pcb = NULL;
 
     if(key_code < MAX_MAKE_SCANCODE) {
         // make key
@@ -338,6 +339,15 @@ void handle_keypress() {
                         update_screen(0, active_terminal);
                         prev_terminal = active_terminal;
                         active_terminal = 0;
+
+                        prev_pcb = get_pcb(prev_terminal);
+                        asm volatile("movl %%esp, %0":"=g"(prev_pcb->p_sched_ksp));
+                        asm volatile("movl %%ebp, %0":"=g"(prev_pcb->p_sched_kbp));
+
+                        // send eoi and restore prev flags
+                        send_eoi(IRQ_KEYBOARD_CTRL);
+                        restore_flags(flags);
+                        
                         context_switch(prev_terminal, active_terminal);
                     // }
                     break;
@@ -348,6 +358,14 @@ void handle_keypress() {
                         update_screen(1, active_terminal);
                         prev_terminal = active_terminal;
                         active_terminal = 1;
+
+                        // send eoi and restore prev flags
+                        send_eoi(IRQ_KEYBOARD_CTRL);
+                        restore_flags(flags);
+
+                        prev_pcb = get_pcb(prev_terminal);
+                        asm volatile("movl %%esp, %0":"=g"(prev_pcb->p_sched_ksp));
+                        asm volatile("movl %%ebp, %0":"=g"(prev_pcb->p_sched_kbp));
 
                         // send eoi and restore prev flags
                         send_eoi(IRQ_KEYBOARD_CTRL);
@@ -371,6 +389,14 @@ void handle_keypress() {
                         update_screen(2, active_terminal);
                         prev_terminal = active_terminal;
                         active_terminal = 2;
+
+                        // send eoi and restore prev flags
+                        send_eoi(IRQ_KEYBOARD_CTRL);
+                        restore_flags(flags);
+
+                        prev_pcb = get_pcb(prev_terminal);
+                        asm volatile("movl %%esp, %0":"=g"(prev_pcb->p_sched_ksp));
+                        asm volatile("movl %%ebp, %0":"=g"(prev_pcb->p_sched_kbp));
 
                         // send eoi and restore prev flags
                         send_eoi(IRQ_KEYBOARD_CTRL);

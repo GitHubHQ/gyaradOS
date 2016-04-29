@@ -68,6 +68,8 @@ void pit_handle_interrupt() {
     // set the esp0 to the correct one for the next process
     tss.esp0 = _8MB - (_8KB) * (next_proc->proc_num) - 4;
 
+    restore_flags(flags);
+
     // stack switch
     asm volatile("movl %0, %%esp"::"g"(next_proc->p_sched_ksp));
     asm volatile("movl %0, %%ebp"::"g"(next_proc->p_sched_kbp));
