@@ -348,7 +348,9 @@ void handle_keypress() {
                         send_eoi(IRQ_KEYBOARD_CTRL);
                         restore_flags(flags);
                         
-                        context_switch(prev_terminal, active_terminal);
+                        if(!SCHED_ENABLED) {
+                            context_switch(prev_terminal, active_terminal);
+                        }
                     // }
                     break;
                 case KEY_MAKE_F2:
@@ -378,7 +380,9 @@ void handle_keypress() {
                             // start up second terminal
                             execute((uint8_t*) "shell");
                         } else {
-                            context_switch(prev_terminal, active_terminal);
+                            if(!SCHED_ENABLED) {
+                                context_switch(prev_terminal, active_terminal);
+                            }
                         }
                     // }
                     break;
@@ -409,7 +413,9 @@ void handle_keypress() {
                             // start up third terminal
                             execute((uint8_t*) "shell");
                         } else {
-                            context_switch(prev_terminal, active_terminal);
+                            if(!SCHED_ENABLED) {
+                                context_switch(prev_terminal, active_terminal);
+                            }
                         }
                     // }
                     break;

@@ -320,6 +320,7 @@ int32_t sigreturn (void) {
 int32_t switch_term(uint8_t dest) {
     // switch terminals to the new one
     curr_terminal = dest;
+    curr_active_p = dest;
 
     return 0;
 }

@@ -1,7 +1,5 @@
 #include "pit.h"
 
-#define SCHED_ENABLED   1
-
 void pit_init() {
     // set up the pit to 30hz
     uint32_t divider = calc_divider(30);
