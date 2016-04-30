@@ -9,6 +9,7 @@
 #include "../drivers/keyboard.h"
 #include "../drivers/rtc.h"
 #include "../drivers/speaker.h"
+#include "../paging.h"
 
 #define VIDEO 0xB8000
 #define NUM_COLS 80
@@ -33,7 +34,7 @@
 
 #define SCHED_ENABLED           1
 
-uint8_t term_vid_mem[NUM_TERMINALS][NUM_COLS * NUM_ROWS * VID_MEM_ATTR];
+//uint8_t term_vid_mem[NUM_TERMINALS][NUM_COLS * NUM_ROWS * VID_MEM_ATTR];
 
 int32_t printf(int8_t *format, ...);
 void putc(uint8_t c);

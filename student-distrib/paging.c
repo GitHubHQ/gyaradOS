@@ -27,9 +27,21 @@ void init_paging() {
 	}
 
     //enabling the present and read/write and user bit for the video memory at physical location 0xB8000
-	pageTable1[VIDEO_PHYS_ADDR/PAGE_SIZE].PTE_bits.present = 1;
-	pageTable1[VIDEO_PHYS_ADDR/PAGE_SIZE].PTE_bits.read_write = 1;
-	pageTable1[VIDEO_PHYS_ADDR/PAGE_SIZE].PTE_bits.user_super = 1; 
+	pageTable1[VIDEO/PAGE_SIZE].PTE_bits.present = 1;
+	pageTable1[VIDEO/PAGE_SIZE].PTE_bits.read_write = 1;
+	pageTable1[VIDEO/PAGE_SIZE].PTE_bits.user_super = 1; 
+
+    pageTable1[VIDEO_PHYS_ADDR0/PAGE_SIZE].PTE_bits.present = 1;
+    pageTable1[VIDEO_PHYS_ADDR0/PAGE_SIZE].PTE_bits.read_write = 1;
+    pageTable1[VIDEO_PHYS_ADDR0/PAGE_SIZE].PTE_bits.user_super = 1; 
+
+    pageTable1[VIDEO_PHYS_ADDR1/PAGE_SIZE].PTE_bits.present = 1;
+    pageTable1[VIDEO_PHYS_ADDR1/PAGE_SIZE].PTE_bits.read_write = 1;
+    pageTable1[VIDEO_PHYS_ADDR1/PAGE_SIZE].PTE_bits.user_super = 1; 
+
+    pageTable1[VIDEO_PHYS_ADDR2/PAGE_SIZE].PTE_bits.present = 1;
+    pageTable1[VIDEO_PHYS_ADDR2/PAGE_SIZE].PTE_bits.read_write = 1;
+    pageTable1[VIDEO_PHYS_ADDR2/PAGE_SIZE].PTE_bits.user_super = 1; 
 
     for(i = 0; i < PAGE_DIRECTORY_SIZE; i++){
         //setting the rest of the pages to not be present, read/write, and supervisor privilege

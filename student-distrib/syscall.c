@@ -353,7 +353,7 @@ int32_t vidmap (uint8_t ** screen_start) {
         return -1;
     }
 
-    *screen_start = (uint8_t *) VIDEO_PHYS_ADDR;
+    *screen_start = (uint8_t *) VIDEO;
 
     restore_flags(flags);
     return 0;

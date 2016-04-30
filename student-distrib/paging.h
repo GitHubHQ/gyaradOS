@@ -13,9 +13,9 @@
 #define KERNEL_END_ADDR         0x800000
 #define PROCESS_START_ADDR      0x08048000
 
-#define _4KB                    0x1000
-
-#define VIDEO_PHYS_ADDR         0XB8000
+#define VIDEO_PHYS_ADDR0        0XBC000
+#define VIDEO_PHYS_ADDR1        0XDC000
+#define VIDEO_PHYS_ADDR2        0XEC000
 
 typedef union PDE {
     struct {
@@ -55,6 +55,5 @@ PTE_t pageTable1[PAGE_TABLE_SIZE] __attribute__((aligned(PAGE_SIZE)));
 extern void init_paging();
 extern uint32_t init_new_process(uint32_t process_num);
 extern int switch_pd(uint8_t process_num, uint32_t prev_base);
-extern void switch_vid(uint8_t terminal_num);
 
 #endif
