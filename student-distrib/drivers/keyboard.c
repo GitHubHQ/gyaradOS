@@ -111,18 +111,18 @@ int32_t terminal_read (int32_t fd, uint8_t * buf, int32_t nbytes) {
     int bytes_read = 0;
     int i = 0;
 
-    while(!read_buf_ready[active_terminal]);
+    while(!read_buf_ready[get_curr_running_term_proc()]);
 
     for(i = 0; i <= nbytes; i++) {
-        buf[i] = keyboard_buf[active_terminal][i];
-        keyboard_buf[active_terminal][i] = NULL;
+        buf[i] = keyboard_buf[get_curr_running_term_proc()][i];
+        keyboard_buf[get_curr_running_term_proc()][i] = NULL;
         bytes_read++;
     }
 
     new_line();
 
-    num_chars_in_buf[active_terminal] = 0;
-    read_buf_ready[active_terminal] = 0;
+    num_chars_in_buf[get_curr_running_term_proc()] = 0;
+    read_buf_ready[get_curr_running_term_proc()] = 0;
 
     return bytes_read;
 }
@@ -184,12 +184,12 @@ void handle_enter() {
         keyboard_buf[active_terminal][i] = ASCII_NULL_CHAR;
     }
 
-    uint8_t buf[MAX_CHARS_IN_BUF + 1];
-    int32_t nbytes = MAX_CHARS_IN_BUF + 1;
-
     read_buf_ready[active_terminal] = 1;
 
     if(TERM_TEST_READ) {
+        uint8_t buf[MAX_CHARS_IN_BUF + 1];
+        int32_t nbytes = MAX_CHARS_IN_BUF + 1;
+
         for(i = 0; i < nbytes; i++) {
             printf("%c", buf[i]);
         }
