@@ -12,6 +12,7 @@ static char* video_mem = (char *)VIDEO;
 
 uint8_t * args;
 uint32_t index = 0;
+char* term_vid_mem[NUM_TERMINALS] = {(char*)VIDEO_PHYS_ADDR0, (char*)VIDEO_PHYS_ADDR1, (char*)VIDEO_PHYS_ADDR2};
 
 /*
 * void clear(void);
