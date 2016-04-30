@@ -61,6 +61,7 @@ typedef struct {
     uint32_t p_kbp;
     uint32_t p_sched_ksp;
     uint32_t p_sched_kbp;
+    int8_t * proc_name;
     struct pcb_t * prev;
 } pcb_t;
 

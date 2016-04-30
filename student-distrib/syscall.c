@@ -214,6 +214,9 @@ int32_t execute (const uint8_t * command) {
     proc_ctrl_blk->fds[1].inode = NULL;
     proc_ctrl_blk->fds[1].flags = IN_USE;
 
+    // add meta information to the pcb about the process
+    // strcpy(proc_ctrl_blk->proc_name, f_name);
+
     // set pcbs correctly
     prev_proc[curr_active_term] = curr_proc[curr_active_term];
     curr_proc[curr_active_term] = proc_ctrl_blk;
