@@ -3,7 +3,7 @@
 pcb_t * curr_proc[] = {NULL, NULL, NULL};
 pcb_t * prev_proc[] = {NULL, NULL, NULL};
 
-uint8_t curr_term = 0;
+uint8_t curr_active_term = 0;
 
 uint32_t curr_proc_id_mask = 0;
 uint32_t curr_proc_id = 0;
@@ -20,11 +20,11 @@ int32_t halt (uint8_t status) {
     unsigned long flags;
     cli_and_save(flags);
 
-    pcb_t * proc_ctrl_blk = curr_proc[curr_term];
+    pcb_t * proc_ctrl_blk = curr_proc[curr_active_term];
 
     // get the process number to free
     uint32_t free_proc_num = proc_ctrl_blk->proc_num;
-    if(prev_proc[curr_term] == NULL) {
+    if(prev_proc[curr_active_term] == NULL) {
         // restart this process since its the first process
         // we can hardcode this to shell since that is the first process every time
         uint8_t f_init_data[32];
@@ -37,6 +37,7 @@ int32_t halt (uint8_t status) {
         exec_read.file_position = 0;
 
         if(fs_read(&exec_read, f_init_data, 32) == -1) {
+            restore_flags(flags);
             return -1;
         }
 
@@ -45,6 +46,8 @@ int32_t halt (uint8_t status) {
         entrypoint += (uint32_t)f_init_data[26] << 16;
         entrypoint += (uint32_t)f_init_data[25] << 8;
         entrypoint += (uint32_t)f_init_data[24];
+
+        restore_flags(flags);
 
         // jump back to the beginning of the executable
         jmp_usr_exec(entrypoint);
@@ -69,16 +72,16 @@ int32_t halt (uint8_t status) {
     }
 
     // reset the page entries
-    switch_pd(prev_proc[curr_term]->proc_num, prev_proc[curr_term]->base);
-    tss.esp0 = _8MB - (_8KB) * prev_proc[curr_term]->proc_num - 4;
+    switch_pd(prev_proc[curr_active_term]->proc_num, prev_proc[curr_active_term]->base);
+    tss.esp0 = _8MB - (_8KB) * prev_proc[curr_active_term]->proc_num - 4;
 
     // stack switch
     asm volatile("movl %0, %%esp"::"g"(proc_ctrl_blk->p_ksp));
     asm volatile("movl %0, %%ebp"::"g"(proc_ctrl_blk->p_kbp));
 
     // swap the pcbs correctly
-    curr_proc[curr_term] = prev_proc[curr_term];
-    prev_proc[curr_term] = (pcb_t *) prev_proc[curr_term]->prev;
+    curr_proc[curr_active_term] = prev_proc[curr_active_term];
+    prev_proc[curr_active_term] = (pcb_t *) prev_proc[curr_active_term]->prev;
 
     restore_flags(flags);
 
@@ -88,6 +91,9 @@ int32_t halt (uint8_t status) {
 }
 
 int32_t execute (const uint8_t * command) {
+    unsigned long flags;
+    cli_and_save(flags);
+
     // Used to hold the first 32 bytes of the file
     // These 32 bytes will contain the exec information and the entry point of the file
     uint8_t f_init_data[32];
@@ -98,6 +104,7 @@ int32_t execute (const uint8_t * command) {
 
     // fail if an invalid command is specified
     if (command == NULL || strlen((int8_t *) command) == 0) {
+        restore_flags(flags);
         return -1;
     }
 
@@ -113,6 +120,7 @@ int32_t execute (const uint8_t * command) {
             temp_arg[i - cmd_len - 1] = command[i];
         } else {
             if(i >= 32 && space_flag == 0) {
+                restore_flags(flags);
                 return -1;
             }
         }
@@ -129,12 +137,14 @@ int32_t execute (const uint8_t * command) {
     strcpy((int8_t*)&(exec_read.file_name),(int8_t*)f_name);
     exec_read.file_position = 0;
     if(fs_read(&exec_read, f_init_data, 32) == -1) {
+        restore_flags(flags);
         return -1;
     }
 
     // See if the file is executeable
     if (!((f_init_data[0] == MAGIC_NUM_1) && (f_init_data[1] == MAGIC_NUM_2) && (f_init_data[2] == MAGIC_NUM_3) && (f_init_data[3] == MAGIC_NUM_4))) {
         printf("ERROR: Non-Runnable file!\n");
+        restore_flags(flags);
         return -1;
     }
 
@@ -158,6 +168,7 @@ int32_t execute (const uint8_t * command) {
     // Max number of programs reached, error out
     if (i >= (MAX_PROG_NUM -1)) {
         printf("ERROR: Out of runnable program slots!\n");
+        restore_flags(flags);
         return -1;
     }
 
@@ -204,9 +215,9 @@ int32_t execute (const uint8_t * command) {
     proc_ctrl_blk->fds[1].flags = IN_USE;
 
     // set pcbs correctly
-    prev_proc[curr_term] = curr_proc[curr_term];
-    curr_proc[curr_term] = proc_ctrl_blk;
-    curr_proc[curr_term]->prev = (struct pcb_t *) prev_proc[curr_term];
+    prev_proc[curr_active_term] = curr_proc[curr_active_term];
+    curr_proc[curr_active_term] = proc_ctrl_blk;
+    curr_proc[curr_active_term]->prev = (struct pcb_t *) prev_proc[curr_active_term];
 
     // set the flag saying that the first program was run
     first_program_run = 1;
@@ -214,6 +225,8 @@ int32_t execute (const uint8_t * command) {
     // Grab and store the ESP and EBP in the PCB
     asm volatile("movl %%esp, %0":"=g"(proc_ctrl_blk->p_sched_ksp));
     asm volatile("movl %%ebp, %0":"=g"(proc_ctrl_blk->p_sched_kbp));
+
+    restore_flags(flags);
 
     // jump to the program to begin execution
     jmp_usr_exec(entrypoint);
@@ -224,20 +237,35 @@ int32_t execute (const uint8_t * command) {
 }
 
 int32_t read (int32_t fd, void * buf, int32_t nbytes) {
-    if (buf == NULL || fd > 7 || fd < 0 || fd == 1 || curr_proc[curr_term]->fds[fd].flags != IN_USE) {
+    unsigned long flags;
+    cli_and_save(flags);
+
+    if (buf == NULL || fd > 7 || fd < 0 || fd == 1 || curr_proc[curr_active_term]->fds[fd].flags != IN_USE) {
         return -1;
     }
-    return curr_proc[curr_term]->fds[fd].operations_pointer[READ](&(curr_proc[curr_term]->fds[fd]), buf, nbytes);
+
+    restore_flags(flags);
+
+    return curr_proc[curr_active_term]->fds[fd].operations_pointer[READ](&(curr_proc[curr_active_term]->fds[fd]), buf, nbytes);
 }
 
 int32_t write (int32_t fd, const void * buf, int32_t nbytes) {
-    if (buf == NULL || fd > 7 || fd <= 0 || curr_proc[curr_term]->fds[fd].flags != IN_USE) {
+    unsigned long flags;
+    cli_and_save(flags);
+
+    if (buf == NULL || fd > 7 || fd <= 0 || curr_proc[curr_active_term]->fds[fd].flags != IN_USE) {
         return -1;
     }
-    return curr_proc[curr_term]->fds[fd].operations_pointer[WRITE](fd, buf, nbytes);
+
+    restore_flags(flags);
+
+    return curr_proc[curr_active_term]->fds[fd].operations_pointer[WRITE](fd, buf, nbytes);
 }
 
 int32_t open (const uint8_t * filename) {
+    unsigned long flags;
+    cli_and_save(flags);
+
     // fail if an invalid filename is specified
     if (filename == NULL || strlen((int8_t *) filename) == 0) {
         return -1;
@@ -254,63 +282,80 @@ int32_t open (const uint8_t * filename) {
     //put back calling open
     int i = 0;
     for(i = 2; i < MAX_FILES; i++) {
-        if(curr_proc[curr_term]->fds[i].flags == NOT_USE) {
+        if(curr_proc[curr_active_term]->fds[i].flags == NOT_USE) {
             switch(file_info.file_type) {
                 case RTC_TYPE:
-                    curr_proc[curr_term]->fds[i].operations_pointer = rtc_ops_table;
-                    curr_proc[curr_term]->fds[i].inode = NULL;
-                    curr_proc[curr_term]->fds[i].file_position = 0;
-                    strcpy((int8_t*)&(curr_proc[curr_term]->fds[i].file_name), (int8_t*) filename);
+                    curr_proc[curr_active_term]->fds[i].operations_pointer = rtc_ops_table;
+                    curr_proc[curr_active_term]->fds[i].inode = NULL;
+                    curr_proc[curr_active_term]->fds[i].file_position = 0;
+                    strcpy((int8_t*)&(curr_proc[curr_active_term]->fds[i].file_name), (int8_t*) filename);
                     rtc_open();
                     break;
                 case DIR_TYPE:
-                    curr_proc[curr_term]->fds[i].operations_pointer = dir_ops_table;
-                    curr_proc[curr_term]->fds[i].inode = NULL;
-                    curr_proc[curr_term]->fds[i].file_position = 0;
-                    strcpy((int8_t*)&(curr_proc[curr_term]->fds[i].file_name), (int8_t*) filename);
+                    curr_proc[curr_active_term]->fds[i].operations_pointer = dir_ops_table;
+                    curr_proc[curr_active_term]->fds[i].inode = NULL;
+                    curr_proc[curr_active_term]->fds[i].file_position = 0;
+                    strcpy((int8_t*)&(curr_proc[curr_active_term]->fds[i].file_name), (int8_t*) filename);
                     dir_open(filename);
                     break;
                 case FILE_TYPE:
-                    curr_proc[curr_term]->fds[i].operations_pointer = files_ops_table;
-                    curr_proc[curr_term]->fds[i].inode = get_inode(file_info.inode_num);
-                    curr_proc[curr_term]->fds[i].file_position = 0;
-                    strcpy((int8_t*)&(curr_proc[curr_term]->fds[i].file_name), (int8_t*) filename);
+                    curr_proc[curr_active_term]->fds[i].operations_pointer = files_ops_table;
+                    curr_proc[curr_active_term]->fds[i].inode = get_inode(file_info.inode_num);
+                    curr_proc[curr_active_term]->fds[i].file_position = 0;
+                    strcpy((int8_t*)&(curr_proc[curr_active_term]->fds[i].file_name), (int8_t*) filename);
                     fs_open(filename);
                     break;
             }
-            curr_proc[curr_term]->fds[i].flags = IN_USE;
+
+            curr_proc[curr_active_term]->fds[i].flags = IN_USE;
+            restore_flags(flags);
             return i;
         }
     }
+
+    restore_flags(flags);
     return -1;
 }
 
 int32_t close (int32_t fd) {
-    if(fd >= 2 && fd <= 7 && (curr_proc[curr_term]->fds[fd].flags == IN_USE)) {
-        curr_proc[curr_term]->fds[fd].flags = NOT_USE;
-        curr_proc[curr_term]->fds[fd].file_position = 0;
-        return curr_proc[curr_term]->fds[fd].operations_pointer[CLOSE](fd);
+    unsigned long flags;
+    cli_and_save(flags);
+
+    if(fd >= 2 && fd <= 7 && (curr_proc[curr_active_term]->fds[fd].flags == IN_USE)) {
+        curr_proc[curr_active_term]->fds[fd].flags = NOT_USE;
+        curr_proc[curr_active_term]->fds[fd].file_position = 0;
+        restore_flags(flags);
+        return curr_proc[curr_active_term]->fds[fd].operations_pointer[CLOSE](fd);
     }
 
+    restore_flags(flags);
     return -1;
 }
 
 int32_t getargs (uint8_t * buf, int32_t nbytes) {
+    unsigned long flags;
+    cli_and_save(flags);
+
     if(nbytes < 0 || buf == NULL) {
         return -1;
     }
 
-    strncpy((int8_t*) buf, (const int8_t*) curr_proc[curr_term]->args, nbytes);
+    strncpy((int8_t*) buf, (const int8_t*) curr_proc[curr_active_term]->args, nbytes);
+    restore_flags(flags);
     return 0;
 }
 
 int32_t vidmap (uint8_t ** screen_start) {
+    unsigned long flags;
+    cli_and_save(flags);
+
     if((uint32_t) screen_start < VID_MEM_START || (uint32_t) screen_start > VID_MEM_END) {
         return -1;
     }
 
     *screen_start = (uint8_t *) VIDEO_PHYS_ADDR;
 
+    restore_flags(flags);
     return 0;
 }
 
@@ -331,11 +376,11 @@ int32_t first_prog_run() {
 }
 
 uint8_t get_curr_running_term_proc() {
-    return curr_term;
+    return curr_active_term;
 }
 
 uint8_t get_next_running_term_proc() {
-    uint8_t n_term_num = curr_term;
+    uint8_t n_term_num = curr_active_term;
     uint8_t found = 0;
 
     while(!found) {
@@ -355,7 +400,7 @@ uint8_t get_next_running_term_proc() {
 }
 
 void set_running_proc(uint8_t proc) {
-    curr_term = proc;
+    curr_active_term = proc;
     return;
 }
 

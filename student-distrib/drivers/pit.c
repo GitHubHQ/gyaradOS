@@ -36,9 +36,6 @@ void pit_handle_interrupt() {
     // get the current and next processes to run
     uint8_t curr_proc_term_num = get_curr_running_term_proc();
     uint8_t next_proc_term_num = get_next_running_term_proc();
-    
-    // set the correct running process
-    set_running_proc(next_proc_term_num);
 
     // if there is only one process running in one terminal, we have nothing to schedule! return
     if(curr_proc_term_num == next_proc_term_num) {
@@ -56,6 +53,9 @@ void pit_handle_interrupt() {
         return;
     }
 
+    // set the correct running process
+    set_running_proc(next_proc_term_num);
+
     // store ksp/kbp before move to the current processes pcb
     asm volatile("movl %%esp, %0":"=g"(curr_proc->p_sched_ksp));
     asm volatile("movl %%ebp, %0":"=g"(curr_proc->p_sched_kbp));
@@ -65,6 +65,8 @@ void pit_handle_interrupt() {
 
     // set the esp0 to the correct one for the next process
     tss.esp0 = _8MB - (_8KB) * (next_proc->proc_num) - 4;
+
+    // printf("NEXT PROC %d\n", next_proc_term_num);
 
     restore_flags(flags);
 
