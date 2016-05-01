@@ -139,3 +139,10 @@ int switch_pd(uint8_t process_num, uint32_t prev_base) {
                  );
     return 0;
 }
+
+void fix_attrs(void) {
+    int32_t i;
+    for(i = 0; i < NUM_ROWS * NUM_COLS; i++) {
+        *(uint8_t *)(VIDEO + (i << 1) + 1) = ATTRIB;
+    }
+}
