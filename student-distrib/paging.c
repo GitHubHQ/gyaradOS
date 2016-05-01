@@ -30,6 +30,7 @@ void init_paging() {
 	pageTable1[VIDEO/PAGE_SIZE].PTE_bits.read_write = 1;
 	pageTable1[VIDEO/PAGE_SIZE].PTE_bits.user_super = 1; 
 
+    //pages used to store the 3 terminals
     pageTable1[VIDEO_PHYS_ADDR0/PAGE_SIZE].PTE_bits.present = 1;
     pageTable1[VIDEO_PHYS_ADDR0/PAGE_SIZE].PTE_bits.read_write = 1;
     pageTable1[VIDEO_PHYS_ADDR0/PAGE_SIZE].PTE_bits.user_super = 1; 
@@ -139,6 +140,9 @@ int switch_pd(uint8_t process_num, uint32_t prev_base) {
     return 0;
 }
 
+/**
+ * method used to fix the attribute bit for multiple terminals
+ */
 void fix_attrs(void) {
     int32_t i;
     for(i = 0; i < NUM_ROWS * NUM_COLS; i++) {

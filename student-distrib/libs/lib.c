@@ -337,8 +337,8 @@ uint8_t* strtok(const uint8_t* input) {
 }
 
 void update_screen(uint8_t dest, uint8_t src) {
-	memcpy(term_vid_mem[src], video_mem, _4KB);
-	memcpy(video_mem, term_vid_mem[dest], _4KB);
+	memcpy(term_vid_mem[dest], video_mem, _4KB);
+	memcpy(video_mem, term_vid_mem[src], _4KB);
 	fix_attrs();
 	
 	update_cursor(screen_y[dest], screen_x[dest]);
