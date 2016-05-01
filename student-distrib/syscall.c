@@ -5,7 +5,7 @@ pcb_t * prev_proc[] = {NULL, NULL, NULL};
 
 uint8_t curr_active_term = 0;
 
-uint32_t curr_proc_id_mask = 0;
+uint8_t curr_proc_id_mask = 0;
 uint32_t curr_proc_id = 0;
 
 uint32_t first_program_run = 0;
@@ -25,6 +25,8 @@ int32_t halt (uint8_t status) {
 
     // get the process number to free
     uint32_t free_proc_num = proc_ctrl_blk->proc_num;
+
+    printf("FREEING: %d\n", free_proc_num);
 
     // check if this is the first terminal
     if(prev_proc[curr_active_term] == NULL) {
@@ -57,7 +59,7 @@ int32_t halt (uint8_t status) {
     }
 
     // set the process to free in the process buffer
-    curr_proc_id_mask &= ~(1 << free_proc_num);
+    curr_proc_id_mask ^= (PROGRAM_LOCATION_MASK >> free_proc_num);
 
     // Close STDIN
     proc_ctrl_blk->fds[0].operations_pointer = NULL;
@@ -170,7 +172,7 @@ int32_t execute (const uint8_t * command) {
     }
 
     // Max number of programs reached, error out
-    if (i >= (MAX_PROG_NUM -1)) {
+    if (i >= MAX_PROG_NUM) {
         printf("ERROR: Out of runnable program slots!\n");
         restore_flags(flags);
         return -1;
@@ -225,6 +227,8 @@ int32_t execute (const uint8_t * command) {
     prev_proc[curr_active_term] = curr_proc[curr_active_term];
     curr_proc[curr_active_term] = proc_ctrl_blk;
     curr_proc[curr_active_term]->prev = (struct pcb_t *) prev_proc[curr_active_term];
+
+    printf("CURRPROCID %d\n", curr_proc_id);
 
     // set the flag saying that the first program was run
     first_program_run = 1;

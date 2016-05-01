@@ -38,8 +38,8 @@
 
 #define MAX_FILES		   8
 
-#define PROGRAM_LOCATION_MASK	0x80000000
-#define MAX_PROG_NUM	32
+#define PROGRAM_LOCATION_MASK	0x80
+#define MAX_PROG_NUM	7
 
 #define MAX_RUN_PROG	3
 
