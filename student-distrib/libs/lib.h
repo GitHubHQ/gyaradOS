@@ -32,7 +32,7 @@
 
 #define NUM_TERMINALS           3
 
-#define SCHED_ENABLED           0
+#define SCHED_ENABLED           1
 
 //uint8_t term_vid_mem[NUM_TERMINALS][NUM_COLS * NUM_ROWS * VID_MEM_ATTR];
 
