@@ -339,17 +339,11 @@ void handle_keypress() {
                         prev_terminal = active_terminal;
                         active_terminal = 0;
 
-                        prev_pcb = get_pcb(prev_terminal);
-                        asm volatile("movl %%esp, %0":"=g"(prev_pcb->p_sched_ksp));
-                        asm volatile("movl %%ebp, %0":"=g"(prev_pcb->p_sched_kbp));
-
                         // send eoi and restore prev flags
                         send_eoi(IRQ_KEYBOARD_CTRL);
                         restore_flags(flags);
 
-                        if(!SCHED_ENABLED) {
-                            context_switch(prev_terminal, active_terminal);
-                        }
+                        context_switch(prev_terminal, active_terminal);
                     // }
                     break;
                 case KEY_MAKE_F2:
@@ -359,25 +353,11 @@ void handle_keypress() {
                         prev_terminal = active_terminal;
                         active_terminal = 1;
 
-                        prev_pcb = get_pcb(prev_terminal);
-                        asm volatile("movl %%esp, %0":"=g"(prev_pcb->p_sched_ksp));
-                        asm volatile("movl %%ebp, %0":"=g"(prev_pcb->p_sched_kbp));
-
                         // send eoi and restore prev flags
                         send_eoi(IRQ_KEYBOARD_CTRL);
                         restore_flags(flags);
 
-                        if(!second_term_start) {
-                            // set the flag correctly
-                            second_term_start = 1;
-                            set_running_proc(1);
-                            // start up second terminal
-                            execute((uint8_t*) "shell");
-                        } else {
-                            if(!SCHED_ENABLED) {
-                                context_switch(prev_terminal, active_terminal);
-                            }
-                        }
+                        context_switch(prev_terminal, active_terminal);
                     // }
                     break;
                 case KEY_MAKE_F3:
@@ -387,25 +367,11 @@ void handle_keypress() {
                         prev_terminal = active_terminal;
                         active_terminal = 2;
 
-                        prev_pcb = get_pcb(prev_terminal);
-                        asm volatile("movl %%esp, %0":"=g"(prev_pcb->p_sched_ksp));
-                        asm volatile("movl %%ebp, %0":"=g"(prev_pcb->p_sched_kbp));
-
                         // send eoi and restore prev flags
                         send_eoi(IRQ_KEYBOARD_CTRL);
                         restore_flags(flags);
                         
-                        if(!third_term_start) {
-                            // set the flag correctly
-                            third_term_start = 1;
-                            set_running_proc(2);
-                            // start up third terminal
-                            execute((uint8_t*) "shell");
-                        } else {
-                            if(!SCHED_ENABLED) {
-                                context_switch(prev_terminal, active_terminal);
-                            }
-                        }
+                        context_switch(prev_terminal, active_terminal);
                     // }
                     break;
                 default:
@@ -474,6 +440,22 @@ void handle_keypress() {
 
 uint8_t get_active_terminal(void) {
     return active_terminal;
+}
+
+uint8_t get_second_term_start() {
+    return second_term_start;
+}
+
+void set_second_term_start() {
+    second_term_start = 1;
+}
+
+void set_third_term_start() {
+    third_term_start = 1;
+}
+
+uint8_t get_third_term_start() {
+    return third_term_start;
 }
 
 void test_open(void) {
