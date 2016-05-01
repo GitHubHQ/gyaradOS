@@ -248,6 +248,7 @@ int32_t read (int32_t fd, void * buf, int32_t nbytes) {
     unsigned long flags;
     cli_and_save(flags);
 
+    //error check for read. anything greater than 7 is out of array index. fd 1 is terminal write, so read gives error
     if (buf == NULL || fd > 7 || fd < 0 || fd == 1 || curr_proc[curr_active_term]->fds[fd].flags != IN_USE) {
         return -1;
     }
@@ -261,6 +262,7 @@ int32_t write (int32_t fd, const void * buf, int32_t nbytes) {
     unsigned long flags;
     cli_and_save(flags);
 
+    //error check for write, fd 0 is terminal read so write gives error. anything above 7 is out of array index
     if (buf == NULL || fd > 7 || fd <= 0 || curr_proc[curr_active_term]->fds[fd].flags != IN_USE) {
         return -1;
     }
@@ -288,7 +290,8 @@ int32_t open (const uint8_t * filename) {
     }
 
     //put back calling open
-    int i = 0;
+    int i;
+    //fd 0 and 1 are stdin and stdout so they are always open
     for(i = 2; i < MAX_FILES; i++) {
         if(curr_proc[curr_active_term]->fds[i].flags == NOT_USE) {
             switch(file_info.file_type) {
@@ -329,6 +332,7 @@ int32_t close (int32_t fd) {
     unsigned long flags;
     cli_and_save(flags);
 
+    //should be impossible to close stdin and stdout, so fd 0 and 1 give error
     if(fd >= 2 && fd <= 7 && (curr_proc[curr_active_term]->fds[fd].flags == IN_USE)) {
         curr_proc[curr_active_term]->fds[fd].flags = NOT_USE;
         curr_proc[curr_active_term]->fds[fd].file_position = 0;
