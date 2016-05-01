@@ -393,7 +393,6 @@ int8_t * itoa(uint32_t value, int8_t* buf, int32_t radix) {
 *   Return Value: reversed string
 *	Function: reverses a string s
 */
-
 int8_t * strrev(int8_t* s) {
 	register int8_t tmp;
 	register int32_t beg=0;
@@ -416,7 +415,6 @@ int8_t * strrev(int8_t* s) {
 *   Return Value: length of string s
 *	Function: return length of string s
 */
-
 uint32_t strlen(const int8_t* s) {
 	register uint32_t len = 0;
 	while(s[len] != '\0')
@@ -433,7 +431,6 @@ uint32_t strlen(const int8_t* s) {
 *   Return Value: new string
 *	Function: set n consecutive bytes of pointer s to value c
 */
-
 void * memset(void* s, int32_t c, uint32_t n) {
 	c &= 0xFF;
 	asm volatile("                  \n\
