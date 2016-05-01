@@ -529,6 +529,7 @@ void init_idt() {
         idt[i].reserved1 = 1;
         idt[i].reserved0 = 0;
 
+        // configure device interrupts
         if(i == PIT_IDT) {
             SET_IDT_ENTRY(idt[PIT_IDT], pit_irq);
         } else if(i == KEYBOARD_IDT) {

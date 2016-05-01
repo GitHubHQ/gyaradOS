@@ -65,6 +65,38 @@ typedef struct {
     struct pcb_t * prev;
 } pcb_t;
 
+typedef union PDE {
+    struct {
+        uint32_t present : 1;
+        uint32_t read_write : 1;
+        uint32_t user_super : 1;
+        uint32_t write_through : 1;
+        uint32_t cache_disabled : 1;
+        uint32_t accessed : 1;
+        uint32_t reserved : 1;
+        uint32_t page_size : 1;
+        uint32_t global : 1;
+        uint32_t avail : 3;
+        uint32_t page_table_base : 20;
+    }__attribute__((packed)) PDE_bits;
+} PDE_t;
+ 
+typedef union PTE {
+    struct {
+        uint32_t present : 1;
+        uint32_t read_write : 1;
+        uint32_t user_super : 1;
+        uint32_t write_through : 1;
+        uint32_t cache_disabled : 1;
+        uint32_t accessed : 1;
+        uint32_t dirty : 1;
+        uint32_t page_table_attribute : 1;
+        uint32_t global : 1;
+        uint32_t avail : 3;
+        uint32_t page_base : 20;
+    }__attribute__((packed)) PTE_bits;   
+} PTE_t;
+
 #endif /* ASM */
 
 #endif /* _TYPES_H */

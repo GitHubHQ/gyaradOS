@@ -20,10 +20,13 @@ int32_t halt (uint8_t status) {
     unsigned long flags;
     cli_and_save(flags);
 
+    // get the correct pcb
     pcb_t * proc_ctrl_blk = curr_proc[curr_active_term];
 
     // get the process number to free
     uint32_t free_proc_num = proc_ctrl_blk->proc_num;
+
+    // check if this is the first terminal
     if(prev_proc[curr_active_term] == NULL) {
         // restart this process since its the first process
         // we can hardcode this to shell since that is the first process every time
@@ -83,8 +86,10 @@ int32_t halt (uint8_t status) {
     curr_proc[curr_active_term] = prev_proc[curr_active_term];
     prev_proc[curr_active_term] = (pcb_t *) prev_proc[curr_active_term]->prev;
 
+    // restore the processor flags
     restore_flags(flags);
 
+    // jump to the end of execute to return to the interrupt handler
     asm volatile("jmp EXECUTE_EXIT");
 
     return 0;
@@ -125,7 +130,6 @@ int32_t execute (const uint8_t * command) {
             }
         }
     }
-
     temp_arg[i-cmd_len-1] = '\0';
 
     // get the file name to execute
@@ -229,6 +233,7 @@ int32_t execute (const uint8_t * command) {
     asm volatile("movl %%esp, %0":"=g"(proc_ctrl_blk->p_sched_ksp));
     asm volatile("movl %%ebp, %0":"=g"(proc_ctrl_blk->p_sched_kbp));
 
+    // restore processor flags
     restore_flags(flags);
 
     // jump to the program to begin execution

@@ -1,11 +1,10 @@
 #include "paging.h"
 
 /* void init_paging()
- * Description: initializes paging
+ * Description: initializes paging (all pages and page directories)
  * Inputs: none
  * Outputs: none
  */
-
 void init_paging() {
 	int i;
     
