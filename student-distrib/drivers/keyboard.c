@@ -339,11 +339,11 @@ void handle_keypress() {
                         prev_terminal = active_terminal;
                         active_terminal = 0;
 
-                        // send eoi and restore prev flags
-                        send_eoi(IRQ_KEYBOARD_CTRL);
-                        restore_flags(flags);
+                        // // send eoi and restore prev flags
+                        // send_eoi(IRQ_KEYBOARD_CTRL);
+                        // restore_flags(flags);
 
-                        context_switch(prev_terminal, active_terminal);
+                        // context_switch(prev_terminal, active_terminal);
                     // }
                     break;
                 case KEY_MAKE_F2:
@@ -353,11 +353,11 @@ void handle_keypress() {
                         prev_terminal = active_terminal;
                         active_terminal = 1;
 
-                        // send eoi and restore prev flags
-                        send_eoi(IRQ_KEYBOARD_CTRL);
-                        restore_flags(flags);
+                        // // send eoi and restore prev flags
+                        // send_eoi(IRQ_KEYBOARD_CTRL);
+                        // restore_flags(flags);
 
-                        context_switch(prev_terminal, active_terminal);
+                        // context_switch(prev_terminal, active_terminal);
                     // }
                     break;
                 case KEY_MAKE_F3:
@@ -367,11 +367,11 @@ void handle_keypress() {
                         prev_terminal = active_terminal;
                         active_terminal = 2;
 
-                        // send eoi and restore prev flags
-                        send_eoi(IRQ_KEYBOARD_CTRL);
-                        restore_flags(flags);
+                        // // send eoi and restore prev flags
+                        // send_eoi(IRQ_KEYBOARD_CTRL);
+                        // restore_flags(flags);
                         
-                        context_switch(prev_terminal, active_terminal);
+                        // context_switch(prev_terminal, active_terminal);
                     // }
                     break;
                 default:
@@ -440,6 +440,10 @@ void handle_keypress() {
 
 uint8_t get_active_terminal(void) {
     return active_terminal;
+}
+
+uint8_t set_active_terminal(uint8_t term) {
+    active_terminal = term;
 }
 
 uint8_t get_second_term_start() {

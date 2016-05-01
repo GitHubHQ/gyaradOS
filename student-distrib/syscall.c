@@ -388,23 +388,21 @@ uint8_t get_curr_running_term_proc() {
 }
 
 uint8_t get_next_running_term_proc() {
-    uint8_t n_term_num = curr_active_term;
-    uint8_t found = 0;
-
-    while(!found) {
-        n_term_num++;
-
-        if(n_term_num >= MAX_RUN_PROG) {
-            n_term_num = 0;
-        }
-
-        if(curr_proc[n_term_num] != NULL) {
-            found = 1;
-            return n_term_num;
-        }
+    switch(curr_active_term) {
+        case 0:
+            return 1;
+            break;
+        case 1:
+            return 2;
+            break;
+        case 2:
+            return 0;
+            break;
+        default:
+            printf("rip");
+            return -1;
+            break;
     }
-
-    return -1;
 }
 
 void set_running_proc(uint8_t proc) {
