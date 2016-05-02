@@ -21,6 +21,8 @@ static func_ptr files_ops_table[4] = {fs_open, fs_read, fs_write, fs_close};
  * @param  status [Status of the program being called]
  * @return        [0 on success, -1 on fail]
  */
+uint32_t g_status = 0;
+
 int32_t halt (uint8_t status) {
     unsigned long flags;
     cli_and_save(flags);
@@ -60,6 +62,8 @@ int32_t halt (uint8_t status) {
         // jump back to the beginning of the executable
         jmp_usr_exec(entrypoint);
     }
+
+    g_status = status;
 
     // set the process to free in the process buffer
     curr_proc_id_mask ^= (PROGRAM_LOCATION_MASK >> free_proc_num);
@@ -251,7 +255,7 @@ int32_t execute (const uint8_t * command) {
 
     asm volatile("EXECUTE_EXIT:");
 
-    return 0;
+    return g_status;
 }
 
 /**

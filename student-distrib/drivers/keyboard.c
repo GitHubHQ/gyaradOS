@@ -259,7 +259,6 @@ void handle_keypress() {
 
     // get scan code
     uint8_t key_code = inb(KEYBOARD_D_PORT);
-    pcb_t * prev_pcb = NULL;
 
     if(key_code < MAX_MAKE_SCANCODE) {
         // make key
@@ -442,7 +441,7 @@ uint8_t get_active_terminal(void) {
     return active_terminal;
 }
 
-uint8_t set_active_terminal(uint8_t term) {
+void set_active_terminal(uint8_t term) {
     active_terminal = term;
 }
 
