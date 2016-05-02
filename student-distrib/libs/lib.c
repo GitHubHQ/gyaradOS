@@ -194,13 +194,6 @@ int32_t puts(int8_t* s) {
 *   Return Value: void
 *	Function: Output a character to the console
 */
-
-<<<<<<< HEAD
-=======
-void putc(uint8_t c) {
-	active_terminal = get_active_terminal();
->>>>>>> 6cd06f69b7f28e3ad00213f8d3340f1903098b68
-
 void putaddc(uint8_t c) {
 	if(c == '\n' || c == '\r') {
 	        new_line();
@@ -219,18 +212,14 @@ void putaddc(uint8_t c) {
 	update_cursor(screen_y[active_terminal], screen_x[active_terminal]);
 }
 
-<<<<<<< HEAD
+/*
+* void putc(uint8_t c);
+*   Inputs: uint_8* c = character to print
+*   Return Value: void
+*	Function: Output a character to the console
+*/
 void putc(uint8_t c) { 
 	active_terminal = get_active_terminal();
-=======
-        if(screen_x[active_terminal] == NUM_COLS) {
-        	new_line();
-        }
-
-        screen_x[active_terminal] %= NUM_COLS;
-        screen_y[active_terminal] = (screen_y[active_terminal] + (screen_x[active_terminal] / NUM_COLS)) % NUM_ROWS;
-    }
->>>>>>> 6cd06f69b7f28e3ad00213f8d3340f1903098b68
 
 	if(active_terminal == get_curr_running_term_proc()){
 	    if(c == '\n' || c == '\r') {
@@ -444,7 +433,7 @@ void new_line() {
 void del_last_char() {
 	active_terminal = get_active_terminal();
 
-<<<<<<< HEAD
+
 	if(active_terminal == get_curr_running_term_proc()){
 		if(screen_x[active_terminal] == 0) {
 			screen_x[active_terminal] = NUM_COLS - 1;
@@ -477,18 +466,6 @@ void del_last_char() {
 				} else {
 					screen_x[get_curr_running_term_proc()]--;
 				}
-=======
-  //check the edges
-	if(screen_x[active_terminal] == 0) {
-		screen_x[active_terminal] = NUM_COLS - 1;
-		screen_y[active_terminal]--;
-	} else {
-		screen_x[active_terminal]--;
-	}
-    //set the video memory to be deleted
-    *(uint8_t *)(video_mem + ((NUM_COLS*screen_y[active_terminal] + screen_x[active_terminal]) << 1)) = ' ';
-    *(uint8_t *)(video_mem + ((NUM_COLS*screen_y[active_terminal] + screen_x[active_terminal]) << 1) + 1) = ATTRIB;
->>>>>>> 6cd06f69b7f28e3ad00213f8d3340f1903098b68
 
 			    *(uint8_t *)(vid_mem_loc[1] + ((NUM_COLS*screen_y[get_curr_running_term_proc()] + screen_x[get_curr_running_term_proc()]) << 1)) = ' ';
 			    *(uint8_t *)(vid_mem_loc[1] + ((NUM_COLS*screen_y[get_curr_running_term_proc()] + screen_x[get_curr_running_term_proc()]) << 1) + 1) = ATTRIB;
@@ -621,18 +598,11 @@ uint8_t* strtok(const uint8_t* input) {
 }
 
 void update_screen(uint8_t dest, uint8_t src) {
-<<<<<<< HEAD
 	memcpy(vid_mem_loc[src], video_mem, _4KB);
 	memcpy(video_mem, vid_mem_loc[dest], _4KB);
 
 	fix_attrs(dest);
 	
-=======
-	memcpy(term_vid_mem[src], video_mem, _4KB);
-	memcpy(video_mem, term_vid_mem[dest], _4KB);
-	fix_attrs();
-
->>>>>>> 6cd06f69b7f28e3ad00213f8d3340f1903098b68
 	update_cursor(screen_y[dest], screen_x[dest]);
 	return;
 }

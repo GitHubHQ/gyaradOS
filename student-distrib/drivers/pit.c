@@ -74,7 +74,7 @@ void pit_handle_interrupt() {
         pcb_t * curr_pcb = get_pcb(curr_proc_term_num);
         asm volatile("movl %%esp, %0":"=g"(curr_pcb->p_sched_ksp));
         asm volatile("movl %%ebp, %0":"=g"(curr_pcb->p_sched_kbp));
-        execute("shell");
+        execute((uint8_t*)"shell");
     } else {
         // store ksp/kbp before move to the current processes pcb
         asm volatile("movl %%esp, %0":"=g"(curr_proc->p_sched_ksp));

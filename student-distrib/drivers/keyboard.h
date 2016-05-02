@@ -137,6 +137,7 @@ uint32_t add_char_to_active(uint8_t new_char, uint8_t term);
 void handle_enter();
 void handle_backspace();
 void handle_keypress(void);
+void set_active_terminal(uint8_t term);
 uint8_t get_active_terminal(void);
 
 /* Tester functions */
