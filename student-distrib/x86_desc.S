@@ -14,18 +14,24 @@
 
 .align 4
 
+#the size of the TSS
 tss_size:
 	.long tss_bottom - tss - 1
 
+#the size of the LDT
 ldt_size:
 	.long ldt_bottom - ldt - 1
 
 	.word 0 # Padding
+
+#Actual ldt struct
 ldt_desc:
 	.word KERNEL_LDT
 	.long ldt
 
 	.align 4
+
+#actual tss struct
 tss:
 _tss:
 	.rept 104
@@ -34,6 +40,8 @@ _tss:
 tss_bottom:
 
 	.align  16
+
+#setting up the GDT
 gdt:
 _gdt:
 
