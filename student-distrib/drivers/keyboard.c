@@ -177,6 +177,27 @@ uint32_t add_char_to_buffer(uint8_t new_char, uint8_t term) {
     return 0;
 }
 
+uint32_t add_char_to_active(uint8_t new_char, uint8_t term) {
+    // if we haven't reached the buffer limit, add the char to the buffer and print the key
+    if(num_chars_in_buf[term] < MAX_CHARS_IN_BUF) {
+        switch(new_char) {
+            case '\n':
+                new_line();
+                break;
+            case '\0':
+                return 1;
+                break;
+            default:
+                keyboard_buf[term][num_chars_in_buf[term]] = new_char;
+                num_chars_in_buf[term]++;
+                putaddc(new_char);
+                break;
+        }
+        return 1;
+    }
+    return 0;
+}
+
 void handle_enter() {
     int i = 0;
 
@@ -296,14 +317,14 @@ void handle_keypress() {
             } else if (caps_on && !(shift_l_on || shift_r_on)) {
                 // print caps version
                 key_ascii = caps_ascii[key_code];
-                add_char_to_buffer(key_ascii, active_terminal);
+                add_char_to_active(key_ascii, active_terminal);
             } else if (!caps_on && (shift_l_on || shift_r_on)) {
                 // print shift version
                 key_ascii = shift_ascii[key_code];
-                add_char_to_buffer(key_ascii, active_terminal);
+                add_char_to_active(key_ascii, active_terminal);
             } else {
                 // print char normally
-                add_char_to_buffer(key_ascii, active_terminal);
+                add_char_to_active(key_ascii, active_terminal);
             }
         } else if(special_key_enabled) {
             special_key_enabled = 0;

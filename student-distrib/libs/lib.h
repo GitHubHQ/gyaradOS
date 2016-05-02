@@ -30,12 +30,18 @@
 #define TERMINAL_1              1
 #define TERMINAL_2              2
 
+#define VIDEO_PHYS_ADDR0        0xBC000
+#define VIDEO_PHYS_ADDR1        0xDC000
+#define VIDEO_PHYS_ADDR2        0xEC000
+
 #define NUM_TERMINALS           3
 
 #define SCHED_ENABLED           1
 
 //uint8_t term_vid_mem[NUM_TERMINALS][NUM_COLS * NUM_ROWS * VID_MEM_ATTR];
 
+
+void putaddc(uint8_t c);
 int32_t printf(int8_t *format, ...);
 void putc(uint8_t c);
 int32_t puts(int8_t *s);
