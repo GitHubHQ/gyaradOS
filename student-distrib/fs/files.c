@@ -65,7 +65,7 @@ int32_t fs_close(void) {
     return 0;
 }
 
-/** 
+/**
  * Copies the data of given name to given dentry
  * @param  fname  File name that user wants to copy
  * @param  dentry Where to copy
@@ -116,6 +116,14 @@ int32_t read_dentry_by_index (uint32_t index, dentry_t* dentry) {
     return 0;
 }
 
+/**
+ * [read_data  reads the contents of a file]
+ * @param  inode  [inode of specified file]
+ * @param  offset [current offset within data blocks]
+ * @param  buf    [buffer to read to]
+ * @param  length [number of bytes to read]
+ * @return        [number of bytes read]
+ */
 int32_t read_data (uint32_t inode, uint32_t offset, uint8_t * buf, uint32_t length) {
     //error checking
     if(inode >= b.n_inodes || inode < 0)
@@ -131,7 +139,7 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t * buf, uint32_t leng
 
     int num_reads = 0;
     int buf_pos = 0;
-     
+
     while(num_reads < length) {
         buf[buf_pos] = *curr_read_pos;
         num_reads++;
@@ -147,7 +155,7 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t * buf, uint32_t leng
             // reset location
             location_in_block = 0;
             curr_block++;
-            
+
             //checking if the data block is invalid
             if(inodes[inode].blocks[curr_block] >= b.n_data_blocks) {
                 return -1;
@@ -175,7 +183,7 @@ int32_t copy_file_to_addr(uint8_t* fname, uint32_t addr) {
     }
 
     uint32_t file_size = inodes[temp_dentry.inode_num].file_size;
-    
+
     uint32_t ret = read_data(temp_dentry.inode_num, 0, (uint8_t *) addr, file_size);
 
     if(ret == -1) {
@@ -281,14 +289,14 @@ int32_t dir_write(file_array* fd, const int8_t * buf, int32_t nbytes){
  * outputs: copies filename into buf and returns the number of bytes copied
  */
 int32_t dir_read(file_array* fd, int8_t * buf, int32_t length){
-    //check if reached end       
+    //check if reached end
     if(fd->file_position >= b.n_dentries){
         fd->file_position = 0;
         return 0;
     }
     //copy name into buf
     strcpy(buf, dentries[fd->file_position].file_name);
-    
+
     //get number of bytes and increment the directory read counter
     int bytesCopied = strlen(buf);
 
@@ -307,7 +315,7 @@ void test_dir_read() {
     // int8_t buf[33];
 
     // printf("Testing dir_read...\n");
-    
+
     // //print out all files in directory
     // while(0 != (cnt = dir_read(fd,buf,32))){
     //     printf("%s\n",buf);
