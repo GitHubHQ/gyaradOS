@@ -1,5 +1,9 @@
 #include "pit.h"
-
+/**
+ * [pit_init Initializes the PIT]
+ * Inputs: none
+ * Outputs: none
+ */
 void pit_init() {
     // set up the pit to 30hz
     uint32_t divider = calc_divider(30);
@@ -9,10 +13,19 @@ void pit_init() {
     outb((divider >> 8), PIT_DATA_PORT);
 }
 
+/**
+ * [calc_divider returns the PIT divider based on period]
+ * @param  msec [period for scheduler]
+ * @return      [none]
+ */
 uint32_t calc_divider(uint32_t msec) {
     return PIT_MAX_DIV / msec;
 }
-
+/**
+ * [pit_handle_interrupt handles a pit interrupt by switching to the next process]
+ * Inputs: none
+ * Outputs: none
+ */
 void pit_handle_interrupt() {
     // Disable interrupts
     unsigned long flags;

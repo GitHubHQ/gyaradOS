@@ -12,6 +12,10 @@ uint32_t flags = 0;
 
 int8_t mouse_byte_1;
 
+/**
+ * [mouse_ack acknowledges mouse in use]
+ * @return [Mouse input, else 0]
+ */
 uint8_t mouse_ack() {
 	if(!(inb(MOUSE_DATA_PORT) & 0x1)) {
 		flags = 1;
@@ -22,6 +26,11 @@ uint8_t mouse_ack() {
 	}
 }
 
+/**
+ * [mouse_init Initializes the mouse driver]
+ * Inputs: None
+ * Outputs: None
+ */
 void mouse_init() {
 	// Reset mouse coord to (0,0)
 	mouse_x = 0;
@@ -44,6 +53,11 @@ void mouse_init() {
 	//printf("Before check X, Y: %d, %d\n", mouse_x, mouse_y);
 }
 
+/**
+ * [mouse_handle_interrupt Handles an interrupt sent from the mouse]
+ * Inputs: None
+ * Outputs: None
+ */
 void mouse_handle_interrupt() {
 	mouse_byte_1 = mouse_ack();
 
@@ -79,7 +93,7 @@ void mouse_handle_interrupt() {
 			mouse_x += deltaX;
 
 			if(mouse_byte_1 && MOUSE_YS_BITM){
-				mouse_y += deltaY;				
+				mouse_y += deltaY;
 			} else {
 				mouse_y -= deltaY;
 			}
