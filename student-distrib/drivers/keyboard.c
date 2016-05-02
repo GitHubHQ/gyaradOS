@@ -42,7 +42,7 @@ uint8_t shift_ascii[] = {
     '.', ASCII_NULL_CHAR, ASCII_NULL_CHAR, ASCII_NULL_CHAR,
     ASCII_PLACEHOLDER, ASCII_PLACEHOLDER
 };
-
+// array of capital letters and such
 uint8_t caps_ascii[] = {
     ASCII_NULL_CHAR, ASCII_PLACEHOLDER, '1', '2', '3', '4',
     '5', '6', '7', '8', '9', '0', '-',
@@ -88,6 +88,11 @@ int shift_r_on = 0;
 int alt_l_on = 0;
 int alt_r_on = 0;
 
+/**
+ * [terminal_open  initializes the active terminal]
+ * @param  filename [just for the sake of having the input]
+ * @return          [0 on success]
+ */
 int32_t terminal_open (const uint8_t * filename) {
     clear_screen();
 
@@ -103,10 +108,22 @@ int32_t terminal_open (const uint8_t * filename) {
     return 0;
 }
 
+/**
+ * [terminal_close  Closes terminal (not implemented)]
+ * @param  fd [file descriptor]
+ * @return    [0]
+ */
 int32_t terminal_close (int32_t fd) {
     return 0;
 }
 
+/**
+ * [terminal_read  reads from terminal into a buffer]
+ * @param  fd     [file descriptor]
+ * @param  buf    [Buffer to copy from terminal into]
+ * @param  nbytes [number of bytes to read]
+ * @return        [number of bytes rtc_read]
+ */
 int32_t terminal_read (int32_t fd, uint8_t * buf, int32_t nbytes) {
     int bytes_read = 0;
     int i = 0;
@@ -126,7 +143,13 @@ int32_t terminal_read (int32_t fd, uint8_t * buf, int32_t nbytes) {
 
     return bytes_read;
 }
-
+/**
+ * [terminal_write  write contents of buffer to screen]
+ * @param  fd     [file descriptor]
+ * @param  buf    [buffer containing contents to write]
+ * @param  nbytes [number of bytes to write]
+ * @return        [number of bytes successfully printed]
+ */
 int32_t terminal_write (int32_t fd, const uint8_t * buf, int32_t nbytes) {
     int num_printed = 0;
     int i = 0;
@@ -143,6 +166,11 @@ int32_t terminal_write (int32_t fd, const uint8_t * buf, int32_t nbytes) {
     return num_printed;
 }
 
+/**
+ * [reset_term reinitializes the current active terminal]
+ * Inputs: None
+ * Outputs: None
+ */
 void reset_term() {
     int i = 0;
 
@@ -155,6 +183,12 @@ void reset_term() {
     clear_screen();
 }
 
+/**
+ * [add_char_to_buffer Adds the current character to the keyboard buffer]
+ * @param  new_char [character to write to buffer]
+ * @param  term     [current active terminal]
+ * @return          [1 on success]
+ */
 uint32_t add_char_to_buffer(uint8_t new_char, uint8_t term) {
     // if we haven't reached the buffer limit, add the char to the buffer and print the key
     if(num_chars_in_buf[term] < MAX_CHARS_IN_BUF) {
@@ -177,9 +211,15 @@ uint32_t add_char_to_buffer(uint8_t new_char, uint8_t term) {
     return 0;
 }
 
+/**
+ * [handle_enter Handles the enter key press]
+ * Inputs: None
+ * Outputs: None
+ */
 void handle_enter() {
     int i = 0;
 
+    //fills keyboard buffer with null characters
     for(i = num_chars_in_buf[active_terminal]; i <= MAX_CHARS_IN_BUF; i++) {
         keyboard_buf[active_terminal][i] = ASCII_NULL_CHAR;
     }
@@ -197,6 +237,11 @@ void handle_enter() {
     }
 }
 
+/**
+ * [handle_backspace Handles the backspace key press]
+ * Inputs: None
+ * Outputs: None
+ */
 void handle_backspace() {
     if(num_chars_in_buf[active_terminal] > 0) {
         del_last_char();
@@ -208,12 +253,12 @@ void handle_backspace() {
 /**
  * Wait for a keyboard ACK
  */
-void kbd_ack(void){ 
+void kbd_ack(void){
     while(!(inb(KEYBOARD_D_PORT) == KEYBOARD_D_ACK));
 }
 
 /**
- * Set the keyboard LED status 
+ * Set the keyboard LED status
  * @param caps   0 or 1 If caps lock is enabled
  * @param num    0 or 1 If num lock is enabled
  * @param scroll 0 or 1 If scroll lock is enabled
@@ -244,7 +289,7 @@ void kbd_led_handling(int caps, int num, int scroll) {
 
 /**
  * handle_keypress()
- * 
+ *
  * Description: Prints the key pressed by the keyboard to the screen
  *
  * Inputs: None (keycode is read from the keyboard port)
@@ -369,7 +414,7 @@ void handle_keypress() {
                         // // send eoi and restore prev flags
                         // send_eoi(IRQ_KEYBOARD_CTRL);
                         // restore_flags(flags);
-                        
+
                         // context_switch(prev_terminal, active_terminal);
                     // }
                     break;
@@ -384,7 +429,7 @@ void handle_keypress() {
 
             // get next code
             key_code = inb(KEYBOARD_D_PORT);
-            
+
             switch(key_code) {
                 case KEY_MAKE_R_CTRL:
                     cntrl_r_on = 1;
@@ -437,38 +482,72 @@ void handle_keypress() {
     restore_flags(flags);
 }
 
+/**
+ * [get_active_terminal Retrieves the current active terminal]
+ * @return  [current active terminal]
+ */
 uint8_t get_active_terminal(void) {
     return active_terminal;
 }
-
+/**
+ * [set_active_terminal Sets the current terminal to input]
+ * @param term [New active terminal]
+ */
 void set_active_terminal(uint8_t term) {
     active_terminal = term;
 }
 
+/**
+ * [get_second_term_start returns whether or not the second terminal has been started]
+ * @return [second_term_start]
+ */
 uint8_t get_second_term_start() {
     return second_term_start;
 }
 
+/**
+ * [set_second_term_start Sets the second terminal to started]
+ * Inputs: None
+ * Outputs: None
+ */
 void set_second_term_start() {
     second_term_start = 1;
 }
 
+/**
+ * [set_third_term_start Sets third terminal to started]
+ * Inputs: None
+ * Outputs: None
+ */
 void set_third_term_start() {
     third_term_start = 1;
 }
 
+/**
+ * [get_third_term_start returns whether or not the third terminal has been started]
+ * @return [third_term_start]
+ */
 uint8_t get_third_term_start() {
     return third_term_start;
 }
 
+/**
+ * [test_open tests terminal_open]
+ */
 void test_open(void) {
     terminal_open(NULL);
 }
 
+/**
+ * [test_close Tests terminal_close]
+ */
 void test_close(void) {
     terminal_close(NULL);
 }
 
+/**
+ * [test_write Tests terminal_write]
+ */
 void test_write(void) {
     int i = 0;
     uint8_t buf[10];
