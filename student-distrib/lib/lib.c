@@ -432,59 +432,16 @@ void new_line() {
  */
 void del_last_char() {
 	active_terminal = get_active_terminal();
-
-
-	if(active_terminal == get_curr_running_term_proc()){
-		if(screen_x[active_terminal] == 0) {
-			screen_x[active_terminal] = NUM_COLS - 1;
-			screen_y[active_terminal]--;
-		} else {
-			screen_x[active_terminal]--;
-		}
-
-	    *(uint8_t *)(video_mem + ((NUM_COLS*screen_y[active_terminal] + screen_x[active_terminal]) << 1)) = ' ';
-	    *(uint8_t *)(video_mem + ((NUM_COLS*screen_y[active_terminal] + screen_x[active_terminal]) << 1) + 1) = ATTRIB;
-	       update_cursor(screen_y[active_terminal], screen_x[active_terminal]);
+	if(screen_x[active_terminal] == 0) {
+		screen_x[active_terminal] = NUM_COLS - 1;
+		screen_y[active_terminal]--;
 	} else {
-		switch(get_curr_running_term_proc()) {
-			case 0:
-				if(screen_x[get_curr_running_term_proc()] == 0) {
-					screen_x[get_curr_running_term_proc()] = NUM_COLS - 1;
-					screen_y[get_curr_running_term_proc()]--;
-				} else {
-					screen_x[get_curr_running_term_proc()]--;
-				}
-
-			    *(uint8_t *)(vid_mem_loc[0] + ((NUM_COLS*screen_y[get_curr_running_term_proc()] + screen_x[get_curr_running_term_proc()]) << 1)) = ' ';
-			    *(uint8_t *)(vid_mem_loc[0] + ((NUM_COLS*screen_y[get_curr_running_term_proc()] + screen_x[get_curr_running_term_proc()]) << 1) + 1) = ATTRIB;
-				
-				break;
-			case 1:
-				if(screen_x[get_curr_running_term_proc()] == 0) {
-					screen_x[get_curr_running_term_proc()] = NUM_COLS - 1;
-					screen_y[get_curr_running_term_proc()]--;
-				} else {
-					screen_x[get_curr_running_term_proc()]--;
-				}
-
-			    *(uint8_t *)(vid_mem_loc[1] + ((NUM_COLS*screen_y[get_curr_running_term_proc()] + screen_x[get_curr_running_term_proc()]) << 1)) = ' ';
-			    *(uint8_t *)(vid_mem_loc[1] + ((NUM_COLS*screen_y[get_curr_running_term_proc()] + screen_x[get_curr_running_term_proc()]) << 1) + 1) = ATTRIB;
-			    
-				break;
-			case 2:
-				if(screen_x[get_curr_running_term_proc()] == 0) {
-					screen_x[get_curr_running_term_proc()] = NUM_COLS - 1;
-					screen_y[get_curr_running_term_proc()]--;
-				} else {
-					screen_x[get_curr_running_term_proc()]--;
-				}
-
-			    *(uint8_t *)(vid_mem_loc[2] + ((NUM_COLS*screen_y[get_curr_running_term_proc()] + screen_x[get_curr_running_term_proc()]) << 1)) = ' ';
-			    *(uint8_t *)(vid_mem_loc[2] + ((NUM_COLS*screen_y[get_curr_running_term_proc()] + screen_x[get_curr_running_term_proc()]) << 1) + 1) = ATTRIB;
-			    
-				break;
-		}
+		screen_x[active_terminal]--;
 	}
+
+    *(uint8_t *)(video_mem + ((NUM_COLS*screen_y[active_terminal] + screen_x[active_terminal]) << 1)) = ' ';
+    *(uint8_t *)(video_mem + ((NUM_COLS*screen_y[active_terminal] + screen_x[active_terminal]) << 1) + 1) = ATTRIB;
+    update_cursor(screen_y[active_terminal], screen_x[active_terminal]);
 }
 
 /**
