@@ -5,11 +5,11 @@
 #ifndef _LIB_H
 #define _LIB_H
 
-#include "types.h"
-#include "../drivers/keyboard.h"
-#include "../drivers/rtc.h"
-#include "../drivers/speaker.h"
-#include "../paging.h"
+#include <lib/types.h>
+#include <drivers/keyboard.h>
+#include <drivers/rtc.h>
+#include <drivers/speaker.h>
+#include <mm/paging.h>
 
 #define VIDEO 0xB8000
 #define NUM_COLS 80

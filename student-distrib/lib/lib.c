@@ -2,7 +2,7 @@
  * vim:ts=4 noexpandtab
  */
 
-#include "lib.h"
+#include <lib/lib.h>
 
 static int screen_x[NUM_TERMINALS] = {0, 0, 0};
 static int screen_y[NUM_TERMINALS] = {0, 0, 0};

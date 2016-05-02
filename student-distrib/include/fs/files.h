@@ -1,8 +1,8 @@
 #ifndef _FILES_H
 #define _FILES_H
 
-#include "../libs/types.h"
-#include "../libs/lib.h"
+#include <lib/types.h>
+#include <lib/lib.h>
 
 #define BOOT_BLOCK_SIZE 64
 #define DENTRY_SIZE 64

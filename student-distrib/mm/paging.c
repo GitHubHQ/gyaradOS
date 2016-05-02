@@ -1,4 +1,4 @@
-#include "paging.h"
+#include <mm/paging.h>
 
 /* void init_paging()
  * Description: initializes paging (all pages and page directories)

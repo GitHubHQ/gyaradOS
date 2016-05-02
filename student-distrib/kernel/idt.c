@@ -1,4 +1,4 @@
-#include "idt.h"
+#include <kernel/idt.h>
 
 /*
  * divide_by_zero_except()

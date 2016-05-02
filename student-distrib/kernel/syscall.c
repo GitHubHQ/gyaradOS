@@ -1,4 +1,5 @@
-#include "syscall.h"
+#include <kernel/syscall.h>
+
 /*curr_proc and prev_proc for all three terminals*/
 pcb_t * curr_proc[] = {NULL, NULL, NULL};
 pcb_t * prev_proc[] = {NULL, NULL, NULL};
