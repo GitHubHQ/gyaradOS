@@ -170,7 +170,7 @@ format_char_switch:
 * int32_t puts(int8_t* s);
 *   Inputs: int_8* s = pointer to a string of characters
 *   Return Value: Number of bytes written
-*	Function: Output a string to the console 
+*	Function: Output a string to the console
 */
 
 int32_t puts(int8_t* s) {
@@ -187,10 +187,10 @@ int32_t puts(int8_t* s) {
 * void putc(uint8_t c);
 *   Inputs: uint_8* c = character to print
 *   Return Value: void
-*	Function: Output a character to the console 
+*	Function: Output a character to the console
 */
 
-void putc(uint8_t c) { 
+void putc(uint8_t c) {
 	active_terminal = get_active_terminal();
 
     if(c == '\n' || c == '\r') {
@@ -203,7 +203,7 @@ void putc(uint8_t c) {
         if(screen_x[active_terminal] == NUM_COLS) {
         	new_line();
         }
-        
+
         screen_x[active_terminal] %= NUM_COLS;
         screen_y[active_terminal] = (screen_y[active_terminal] + (screen_x[active_terminal] / NUM_COLS)) % NUM_ROWS;
     }
@@ -223,6 +223,11 @@ void update_cursor(int row, int col) {
 	outb((unsigned char ) ((position >> 8) & FB_POSITION_MASK), FB_DATA_PORT);
 }
 
+/**
+ * [new_line inserts a new line after the last printed line]
+ * Inputs: none
+ * Outputs: none
+ */
 void new_line() {
 	active_terminal = get_active_terminal();
 
@@ -255,22 +260,33 @@ void new_line() {
 	update_cursor(screen_y[active_terminal], screen_x[active_terminal]);
 }
 
+/**
+ * [del_last_char deletes the last character entered and updates the cursor]
+ * Inputs: none
+ * Outputs: none
+ */
 void del_last_char() {
 	active_terminal = get_active_terminal();
 
+  //check the edges
 	if(screen_x[active_terminal] == 0) {
 		screen_x[active_terminal] = NUM_COLS - 1;
 		screen_y[active_terminal]--;
 	} else {
 		screen_x[active_terminal]--;
 	}
-
+    //set the video memory to be deleted
     *(uint8_t *)(video_mem + ((NUM_COLS*screen_y[active_terminal] + screen_x[active_terminal]) << 1)) = ' ';
     *(uint8_t *)(video_mem + ((NUM_COLS*screen_y[active_terminal] + screen_x[active_terminal]) << 1) + 1) = ATTRIB;
 
     update_cursor(screen_y[active_terminal], screen_x[active_terminal]);
 }
 
+/**
+ * [clear_screen  clears the screen]
+ * Inputs: none
+ * Outputs: none
+ */
 void clear_screen (void) {
     int32_t i;
     for(i=0; i<NUM_ROWS*NUM_COLS; i++) {
@@ -284,6 +300,11 @@ void clear_screen (void) {
     update_cursor(screen_y[active_terminal], screen_x[active_terminal]);
 }
 
+/**
+ * [splash_screen text displayed when booting the OS]
+ * Inputs: none
+ * Outputs: none
+ */
 void splash_screen(void) {
 	/* Clear the screen */
 	clear_screen();
@@ -300,7 +321,7 @@ void splash_screen(void) {
 	printf("\n\n\n\n\n\n\n\n");
 
 	sound_bootup();
-	
+
 	clear_screen();
 }
 
@@ -340,7 +361,7 @@ void update_screen(uint8_t dest, uint8_t src) {
 	memcpy(term_vid_mem[src], video_mem, _4KB);
 	memcpy(video_mem, term_vid_mem[dest], _4KB);
 	fix_attrs();
-	
+
 	update_cursor(screen_y[dest], screen_x[dest]);
 	return;
 }
@@ -604,11 +625,11 @@ void* memmove(void* dest, const void* src, uint32_t n) {
 *   Inputs: const int8_t* s1 = first string to compare
 *			const int8_t* s2 = second string to compare
 *			uint32_t n = number of bytes to compare
-*	Return Value: A zero value indicates that the characters compared 
+*	Return Value: A zero value indicates that the characters compared
 *					in both strings form the same string.
-*				A value greater than zero indicates that the first 
-*					character that does not match has a greater value 
-*					in str1 than in str2; And a value less than zero 
+*				A value greater than zero indicates that the first
+*					character that does not match has a greater value
+*					in str1 than in str2; And a value less than zero
 *					indicates the opposite.
 *	Function: compares string 1 and string 2 for equality
 */
