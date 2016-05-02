@@ -1,7 +1,7 @@
 /* speaker.c - Implementation for speaker functions
  */
 
-#include "speaker.h"
+#include <drivers/speaker.h>
 
 /**
  * Uses the internal speaker to play a sound at the specified frequency

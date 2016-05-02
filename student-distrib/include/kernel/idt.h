@@ -1,13 +1,13 @@
 #ifndef _IDT_H
 #define _IDT_H
 
-#include "drivers/rtc.h"
-#include "drivers/keyboard.h"
-#include "drivers/i8259.h"
-#include "drivers/mouse.h"
-#include "irq.h"
-#include "libs/lib.h"
-#include "x86_desc.h"
+#include <drivers/rtc.h>
+#include <drivers/keyboard.h>
+#include <drivers/i8259.h>
+#include <drivers/mouse.h>
+#include <kernel/irq.h>
+#include <lib/lib.h>
+#include <boot/x86_desc.h>
 
 #define NUM_EXCEPTIONS 0x20
 
