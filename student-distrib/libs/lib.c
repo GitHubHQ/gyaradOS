@@ -12,7 +12,7 @@ static char* video_mem = (char *)VIDEO;
 
 uint8_t * args;
 uint32_t index = 0;
-char* term_vid_mem[NUM_TERMINALS] = {(char*)VIDEO_PHYS_ADDR0, (char*)VIDEO_PHYS_ADDR1, (char*)VIDEO_PHYS_ADDR2};
+//char* term_vid_mem[NUM_TERMINALS] = {(char*)VIDEO_PHYS_ADDR0, (char*)VIDEO_PHYS_ADDR1, (char*)VIDEO_PHYS_ADDR2};
 
 /*
 * void clear(void);
@@ -196,8 +196,8 @@ void putc(uint8_t c) {
     if(c == '\n' || c == '\r') {
         new_line();
     } else {
-        *(uint8_t *)(video_mem + ((NUM_COLS*screen_y[active_terminal] + screen_x[active_terminal]) << 1)) = c;
-        *(uint8_t *)(video_mem + ((NUM_COLS*screen_y[active_terminal] + screen_x[active_terminal]) << 1) + 1) = ATTRIB;
+        *(uint8_t *)(get_video_start() + ((NUM_COLS*screen_y[active_terminal] + screen_x[active_terminal]) << 1)) = c;
+        *(uint8_t *)(get_video_start() + ((NUM_COLS*screen_y[active_terminal] + screen_x[active_terminal]) << 1) + 1) = ATTRIB;
         screen_x[active_terminal]++;
 
         if(screen_x[active_terminal] == NUM_COLS) {
@@ -337,9 +337,11 @@ uint8_t* strtok(const uint8_t* input) {
 }
 
 void update_screen(uint8_t dest, uint8_t src) {
-	memcpy(term_vid_mem[src], video_mem, _4KB);
-	memcpy(video_mem, term_vid_mem[dest], _4KB);
-	fix_attrs();
+	// memcpy(term_vid_mem[src], video_mem, _4KB);
+	// memcpy(video_mem, term_vid_mem[dest], _4KB);
+
+	switch_vid(src);
+	fix_attrs(src);
 	
 	update_cursor(screen_y[dest], screen_x[dest]);
 	return;
