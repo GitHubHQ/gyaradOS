@@ -16,9 +16,9 @@
 #define PROCESS_START_ADDR      0x08048000
 
 // constants relating to the video address
-#define VIDEO_PHYS_ADDR0        0X01000
-#define VIDEO_PHYS_ADDR1        0X03000
-#define VIDEO_PHYS_ADDR2        0X05000
+#define VIDEO_PHYS_ADDR0        0xBC000
+#define VIDEO_PHYS_ADDR1        0xDC000
+#define VIDEO_PHYS_ADDR2        0xEC000
 
 // page directory entry array
 PDE_t pageDirectory[PAGE_DIRECTORY_SIZE] __attribute__((aligned(PAGE_SIZE)));
@@ -29,7 +29,6 @@ PTE_t pageTable1[PAGE_TABLE_SIZE] __attribute__((aligned(PAGE_SIZE)));
 extern void init_paging();
 extern uint32_t init_new_process(uint32_t process_num);
 extern int switch_pd(uint8_t process_num, uint32_t prev_base);
-extern void switch_vid(uint32_t vid_num);
 extern void fix_attrs(uint32_t process_num);
 extern char * get_video_start();
 

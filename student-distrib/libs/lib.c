@@ -10,6 +10,11 @@ static int active_terminal = 0;
 
 static char* video_mem = (char *)VIDEO;
 
+static char* vid_mem_loc[3] = { (char *)VIDEO_PHYS_ADDR0,
+                               (char *)VIDEO_PHYS_ADDR1,
+                               (char *)VIDEO_PHYS_ADDR2
+                              };
+
 uint8_t * args;
 uint32_t index = 0;
 //char* term_vid_mem[NUM_TERMINALS] = {(char*)VIDEO_PHYS_ADDR0, (char*)VIDEO_PHYS_ADDR1, (char*)VIDEO_PHYS_ADDR2};
@@ -190,25 +195,99 @@ int32_t puts(int8_t* s) {
 *	Function: Output a character to the console 
 */
 
+
+void putaddc(uint8_t c) {
+	if(c == '\n' || c == '\r') {
+	        new_line();
+	    } else {
+	        *(uint8_t *)(video_mem + ((NUM_COLS*screen_y[active_terminal] + screen_x[active_terminal]) << 1)) = c;
+	        *(uint8_t *)(video_mem + ((NUM_COLS*screen_y[active_terminal] + screen_x[active_terminal]) << 1) + 1) = ATTRIB;
+	        screen_x[active_terminal]++;
+
+	        if(screen_x[active_terminal] == NUM_COLS) {
+	        	new_line();
+	        }
+	        
+	        screen_x[active_terminal] %= NUM_COLS;
+	        screen_y[active_terminal] = (screen_y[active_terminal] + (screen_x[active_terminal] / NUM_COLS)) % NUM_ROWS;
+	    }
+	update_cursor(screen_y[active_terminal], screen_x[active_terminal]);
+}
+
 void putc(uint8_t c) { 
 	active_terminal = get_active_terminal();
 
-    if(c == '\n' || c == '\r') {
-        new_line();
-    } else {
-        *(uint8_t *)(get_video_start() + ((NUM_COLS*screen_y[active_terminal] + screen_x[active_terminal]) << 1)) = c;
-        *(uint8_t *)(get_video_start() + ((NUM_COLS*screen_y[active_terminal] + screen_x[active_terminal]) << 1) + 1) = ATTRIB;
-        screen_x[active_terminal]++;
+	if(active_terminal == get_curr_running_term_proc()){
+	    if(c == '\n' || c == '\r') {
+	        new_line();
+	    } else {
+	        *(uint8_t *)(video_mem + ((NUM_COLS*screen_y[active_terminal] + screen_x[active_terminal]) << 1)) = c;
+	        *(uint8_t *)(video_mem + ((NUM_COLS*screen_y[active_terminal] + screen_x[active_terminal]) << 1) + 1) = ATTRIB;
+	        screen_x[active_terminal]++;
 
-        if(screen_x[active_terminal] == NUM_COLS) {
-        	new_line();
-        }
-        
-        screen_x[active_terminal] %= NUM_COLS;
-        screen_y[active_terminal] = (screen_y[active_terminal] + (screen_x[active_terminal] / NUM_COLS)) % NUM_ROWS;
-    }
+	        if(screen_x[active_terminal] == NUM_COLS) {
+	        	new_line();
+	        }
+	        
+	        screen_x[active_terminal] %= NUM_COLS;
+	        screen_y[active_terminal] = (screen_y[active_terminal] + (screen_x[active_terminal] / NUM_COLS)) % NUM_ROWS;
+	    }
+	    update_cursor(screen_y[active_terminal], screen_x[active_terminal]);
+	} else {
+		switch(get_curr_running_term_proc()) {
+			case 0:
+				if(c == '\n' || c == '\r') {
+			        new_line();
+			    } else {
+			        *(uint8_t *)(vid_mem_loc[0] + ((NUM_COLS*screen_y[get_curr_running_term_proc()] + screen_x[get_curr_running_term_proc()]) << 1)) = c;
+			        *(uint8_t *)(vid_mem_loc[0] + ((NUM_COLS*screen_y[get_curr_running_term_proc()] + screen_x[get_curr_running_term_proc()]) << 1) + 1) = ATTRIB;
+			        screen_x[get_curr_running_term_proc()]++;
 
-    update_cursor(screen_y[active_terminal], screen_x[active_terminal]);
+			        if(screen_x[get_curr_running_term_proc()] == NUM_COLS) {
+			        	new_line();
+			        }
+			        
+			        screen_x[get_curr_running_term_proc()] %= NUM_COLS;
+			        screen_y[get_curr_running_term_proc()] = (screen_y[get_curr_running_term_proc()] + (screen_x[get_curr_running_term_proc()] / NUM_COLS)) % NUM_ROWS;
+			    }
+			    
+				break;
+			case 1:
+					if(c == '\n' || c == '\r') {
+			        	new_line();
+			    	} else {
+			        *(uint8_t *)(vid_mem_loc[1] + ((NUM_COLS*screen_y[get_curr_running_term_proc()] + screen_x[get_curr_running_term_proc()]) << 1)) = c;
+			        *(uint8_t *)(vid_mem_loc[1] + ((NUM_COLS*screen_y[get_curr_running_term_proc()] + screen_x[get_curr_running_term_proc()]) << 1) + 1) = ATTRIB;
+			        screen_x[get_curr_running_term_proc()]++;
+
+			        if(screen_x[get_curr_running_term_proc()] == NUM_COLS) {
+			        	new_line();
+			        }
+			        
+			        screen_x[get_curr_running_term_proc()] %= NUM_COLS;
+			        screen_y[get_curr_running_term_proc()] = (screen_y[get_curr_running_term_proc()] + (screen_x[get_curr_running_term_proc()] / NUM_COLS)) % NUM_ROWS;
+			    }
+			    
+				break;
+			case 2:
+			if(c == '\n' || c == '\r') {
+			        new_line();
+			    } else {
+			        *(uint8_t *)(vid_mem_loc[2] + ((NUM_COLS*screen_y[get_curr_running_term_proc()] + screen_x[get_curr_running_term_proc()]) << 1)) = c;
+			        *(uint8_t *)(vid_mem_loc[2] + ((NUM_COLS*screen_y[get_curr_running_term_proc()] + screen_x[get_curr_running_term_proc()]) << 1) + 1) = ATTRIB;
+			        screen_x[get_curr_running_term_proc()]++;
+
+			        if(screen_x[get_curr_running_term_proc()] == NUM_COLS) {
+			        	new_line();
+			        }
+			        
+			        screen_x[get_curr_running_term_proc()] %= NUM_COLS;
+			        screen_y[get_curr_running_term_proc()] = (screen_y[get_curr_running_term_proc()] + (screen_x[get_curr_running_term_proc()] / NUM_COLS)) % NUM_ROWS;
+			    }
+			    
+				break;
+		}
+	}
 }
 
 void update_cursor(int row, int col) {
@@ -226,62 +305,219 @@ void update_cursor(int row, int col) {
 void new_line() {
 	active_terminal = get_active_terminal();
 
-	// if we are at the end of the display, we need to "scroll"
-	if(screen_y[active_terminal] == (NUM_ROWS - 1)) {
-		int i = 0;
-		int j = 0;
+	if(active_terminal == get_curr_running_term_proc()){
+		// if we are at the end of the display, we need to "scroll"
+			if(screen_y[active_terminal] == (NUM_ROWS - 1)) {
+			int i = 0;
+			int j = 0;
 
-	    for(i = 0; i < (NUM_ROWS - 1); i++) {
-	    	for(j = 0; j < NUM_COLS; j++) {
-	    		*(uint8_t *)(video_mem + ((NUM_COLS * i + j) << 1)) = *(uint8_t *)(video_mem + (((NUM_COLS * (i + 1)) + j) << 1));
-	    		*(uint8_t *)(video_mem + ((NUM_COLS * i + j) << 1) + 1) = ATTRIB;
-	    	}
-	    }
+		    for(i = 0; i < (NUM_ROWS - 1); i++) {
+		    	for(j = 0; j < NUM_COLS; j++) {
+		    		*(uint8_t *)(video_mem + ((NUM_COLS * i + j) << 1)) = *(uint8_t *)(video_mem + (((NUM_COLS * (i + 1)) + j) << 1));
+		    		*(uint8_t *)(video_mem + ((NUM_COLS * i + j) << 1) + 1) = ATTRIB;
+		    	}
+		    }
 
-	    for(i = (NUM_ROWS - 1); i < NUM_ROWS; i++) {
-	    	for(j = 0; j < NUM_COLS; j++) {
-			    *(uint8_t *)(video_mem + ((NUM_COLS * i + j) << 1)) = ' ';
-			    *(uint8_t *)(video_mem + ((NUM_COLS * i + j) << 1) + 1) = ATTRIB;
-	    	}
-	    }
+		    for(i = (NUM_ROWS - 1); i < NUM_ROWS; i++) {
+		    	for(j = 0; j < NUM_COLS; j++) {
+				    *(uint8_t *)(video_mem + ((NUM_COLS * i + j) << 1)) = ' ';
+				    *(uint8_t *)(video_mem + ((NUM_COLS * i + j) << 1) + 1) = ATTRIB;
+		    	}
+		    }
 
-	    screen_y[active_terminal] = NUM_ROWS - 1;
-	    screen_x[active_terminal] = 0;
+		    screen_y[active_terminal] = NUM_ROWS - 1;
+		    screen_x[active_terminal] = 0;
+		} else {
+			screen_y[active_terminal]++;
+			screen_x[active_terminal] = 0;
+		}
+		update_cursor(screen_y[active_terminal], screen_x[active_terminal]);
 	} else {
-		screen_y[active_terminal]++;
-		screen_x[active_terminal] = 0;
-	}
+		switch(get_curr_running_term_proc()) {
+			case 0:
+				if(screen_y[get_curr_running_term_proc()] == (NUM_ROWS - 1)) {
+					int i = 0;
+					int j = 0;
 
-	update_cursor(screen_y[active_terminal], screen_x[active_terminal]);
+				    for(i = 0; i < (NUM_ROWS - 1); i++) {
+				    	for(j = 0; j < NUM_COLS; j++) {
+				    		*(uint8_t *)(vid_mem_loc[0] + ((NUM_COLS * i + j) << 1)) = *(uint8_t *)(vid_mem_loc[0] + (((NUM_COLS * (i + 1)) + j) << 1));
+				    		*(uint8_t *)(vid_mem_loc[0] + ((NUM_COLS * i + j) << 1) + 1) = ATTRIB;
+				    	}
+				    }
+
+				    for(i = (NUM_ROWS - 1); i < NUM_ROWS; i++) {
+				    	for(j = 0; j < NUM_COLS; j++) {
+						    *(uint8_t *)(vid_mem_loc[0] + ((NUM_COLS * i + j) << 1)) = ' ';
+						    *(uint8_t *)(vid_mem_loc[0] + ((NUM_COLS * i + j) << 1) + 1) = ATTRIB;
+				    	}
+				    }
+
+				    screen_y[get_curr_running_term_proc()] = NUM_ROWS - 1;
+				    screen_x[get_curr_running_term_proc()] = 0;
+				} else {
+					screen_y[get_curr_running_term_proc()]++;
+					screen_x[get_curr_running_term_proc()] = 0;
+				}
+				break;
+			case 1:
+				if(screen_y[get_curr_running_term_proc()] == (NUM_ROWS - 1)) {
+					int i = 0;
+					int j = 0;
+
+				    for(i = 0; i < (NUM_ROWS - 1); i++) {
+				    	for(j = 0; j < NUM_COLS; j++) {
+				    		*(uint8_t *)(vid_mem_loc[1] + ((NUM_COLS * i + j) << 1)) = *(uint8_t *)(vid_mem_loc[1] + (((NUM_COLS * (i + 1)) + j) << 1));
+				    		*(uint8_t *)(vid_mem_loc[1] + ((NUM_COLS * i + j) << 1) + 1) = ATTRIB;
+				    	}
+				    }
+
+				    for(i = (NUM_ROWS - 1); i < NUM_ROWS; i++) {
+				    	for(j = 0; j < NUM_COLS; j++) {
+						    *(uint8_t *)(vid_mem_loc[1] + ((NUM_COLS * i + j) << 1)) = ' ';
+						    *(uint8_t *)(vid_mem_loc[1] + ((NUM_COLS * i + j) << 1) + 1) = ATTRIB;
+				    	}
+				    }
+
+				    screen_y[get_curr_running_term_proc()] = NUM_ROWS - 1;
+				    screen_x[get_curr_running_term_proc()] = 0;
+				} else {
+					screen_y[get_curr_running_term_proc()]++;
+					screen_x[get_curr_running_term_proc()] = 0;
+				}
+				break;
+			case 2:
+				if(screen_y[get_curr_running_term_proc()] == (NUM_ROWS - 1)) {
+					int i = 0;
+					int j = 0;
+
+				    for(i = 0; i < (NUM_ROWS - 1); i++) {
+				    	for(j = 0; j < NUM_COLS; j++) {
+				    		*(uint8_t *)(vid_mem_loc[2] + ((NUM_COLS * i + j) << 1)) = *(uint8_t *)(vid_mem_loc[2] + (((NUM_COLS * (i + 1)) + j) << 1));
+				    		*(uint8_t *)(vid_mem_loc[2] + ((NUM_COLS * i + j) << 1) + 1) = ATTRIB;
+				    	}
+				    }
+
+				    for(i = (NUM_ROWS - 1); i < NUM_ROWS; i++) {
+				    	for(j = 0; j < NUM_COLS; j++) {
+						    *(uint8_t *)(vid_mem_loc[2] + ((NUM_COLS * i + j) << 1)) = ' ';
+						    *(uint8_t *)(vid_mem_loc[2] + ((NUM_COLS * i + j) << 1) + 1) = ATTRIB;
+				    	}
+				    }
+				    screen_y[get_curr_running_term_proc()] = NUM_ROWS - 1;
+				    screen_x[get_curr_running_term_proc()] = 0;
+				} else {
+					screen_y[get_curr_running_term_proc()]++;
+					screen_x[get_curr_running_term_proc()] = 0;
+				}
+				
+				break;
+		}
+	}
 }
 
 void del_last_char() {
 	active_terminal = get_active_terminal();
 
-	if(screen_x[active_terminal] == 0) {
-		screen_x[active_terminal] = NUM_COLS - 1;
-		screen_y[active_terminal]--;
+	if(active_terminal == get_curr_running_term_proc()){
+		if(screen_x[active_terminal] == 0) {
+			screen_x[active_terminal] = NUM_COLS - 1;
+			screen_y[active_terminal]--;
+		} else {
+			screen_x[active_terminal]--;
+		}
+
+	    *(uint8_t *)(video_mem + ((NUM_COLS*screen_y[active_terminal] + screen_x[active_terminal]) << 1)) = ' ';
+	    *(uint8_t *)(video_mem + ((NUM_COLS*screen_y[active_terminal] + screen_x[active_terminal]) << 1) + 1) = ATTRIB;
+	       update_cursor(screen_y[active_terminal], screen_x[active_terminal]);
 	} else {
-		screen_x[active_terminal]--;
+		switch(get_curr_running_term_proc()) {
+			case 0:
+				if(screen_x[get_curr_running_term_proc()] == 0) {
+					screen_x[get_curr_running_term_proc()] = NUM_COLS - 1;
+					screen_y[get_curr_running_term_proc()]--;
+				} else {
+					screen_x[get_curr_running_term_proc()]--;
+				}
+
+			    *(uint8_t *)(vid_mem_loc[0] + ((NUM_COLS*screen_y[get_curr_running_term_proc()] + screen_x[get_curr_running_term_proc()]) << 1)) = ' ';
+			    *(uint8_t *)(vid_mem_loc[0] + ((NUM_COLS*screen_y[get_curr_running_term_proc()] + screen_x[get_curr_running_term_proc()]) << 1) + 1) = ATTRIB;
+				
+				break;
+			case 1:
+				if(screen_x[get_curr_running_term_proc()] == 0) {
+					screen_x[get_curr_running_term_proc()] = NUM_COLS - 1;
+					screen_y[get_curr_running_term_proc()]--;
+				} else {
+					screen_x[get_curr_running_term_proc()]--;
+				}
+
+			    *(uint8_t *)(vid_mem_loc[1] + ((NUM_COLS*screen_y[get_curr_running_term_proc()] + screen_x[get_curr_running_term_proc()]) << 1)) = ' ';
+			    *(uint8_t *)(vid_mem_loc[1] + ((NUM_COLS*screen_y[get_curr_running_term_proc()] + screen_x[get_curr_running_term_proc()]) << 1) + 1) = ATTRIB;
+			    
+				break;
+			case 2:
+				if(screen_x[get_curr_running_term_proc()] == 0) {
+					screen_x[get_curr_running_term_proc()] = NUM_COLS - 1;
+					screen_y[get_curr_running_term_proc()]--;
+				} else {
+					screen_x[get_curr_running_term_proc()]--;
+				}
+
+			    *(uint8_t *)(vid_mem_loc[2] + ((NUM_COLS*screen_y[get_curr_running_term_proc()] + screen_x[get_curr_running_term_proc()]) << 1)) = ' ';
+			    *(uint8_t *)(vid_mem_loc[2] + ((NUM_COLS*screen_y[get_curr_running_term_proc()] + screen_x[get_curr_running_term_proc()]) << 1) + 1) = ATTRIB;
+			    
+				break;
+		}
 	}
-
-    *(uint8_t *)(video_mem + ((NUM_COLS*screen_y[active_terminal] + screen_x[active_terminal]) << 1)) = ' ';
-    *(uint8_t *)(video_mem + ((NUM_COLS*screen_y[active_terminal] + screen_x[active_terminal]) << 1) + 1) = ATTRIB;
-
-    update_cursor(screen_y[active_terminal], screen_x[active_terminal]);
 }
 
 void clear_screen (void) {
     int32_t i;
-    for(i=0; i<NUM_ROWS*NUM_COLS; i++) {
-        *(uint8_t *)(video_mem + (i << 1)) = ' ';
-        *(uint8_t *)(video_mem + (i << 1) + 1) = ATTRIB;
-    }
 
-    screen_x[active_terminal] = 0;
-    screen_y[active_terminal] = 0;
+    if(active_terminal == get_curr_running_term_proc()){
+	    for(i=0; i<NUM_ROWS*NUM_COLS; i++) {
+	        *(uint8_t *)(video_mem + (i << 1)) = ' ';
+	        *(uint8_t *)(video_mem + (i << 1) + 1) = ATTRIB;
+	    }
 
-    update_cursor(screen_y[active_terminal], screen_x[active_terminal]);
+	    screen_x[active_terminal] = 0;
+	    screen_y[active_terminal] = 0;
+	    update_cursor(screen_y[active_terminal], screen_x[active_terminal]);
+	} else {
+		switch(get_curr_running_term_proc()) {
+			case 0:
+				for(i=0; i<NUM_ROWS*NUM_COLS; i++) {
+			        *(uint8_t *)(vid_mem_loc[0] + (i << 1)) = ' ';
+			        *(uint8_t *)(vid_mem_loc[0] + (i << 1) + 1) = ATTRIB;
+			    }
+
+			    screen_x[get_curr_running_term_proc()] = 0;
+			    screen_y[get_curr_running_term_proc()] = 0;
+				
+				break;
+			case 1:
+				for(i=0; i<NUM_ROWS*NUM_COLS; i++) {
+			        *(uint8_t *)(vid_mem_loc[1] + (i << 1)) = ' ';
+			        *(uint8_t *)(vid_mem_loc[1] + (i << 1) + 1) = ATTRIB;
+			    }
+
+			    screen_x[get_curr_running_term_proc()] = 0;
+			    screen_y[get_curr_running_term_proc()] = 0;
+				
+				break;
+			case 2:
+				for(i=0; i<NUM_ROWS*NUM_COLS; i++) {
+			        *(uint8_t *)(vid_mem_loc[2] + (i << 1)) = ' ';
+			        *(uint8_t *)(vid_mem_loc[2] + (i << 1) + 1) = ATTRIB;
+			    }
+
+			    screen_x[get_curr_running_term_proc()] = 0;
+			    screen_y[get_curr_running_term_proc()] = 0;
+				
+				break;
+		}
+	}
 }
 
 void splash_screen(void) {
@@ -337,11 +573,10 @@ uint8_t* strtok(const uint8_t* input) {
 }
 
 void update_screen(uint8_t dest, uint8_t src) {
-	// memcpy(term_vid_mem[src], video_mem, _4KB);
-	// memcpy(video_mem, term_vid_mem[dest], _4KB);
+	memcpy(vid_mem_loc[src], video_mem, _4KB);
+	memcpy(video_mem, vid_mem_loc[dest], _4KB);
 
-	switch_vid(src);
-	fix_attrs(src);
+	fix_attrs(dest);
 	
 	update_cursor(screen_y[dest], screen_x[dest]);
 	return;

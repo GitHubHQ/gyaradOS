@@ -151,40 +151,22 @@ void fix_attrs(uint32_t process_num) {
     switch(process_num) {
         case 0:
             for(i = 0; i < NUM_ROWS * NUM_COLS; i++) {
-                *(uint8_t *)(VIDEO_PHYS_ADDR0 + (i << 1) + 1) = ATTRIB;
+                *(uint8_t *)(VIDEO + (i << 1) + 1) = ATTRIB;
             }
             break;
         case 1:
             for(i = 0; i < NUM_ROWS * NUM_COLS; i++) {
-                *(uint8_t *)(VIDEO_PHYS_ADDR1 + (i << 1) + 1) = ATTRIB;
+                *(uint8_t *)(VIDEO + (i << 1) + 1) = ATTRIB;
             }
             break;
         case 2:
             for(i = 0; i < NUM_ROWS * NUM_COLS; i++) {
-                *(uint8_t *)(VIDEO_PHYS_ADDR2 + (i << 1) + 1) = ATTRIB;
+                *(uint8_t *)(VIDEO + (i << 1) + 1) = ATTRIB;
             }
             break;
     }
-    printf("hey");
 }
 
-void switch_vid(uint32_t vid_num) {
-    switch(vid_num) {
-        case 0:
-        pageTable1[VIDEO/PAGE_SIZE].PTE_bits.page_base = VIDEO_PHYS_ADDR0 / _4KB;
-        VIDEO_START = VIDEO_PHYS_ADDR0;
-        break;
-                case 1:
-        pageTable1[VIDEO/PAGE_SIZE].PTE_bits.page_base = VIDEO_PHYS_ADDR1 / _4KB;
-        VIDEO_START = VIDEO_PHYS_ADDR1;
-        break;
-                case 2:
-        pageTable1[VIDEO/PAGE_SIZE].PTE_bits.page_base = VIDEO_PHYS_ADDR2/ _4KB;
-        VIDEO_START = VIDEO_PHYS_ADDR2;
-        break;
-    }
-
-}
 
 char * get_video_start() {
     return (char *)VIDEO_START;
