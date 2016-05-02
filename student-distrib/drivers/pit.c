@@ -1,4 +1,5 @@
-#include "pit.h"
+#include <drivers/pit.h>
+
 /**
  * [pit_init Initializes the PIT]
  * Inputs: none

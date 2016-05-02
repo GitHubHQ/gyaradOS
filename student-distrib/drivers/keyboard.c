@@ -1,5 +1,5 @@
 
-#include "keyboard.h"
+#include <drivers/keyboard.h>
 
 // array of lowercase ASCII codes, indexed by the corresponding characters scan code
 uint8_t code_to_ascii[] = {

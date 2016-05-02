@@ -2,13 +2,13 @@
 #ifndef _SYSCALL_H
 #define _SYSCALL_H
 
-#include "libs/types.h"
-#include "fs/files.h"
-#include "drivers/rtc.h"
-#include "drivers/keyboard.h"
-#include "user.h"
-#include "paging.h"
-#include "x86_desc.h"
+#include <lib/types.h>
+#include <fs/files.h>
+#include <drivers/rtc.h>
+#include <drivers/keyboard.h>
+#include <kernel/user.h>
+#include <mm/paging.h>
+#include <boot/x86_desc.h>
 
 // null-terminating character for strings
 #define NULL_CHAR       '\0'

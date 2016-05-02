@@ -1,4 +1,4 @@
-#include "mouse.h"
+#include <drivers/mouse.h>
 
 // Current mouse position
 // Initalized to (0,0)

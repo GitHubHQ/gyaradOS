@@ -1,7 +1,7 @@
 /* math.c - Contains common math functions 
  */
 
-#include "math.h"
+#include <lib/math.h>
 
 /**
  * Calculates the Log2(x) of a number x

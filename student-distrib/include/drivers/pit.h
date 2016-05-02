@@ -1,10 +1,10 @@
 #ifndef _PIT_H
 #define _PIT_H
 
-#include "../libs/types.h"
-#include "../libs/lib.h"
-#include "../syscall.h"
-#include "keyboard.h"
+#include <lib/types.h>
+#include <lib/lib.h>
+#include <kernel/syscall.h>
+#include <drivers/keyboard.h>
 
 // PIT IRQ line
 #define IRQ_PIT         0
