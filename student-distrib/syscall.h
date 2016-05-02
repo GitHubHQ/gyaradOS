@@ -54,6 +54,10 @@
 #define VID_MEM_START 0x08000000
 #define VID_MEM_END   0x08400000
 
+#define TERM_0  0
+#define TERM_1  1
+#define TERM_2  2
+
 extern int32_t halt (uint8_t status);
 extern int32_t execute (const uint8_t * command);
 extern int32_t read (int32_t fd, void * buf, int32_t nbytes);

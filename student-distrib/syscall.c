@@ -1,21 +1,26 @@
 #include "syscall.h"
-
+/*curr_proc and prev_proc for all three terminals*/
 pcb_t * curr_proc[] = {NULL, NULL, NULL};
 pcb_t * prev_proc[] = {NULL, NULL, NULL};
 
+/* initialize variables for current terminal and process */
 uint8_t curr_active_term = 0;
-
 uint8_t curr_proc_id_mask = 0;
 uint32_t curr_proc_id = 0;
-
 uint32_t first_program_run = 0;
 
+/* function pointers to be called for system calls */
 static func_ptr stdin_ops_table[4] = {NULL, terminal_read, NULL, NULL};
 static func_ptr stdout_ops_table[4] = {NULL, NULL, terminal_write, NULL};
 static func_ptr rtc_ops_table[4] = {rtc_open, rtc_read, rtc_write, rtc_close};
 static func_ptr dir_ops_table[4] = {dir_open, dir_read, dir_write, dir_close};
 static func_ptr files_ops_table[4] = {fs_open, fs_read, fs_write, fs_close};
 
+/**
+ * [halts the current process and jumps back to shell or previous process]
+ * @param  status [Status of the program being called]
+ * @return        [0 on success, -1 on fail]
+ */
 int32_t halt (uint8_t status) {
     unsigned long flags;
     cli_and_save(flags);
@@ -95,6 +100,11 @@ int32_t halt (uint8_t status) {
     return 0;
 }
 
+/**
+ * [starts a new process on the stack ]
+ * @param  command [the input to be executed]
+ * @return         [0 on success, -1 if failed]
+ */
 int32_t execute (const uint8_t * command) {
     unsigned long flags;
     cli_and_save(flags);
@@ -244,6 +254,13 @@ int32_t execute (const uint8_t * command) {
     return 0;
 }
 
+/**
+ * [read  calls the correct system call to read a file descriptor]
+ * @param  fd     [The file descriptor of the file to read]
+ * @param  buf    [The buffer to read/copy into]
+ * @param  nbytes [number of bytes to read]
+ * @return        [bytes read on success, -1 on fail]
+ */
 int32_t read (int32_t fd, void * buf, int32_t nbytes) {
     unsigned long flags;
     cli_and_save(flags);
@@ -254,10 +271,17 @@ int32_t read (int32_t fd, void * buf, int32_t nbytes) {
     }
 
     restore_flags(flags);
-
+    //call the specified function
     return curr_proc[curr_active_term]->fds[fd].operations_pointer[READ](&(curr_proc[curr_active_term]->fds[fd]), buf, nbytes);
 }
 
+/**
+ * [write  call the function pointer required to write ]
+ * @param  fd     [The file descriptor of the file to be written to]
+ * @param  buf    [buffer containing data to write]
+ * @param  nbytes [number of byte to write]
+ * @return        [-1 on fail, else number of bytes written on success]
+ */
 int32_t write (int32_t fd, const void * buf, int32_t nbytes) {
     unsigned long flags;
     cli_and_save(flags);
@@ -269,9 +293,15 @@ int32_t write (int32_t fd, const void * buf, int32_t nbytes) {
 
     restore_flags(flags);
 
+    //call the specified function
     return curr_proc[curr_active_term]->fds[fd].operations_pointer[WRITE](fd, buf, nbytes);
 }
 
+/**
+ * [open  Opens a given file]
+ * @param  filename [The name of the file to open]
+ * @return          [-1 on fail, else 0]
+ */
 int32_t open (const uint8_t * filename) {
     unsigned long flags;
     cli_and_save(flags);
@@ -328,6 +358,11 @@ int32_t open (const uint8_t * filename) {
     return -1;
 }
 
+/**
+ * [close  closes a previously opened file]
+ * @param  fd [The file descriptor of the file to close]
+ * @return    [-1 on fail, else 0]
+ */
 int32_t close (int32_t fd) {
     unsigned long flags;
     cli_and_save(flags);
@@ -344,63 +379,105 @@ int32_t close (int32_t fd) {
     return -1;
 }
 
+/**
+ * [getargs  gets the arguments for a command and returns them]
+ * @param  buf    [buffer to copy args into]
+ * @param  nbytes [number of bytes to copy into buffer]
+ * @return        [-1 on fail, 0 on success]
+ */
 int32_t getargs (uint8_t * buf, int32_t nbytes) {
     unsigned long flags;
     cli_and_save(flags);
 
+    //error check
     if(nbytes < 0 || buf == NULL) {
         return -1;
     }
 
+    //copy arguements into buffer
     strncpy((int8_t*) buf, (const int8_t*) curr_proc[curr_active_term]->args, nbytes);
     restore_flags(flags);
     return 0;
 }
 
+/**
+ * [vidmap  maps text-mode video memory into user space]
+ * @param  screen_start [the start of the screen]
+ * @return              [-1 on fail, 0 on success]
+ */
 int32_t vidmap (uint8_t ** screen_start) {
     unsigned long flags;
     cli_and_save(flags);
 
+    //error check to make sure screen_start is valid
     if((uint32_t) screen_start < VID_MEM_START || (uint32_t) screen_start > VID_MEM_END) {
         return -1;
     }
 
+    //map screen_start to vidoe memory
     *screen_start = (uint8_t *) VIDEO;
 
     restore_flags(flags);
     return 0;
 }
 
+/**
+ * [set_handler Related to signal handling (not implemented)]
+ * @param  signum          [description]
+ * @param  handler_address [description]
+ * @return                 [description]
+ */
 int32_t set_handler (int32_t signum, void * handler_address) {
     return 0;
 }
 
+/**
+ * [sigreturn  Related to signal handling (not implemened)]
+ * @return  [description]
+ */
 int32_t sigreturn (void) {
     return 0;
 }
 
+/**
+ * [get_pcb retrieves the pcb based on the specified terminal]
+ * @param  term [the terminal for the desired pcb]
+ * @return      [pcb of input terminal number]
+ */
 pcb_t * get_pcb(int32_t term) {
     return curr_proc[term];
 }
 
+/**
+ * [first_prog_run Returns the first program run variable
+ * @return [first_program_run]
+ */
 int32_t first_prog_run() {
     return first_program_run;
 }
 
+/**
+ * [get_curr_running_term_proc retrieves the current active terminal]
+ * @return [current active terminal number]
+ */
 uint8_t get_curr_running_term_proc() {
     return curr_active_term;
 }
 
+/**
+ * [get_next_running_term_proc Returns the next terminal to switch to for scheduling]
+ * @return [the next terminal number]
+ */
 uint8_t get_next_running_term_proc() {
     switch(curr_active_term) {
-        case 0:
-            return 1;
+        case TERM_0:
+            return TERM_1;
             break;
-        case 1:
-            return 2;
+        case TERM_1:
+            return TERM_2;
             break;
-        case 2:
-            return 0;
+        case TERM_2:
+            return TERM_0;
             break;
         default:
             printf("rip");
@@ -409,6 +486,10 @@ uint8_t get_next_running_term_proc() {
     }
 }
 
+/**
+ * [set_running_proc Sets the current active terminal to given process]
+ * @param proc [process to set current active terminal to]
+ */
 void set_running_proc(uint8_t proc) {
     curr_active_term = proc;
     return;
