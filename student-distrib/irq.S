@@ -36,7 +36,7 @@
 /*
  * divide_by_zero_irq()
  *
- * Description: 
+ * Description: Assembly wrapper for the exception divide by zero
  * Inputs: none
  * Outputs: none
  * Returns: none
@@ -61,7 +61,7 @@ divide_by_zero_irq:
 /*
  * debug_irq()
  *
- * Description: 
+ * Description: Assembly wrapper for the exception debug
  * Inputs: none
  * Outputs: none
  * Returns: none
@@ -86,7 +86,7 @@ debug_irq:
 /*
  * nmi_irq()
  *
- * Description: 
+ * Description: Assembly wrapper for the exception non maskable interrupt
  * Inputs: none
  * Outputs: none
  * Returns: none
@@ -111,7 +111,7 @@ nmi_irq:
 /*
  * breakpoint_irq()
  *
- * Description: 
+ * Description: Assembly wrapper for the exception breakpoint
  * Inputs: none
  * Outputs: none
  * Returns: none
@@ -136,7 +136,7 @@ breakpoint_irq:
 /*
  * overflow_irq()
  *
- * Description: 
+ * Description: Assembly wrapper for the exception overflow
  * Inputs: none
  * Outputs: none
  * Returns: none
@@ -161,7 +161,7 @@ overflow_irq:
 /*
  * oob_irq()
  *
- * Description: 
+ * Description: Assembly wrapper for the exception out of bounds
  * Inputs: none
  * Outputs: none
  * Returns: none
@@ -186,7 +186,7 @@ oob_irq:
 /*
  * opcode_irq()
  *
- * Description: 
+ * Description: Assembly wrapper for the exception opcode invalid
  * Inputs: none
  * Outputs: none
  * Returns: none
@@ -211,7 +211,7 @@ opcode_irq:
 /*
  * no_coproc_irq()
  *
- * Description: 
+ * Description: Assembly wrapper for the exception no coprocessor
  * Inputs: none
  * Outputs: none
  * Returns: none
@@ -236,7 +236,7 @@ no_coproc_irq:
 /*
  * double_fault_irq()
  *
- * Description: 
+ * Description: Assembly wrapper for the exception double fault
  * Inputs: none
  * Outputs: none
  * Returns: none
@@ -261,7 +261,7 @@ double_fault_irq:
 /*
  * coproc_seg_overrun_irq()
  *
- * Description: 
+ * Description: Assembly wrapper for the exception segmentation overrun
  * Inputs: none
  * Outputs: none
  * Returns: none
@@ -286,7 +286,7 @@ coproc_seg_overrun_irq:
 /*
  * tss_irq()
  *
- * Description: 
+ * Description: Assembly wrapper for the exception tss failure
  * Inputs: none
  * Outputs: none
  * Returns: none
@@ -311,7 +311,7 @@ tss_irq:
 /*
  * segment_irq()
  *
- * Description: 
+ * Description: Assembly wrapper for the exception segmentation failure
  * Inputs: none
  * Outputs: none
  * Returns: none
@@ -336,7 +336,7 @@ segment_irq:
 /*
  * stack_irq()
  *
- * Description: 
+ * Description: Assembly wrapper for the exception stack failure
  * Inputs: none
  * Outputs: none
  * Returns: none
@@ -361,7 +361,7 @@ stack_irq:
 /*
  * general_protec_irq()
  *
- * Description: 
+ * Description: Assembly wrapper for the exception general protection fault
  * Inputs: none
  * Outputs: none
  * Returns: none
@@ -386,7 +386,7 @@ general_protec_irq:
 /*
  * page_fault_irq()
  *
- * Description: 
+ * Description: Assembly wrapper for the exception page fault
  * Inputs: none
  * Outputs: none
  * Returns: none
@@ -411,7 +411,7 @@ page_fault_irq:
 /*
  * unknown_interr_irq()
  *
- * Description: 
+ * Description: Assembly wrapper for the exception unknown interrupt
  * Inputs: none
  * Outputs: none
  * Returns: none
@@ -436,7 +436,7 @@ unknown_interr_irq:
 /*
  * coproc_irq()
  *
- * Description: 
+ * Description: Assembly wrapper for the exception coprocessor fail
  * Inputs: none
  * Outputs: none
  * Returns: none
@@ -461,7 +461,7 @@ coproc_irq:
 /*
  * align_irq()
  *
- * Description: 
+ * Description: align failure
  * Inputs: none
  * Outputs: none
  * Returns: none
@@ -486,7 +486,7 @@ align_irq:
 /*
  * machine_chk_irq()
  *
- * Description: 
+ * Description: Assembly wrapper for the exception machine check
  * Inputs: none
  * Outputs: none
  * Returns: none
@@ -637,6 +637,11 @@ general_irq:
     // return to the interrupt handler
     iret
 
+/* 
+ * syscall_jumptable
+ * 
+ * A jump table of the syscall functions to be used
+ */
 syscall_jumptable:
     .long divide_by_zero_except
     .long halt
@@ -650,11 +655,19 @@ syscall_jumptable:
     .long set_handler
     .long sigreturn
 
+/* 
+ * syscall_irq
+ * 
+ * Description: main entrypoint for syscalls in the operating system
+ * 
+ * Input: Syscall number in eax
+ * Output: Launches and returns from the appropriate syscall
+ */
 syscall_irq:
     cmpl $1, %eax
-    jl syscall_invalid_eax
+    jl syscall_invalid
     cmpl $10, %eax
-    jg syscall_invalid_eax
+    jg syscall_invalid
 
     // save other registers we need
     pushl %ebp
@@ -688,10 +701,12 @@ syscall_irq:
     // jump to return
     jmp syscall_ret
 
-syscall_invalid_eax:
+// invalid syscall label
+syscall_invalid:
     movl $-1, %eax
     jmp syscall_ret
 
+// return from the syscall and iret back
 syscall_ret:
     // return to interrupt handler
     iret

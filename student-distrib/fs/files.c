@@ -29,6 +29,7 @@ void fs_init(uint32_t addrs) {
 int32_t fs_read(file_array* fd, uint8_t * buf, int32_t nbytes) {
     dentry_t temp;
 
+    //checking if file exists
     if(0 != read_dentry_by_name((uint8_t*)(fd->file_name), &temp)) {
         return -1;
     }
@@ -64,7 +65,7 @@ int32_t fs_close(void) {
     return 0;
 }
 
-/** 
+/**
  * Copies the data of given name to given dentry
  * @param  fname  File name that user wants to copy
  * @param  dentry Where to copy
@@ -75,6 +76,7 @@ int32_t read_dentry_by_name (const uint8_t* fname, dentry_t* dentry) {
 
     int readBytes = strlen((int8_t *) fname);
 
+    //error check for out of bounds
     if (readBytes > MAX_FILENAME_LENGTH) {
         readBytes = MAX_FILENAME_LENGTH;
     }
@@ -106,7 +108,7 @@ int32_t read_dentry_by_index (uint32_t index, dentry_t* dentry) {
     if(index >= b.n_dentries || index < 0)
         return -1;
 
-    //copying the data from the index to the dentry
+    //copying the data from the index to the dentry, 32 is max number of bytes for a file name
     strncpy((int8_t *)dentry->file_name, (int8_t *)dentries[index].file_name, 32);
     dentry->file_type = dentries[index].file_type;
     dentry->inode_num = dentries[index].inode_num;
@@ -114,7 +116,16 @@ int32_t read_dentry_by_index (uint32_t index, dentry_t* dentry) {
     return 0;
 }
 
+/**
+ * [read_data  reads the contents of a file]
+ * @param  inode  [inode of specified file]
+ * @param  offset [current offset within data blocks]
+ * @param  buf    [buffer to read to]
+ * @param  length [number of bytes to read]
+ * @return        [number of bytes read]
+ */
 int32_t read_data (uint32_t inode, uint32_t offset, uint8_t * buf, uint32_t length) {
+    //error checking
     if(inode >= b.n_inodes || inode < 0)
         return -1;
 
@@ -128,7 +139,7 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t * buf, uint32_t leng
 
     int num_reads = 0;
     int buf_pos = 0;
-     
+
     while(num_reads < length) {
         buf[buf_pos] = *curr_read_pos;
         num_reads++;
@@ -144,7 +155,7 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t * buf, uint32_t leng
             // reset location
             location_in_block = 0;
             curr_block++;
-            
+
             //checking if the data block is invalid
             if(inodes[inode].blocks[curr_block] >= b.n_data_blocks) {
                 return -1;
@@ -158,6 +169,12 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t * buf, uint32_t leng
     return num_reads;
 }
 
+/**
+ * Copies a file to a given address
+ * @param  fname file name
+ * @param  addr  address to copy to
+ * @return       0 success, -1 failure
+ */
 int32_t copy_file_to_addr(uint8_t* fname, uint32_t addr) {
     dentry_t temp_dentry;
 
@@ -166,7 +183,7 @@ int32_t copy_file_to_addr(uint8_t* fname, uint32_t addr) {
     }
 
     uint32_t file_size = inodes[temp_dentry.inode_num].file_size;
-    
+
     uint32_t ret = read_data(temp_dentry.inode_num, 0, (uint8_t *) addr, file_size);
 
     if(ret == -1) {
@@ -176,9 +193,15 @@ int32_t copy_file_to_addr(uint8_t* fname, uint32_t addr) {
     return 0;
 }
 
+/**
+ * Returns the inodes from given inode_num
+ * @param  inode_num inode number
+ * @return           returns the inode of the inode number
+ */
 inode_t* get_inode(uint32_t inode_num) {
     return inodes + inode_num * BLOCK_SIZE;
 }
+
 /* test_fs()
  * description: tests the filesystem functions
  * input: none
@@ -266,14 +289,14 @@ int32_t dir_write(file_array* fd, const int8_t * buf, int32_t nbytes){
  * outputs: copies filename into buf and returns the number of bytes copied
  */
 int32_t dir_read(file_array* fd, int8_t * buf, int32_t length){
-    //check if reached end       
+    //check if reached end
     if(fd->file_position >= b.n_dentries){
         fd->file_position = 0;
         return 0;
     }
     //copy name into buf
     strcpy(buf, dentries[fd->file_position].file_name);
-    
+
     //get number of bytes and increment the directory read counter
     int bytesCopied = strlen(buf);
 
@@ -292,7 +315,7 @@ void test_dir_read() {
     // int8_t buf[33];
 
     // printf("Testing dir_read...\n");
-    
+
     // //print out all files in directory
     // while(0 != (cnt = dir_read(fd,buf,32))){
     //     printf("%s\n",buf);

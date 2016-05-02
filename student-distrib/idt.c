@@ -10,14 +10,16 @@
  */
 void divide_by_zero_except() {
     // block interrupts
-    cli();
+    unsigned long flags;
+    cli_and_save(flags);
 
     // print the interrupt type
     printf("\nEXCEPTION: Divide by zero!\n");
-    while(1);
+    halt(0);
 
     // unblock interrupts (to be used when loop is removed)
-    sti();
+    // Restore flags
+    restore_flags(flags);
 }
 
 /*
@@ -30,14 +32,16 @@ void divide_by_zero_except() {
  */
 void debug_except() {
     // block interrupts
-    cli();
+    unsigned long flags;
+    cli_and_save(flags);
 
     // print the interrupt type
     printf("\nEXCEPTION: Debug!\n");
-    while(1);
+    halt(0);
 
     // unblock interrupts (to be used when loop is removed)
-    sti();
+    // Restore flags
+    restore_flags(flags);
 }
 
 /*
@@ -50,14 +54,16 @@ void debug_except() {
  */
 void nmi_except() {
     // block interrupts
-    cli();
+    unsigned long flags;
+    cli_and_save(flags);
 
     // print the interrupt type
     printf("\nEXCEPTION: Non-maskable interrupt!\n");
-    while(1);
+    halt(0);
 
     // unblock interrupts (to be used when loop is removed)
-    sti();
+    // Restore flags
+    restore_flags(flags);
 }
 
 /*
@@ -70,14 +76,16 @@ void nmi_except() {
  */
 void breakpoint_except() {
     // block interrupts
-    cli();
+    unsigned long flags;
+    cli_and_save(flags);
 
     // print the interrupt type
     printf("\nEXCEPTION: Breakpoint!\n");
-    while(1);
+    halt(0);
 
     // unblock interrupts (to be used when loop is removed)
-    sti();
+    // Restore flags
+    restore_flags(flags);
 }
 
 /*
@@ -90,14 +98,16 @@ void breakpoint_except() {
  */
 void overflow_except() {
     // block interrupts
-    cli();
+    unsigned long flags;
+    cli_and_save(flags);
 
     // print the interrupt type
     printf("\nEXCEPTION: Into detected overflow!\n");
-    while(1);
+    halt(0);
 
     // unblock interrupts (to be used when loop is removed)
-    sti();
+    // Restore flags
+    restore_flags(flags);
 }
 
 /*
@@ -110,14 +120,16 @@ void overflow_except() {
  */
 void oob_except() {
     // block interrupts
-    cli();
+    unsigned long flags;
+    cli_and_save(flags);
 
     // print the interrupt type
     printf("\nEXCEPTION: Out of bounds!\n");
-    while(1);
+    halt(0);
 
     // unblock interrupts (to be used when loop is removed)
-    sti();
+    // Restore flags
+    restore_flags(flags);
 }
 
 /*
@@ -130,14 +142,16 @@ void oob_except() {
  */
 void opcode_except() {
     // block interrupts
-    cli();
+    unsigned long flags;
+    cli_and_save(flags);
 
     // print the interrupt type
     printf("\nEXCEPTION: Invalid opcode!\n");
-    while(1);
+    halt(0);
 
     // unblock interrupts (to be used when loop is removed)
-    sti();
+    // Restore flags
+    restore_flags(flags);
 }
 
 /*
@@ -150,14 +164,16 @@ void opcode_except() {
  */
 void no_coproc_except() {
     // block interrupts
-    cli();
+    unsigned long flags;
+    cli_and_save(flags);
 
     // print the interrupt type
     printf("\nEXCEPTION: No coprocessor!\n");
-    while(1);
+    halt(0);
 
     // unblock interrupts (to be used when loop is removed)
-    sti();
+    // Restore flags
+    restore_flags(flags);
 }
 
 /*
@@ -171,14 +187,16 @@ void no_coproc_except() {
  */
 void double_fault_except() {
     // block interrupts
-    cli();
+    unsigned long flags;
+    cli_and_save(flags);
 
     // print the interrupt type
     printf("\nEXCEPTION: Double fault!\n");
-    while(1);
+    halt(0);
 
     // unblock interrupts (to be used when loop is removed)
-    sti();
+    // Restore flags
+    restore_flags(flags);
 }
 
 /*
@@ -192,14 +210,16 @@ void double_fault_except() {
  */
 void coproc_seg_overrun_except() {
     // block interrupts
-    cli();
+    unsigned long flags;
+    cli_and_save(flags);
 
     // print the interrupt type
     printf("\nEXCEPTION: Coprocessor segment overrun!\n");
-    while(1);
+    halt(0);
 
     // unblock interrupts (to be used when loop is removed)
-    sti();
+    // Restore flags
+    restore_flags(flags);
 }
 
 /*
@@ -213,14 +233,16 @@ void coproc_seg_overrun_except() {
  */
 void tss_except() {
     // block interrupts
-    cli();
+    unsigned long flags;
+    cli_and_save(flags);
 
     // print the interrupt type
     printf("\nEXCEPTION: Bad TSS!\n");
-    while(1);
+    halt(0);
 
     // unblock interrupts (to be used when loop is removed)
-    sti();
+    // Restore flags
+    restore_flags(flags);
 }
 
 /*
@@ -234,14 +256,16 @@ void tss_except() {
  */
 void segment_except() {
     // block interrupts
-    cli();
+    unsigned long flags;
+    cli_and_save(flags);
 
     // print the interrupt type
     printf("\nEXCEPTION: Segment not present!\n");
-    while(1);
+    halt(0);
 
     // unblock interrupts (to be used when loop is removed)
-    sti();
+    // Restore flags
+    restore_flags(flags);
 }
 
 /*
@@ -255,14 +279,16 @@ void segment_except() {
  */
 void stack_except() {
     // block interrupts
-    cli();
+    unsigned long flags;
+    cli_and_save(flags);
 
     // print the interrupt type
     printf("\nEXCEPTION: Stack fault!\n");
-    while(1);
+    halt(0);
 
     // unblock interrupts (to be used when loop is removed)
-    sti();
+    // Restore flags
+    restore_flags(flags);
 }
 
 /*
@@ -276,14 +302,16 @@ void stack_except() {
  */
 void general_protec_except() {
     // block interrupts
-    cli();
+    unsigned long flags;
+    cli_and_save(flags);
 
     // print the interrupt type
     printf("\nEXCEPTION: General protection fault!\n");
-    while(1);
+    halt(0);
 
     // unblock interrupts (to be used when loop is removed)
-    sti();
+    // Restore flags
+    restore_flags(flags);
 }
 
 /*
@@ -297,7 +325,8 @@ void general_protec_except() {
  */
 void page_fault_except() {
     // block interrupts
-    cli();
+    unsigned long flags;
+    cli_and_save(flags);
 
     // print the interrupt type
     printf("\nEXCEPTION: Page fault!\n");
@@ -307,10 +336,11 @@ void page_fault_except() {
     asm volatile("movl %%cr2, %0": "=r" (fault_addr));
     printf("Tried to access memory at 0x%#x\n", fault_addr);
 
-    while(1);
+    halt(0);
 
     // unblock interrupts (to be used when loop is removed)
-    sti();
+    // Restore flags
+    restore_flags(flags);
 }
 
 /*
@@ -323,14 +353,16 @@ void page_fault_except() {
  */
 void unknown_interr_except() {
     // block interrupts
-    cli();
+    unsigned long flags;
+    cli_and_save(flags);
 
     // print the interrupt type
     printf("\nEXCEPTION: Unknown interrupt!\n");
-    while(1);
+    halt(0);
 
     // unblock interrupts (to be used when loop is removed)
-    sti();
+    // Restore flags
+    restore_flags(flags);
 }
 
 /*
@@ -343,14 +375,16 @@ void unknown_interr_except() {
  */
 void coproc_except() {
     // block interrupts
-    cli();
+    unsigned long flags;
+    cli_and_save(flags);
 
     // print the interrupt type
     printf("\nEXCEPTION: Coprocessor fault!\n");
-    while(1);
+    halt(0);
 
     // unblock interrupts (to be used when loop is removed)
-    sti();
+    // Restore flags
+    restore_flags(flags);
 }
 
 /*
@@ -363,14 +397,16 @@ void coproc_except() {
  */
 void align_except() {
     // block interrupts
-    cli();
+    unsigned long flags;
+    cli_and_save(flags);
 
     // print the interrupt type
     printf("\nEXCEPTION: Alignment check!\n");
-    while(1);
+    halt(0);
 
     // unblock interrupts (to be used when loop is removed)
-    sti();
+    // Restore flags
+    restore_flags(flags);
 }
 
 /*
@@ -383,14 +419,16 @@ void align_except() {
  */
 void machine_chk_except() {
     // block interrupts
-    cli();
+    unsigned long flags;
+    cli_and_save(flags);
 
     // print the interrupt type
     printf("\nEXCEPTION: Machine check!\n");
-    while(1);
+    halt(0);
 
     // unblock interrupts (to be used when loop is removed)
-    sti();
+    // Restore flags
+    restore_flags(flags);
 }
 
 /*
@@ -402,10 +440,12 @@ void machine_chk_except() {
  * Returns: none
  */
 void general_interrupt() {
-    cli();
+    unsigned long flags;
+    cli_and_save(flags);
     printf("General interrupt recieved!\n");
     send_eoi(IRQ_SYSTEM_TIMER);
-    sti();
+    // Restore flags
+    restore_flags(flags);
 }
 
 /* init_idt()
@@ -489,6 +529,7 @@ void init_idt() {
         idt[i].reserved1 = 1;
         idt[i].reserved0 = 0;
 
+        // configure device interrupts
         if(i == PIT_IDT) {
             SET_IDT_ENTRY(idt[PIT_IDT], pit_irq);
         } else if(i == KEYBOARD_IDT) {

@@ -132,10 +132,12 @@ int32_t terminal_write (int32_t fd, const uint8_t * buf, int32_t nbytes);
 int32_t terminal_read (int32_t fd, uint8_t * buf, int32_t nbytes);
 
 void reset_term();
-uint32_t add_char_to_buffer(uint8_t new_char);
+uint32_t add_char_to_buffer(uint8_t new_char, uint8_t term);
+uint32_t add_char_to_active(uint8_t new_char, uint8_t term);
 void handle_enter();
 void handle_backspace();
 void handle_keypress(void);
+void set_active_terminal(uint8_t term);
 uint8_t get_active_terminal(void);
 
 /* Tester functions */

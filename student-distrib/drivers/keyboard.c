@@ -42,7 +42,7 @@ uint8_t shift_ascii[] = {
     '.', ASCII_NULL_CHAR, ASCII_NULL_CHAR, ASCII_NULL_CHAR,
     ASCII_PLACEHOLDER, ASCII_PLACEHOLDER
 };
-
+// array of capital letters and such
 uint8_t caps_ascii[] = {
     ASCII_NULL_CHAR, ASCII_PLACEHOLDER, '1', '2', '3', '4',
     '5', '6', '7', '8', '9', '0', '-',
@@ -69,6 +69,7 @@ uint8_t caps_ascii[] = {
 #define TERM_TEST_READ 0
 
 uint8_t active_terminal = 0;
+uint8_t prev_terminal = 0;
 
 uint8_t second_term_start = 0;
 uint8_t third_term_start = 0;
@@ -87,6 +88,11 @@ int shift_r_on = 0;
 int alt_l_on = 0;
 int alt_r_on = 0;
 
+/**
+ * [terminal_open  initializes the active terminal]
+ * @param  filename [just for the sake of having the input]
+ * @return          [0 on success]
+ */
 int32_t terminal_open (const uint8_t * filename) {
     clear_screen();
 
@@ -102,36 +108,54 @@ int32_t terminal_open (const uint8_t * filename) {
     return 0;
 }
 
+/**
+ * [terminal_close  Closes terminal (not implemented)]
+ * @param  fd [file descriptor]
+ * @return    [0]
+ */
 int32_t terminal_close (int32_t fd) {
     return 0;
 }
 
+/**
+ * [terminal_read  reads from terminal into a buffer]
+ * @param  fd     [file descriptor]
+ * @param  buf    [Buffer to copy from terminal into]
+ * @param  nbytes [number of bytes to read]
+ * @return        [number of bytes rtc_read]
+ */
 int32_t terminal_read (int32_t fd, uint8_t * buf, int32_t nbytes) {
     int bytes_read = 0;
     int i = 0;
 
-    while(!read_buf_ready[active_terminal]);
+    while(!read_buf_ready[get_curr_running_term_proc()]);
 
     for(i = 0; i <= nbytes; i++) {
-        buf[i] = keyboard_buf[active_terminal][i];
-        keyboard_buf[active_terminal][i] = NULL;
+        buf[i] = keyboard_buf[get_curr_running_term_proc()][i];
+        keyboard_buf[get_curr_running_term_proc()][i] = NULL;
         bytes_read++;
     }
 
     new_line();
 
-    num_chars_in_buf[active_terminal] = 0;
-    read_buf_ready[active_terminal] = 0;
+    num_chars_in_buf[get_curr_running_term_proc()] = 0;
+    read_buf_ready[get_curr_running_term_proc()] = 0;
 
     return bytes_read;
 }
-
+/**
+ * [terminal_write  write contents of buffer to screen]
+ * @param  fd     [file descriptor]
+ * @param  buf    [buffer containing contents to write]
+ * @param  nbytes [number of bytes to write]
+ * @return        [number of bytes successfully printed]
+ */
 int32_t terminal_write (int32_t fd, const uint8_t * buf, int32_t nbytes) {
     int num_printed = 0;
     int i = 0;
 
     for(i = 0; i < nbytes; i++) {
-        if(add_char_to_buffer(buf[i])) {
+        if(add_char_to_buffer(buf[i], get_curr_running_term_proc())) {
             num_printed++;
         }
     }
@@ -142,6 +166,11 @@ int32_t terminal_write (int32_t fd, const uint8_t * buf, int32_t nbytes) {
     return num_printed;
 }
 
+/**
+ * [reset_term reinitializes the current active terminal]
+ * Inputs: None
+ * Outputs: None
+ */
 void reset_term() {
     int i = 0;
 
@@ -154,9 +183,15 @@ void reset_term() {
     clear_screen();
 }
 
-uint32_t add_char_to_buffer(uint8_t new_char) {
+/**
+ * [add_char_to_buffer Adds the current character to the keyboard buffer]
+ * @param  new_char [character to write to buffer]
+ * @param  term     [current active terminal]
+ * @return          [1 on success]
+ */
+uint32_t add_char_to_buffer(uint8_t new_char, uint8_t term) {
     // if we haven't reached the buffer limit, add the char to the buffer and print the key
-    if(num_chars_in_buf[active_terminal] < MAX_CHARS_IN_BUF) {
+    if(num_chars_in_buf[term] < MAX_CHARS_IN_BUF) {
         switch(new_char) {
             case '\n':
                 new_line();
@@ -165,8 +200,8 @@ uint32_t add_char_to_buffer(uint8_t new_char) {
                 return 1;
                 break;
             default:
-                keyboard_buf[active_terminal][num_chars_in_buf[active_terminal]] = new_char;
-                num_chars_in_buf[active_terminal]++;
+                keyboard_buf[term][num_chars_in_buf[term]] = new_char;
+                num_chars_in_buf[term]++;
                 putc(new_char);
                 break;
         }
@@ -176,19 +211,52 @@ uint32_t add_char_to_buffer(uint8_t new_char) {
     return 0;
 }
 
+/**
+ * Special case of printing to the terminal
+ * @param  new_char char to print
+ * @param  term     term to print to
+ * @return          success or not
+ */
+uint32_t add_char_to_active(uint8_t new_char, uint8_t term) {
+    // if we haven't reached the buffer limit, add the char to the buffer and print the key
+    if(num_chars_in_buf[term] < MAX_CHARS_IN_BUF) {
+        switch(new_char) {
+            case '\n':
+                new_line();
+                break;
+            case '\0':
+                return 1;
+                break;
+            default:
+                keyboard_buf[term][num_chars_in_buf[term]] = new_char;
+                num_chars_in_buf[term]++;
+                putaddc(new_char);
+                break;
+        }
+        return 1;
+    }
+    return 0;
+}
+
+/**
+ * [handle_enter Handles the enter key press]
+ * Inputs: None
+ * Outputs: None
+ */
 void handle_enter() {
     int i = 0;
 
+    //fills keyboard buffer with null characters
     for(i = num_chars_in_buf[active_terminal]; i <= MAX_CHARS_IN_BUF; i++) {
         keyboard_buf[active_terminal][i] = ASCII_NULL_CHAR;
     }
 
-    uint8_t buf[MAX_CHARS_IN_BUF + 1];
-    int32_t nbytes = MAX_CHARS_IN_BUF + 1;
-
     read_buf_ready[active_terminal] = 1;
 
     if(TERM_TEST_READ) {
+        uint8_t buf[MAX_CHARS_IN_BUF + 1];
+        int32_t nbytes = MAX_CHARS_IN_BUF + 1;
+
         for(i = 0; i < nbytes; i++) {
             printf("%c", buf[i]);
         }
@@ -196,6 +264,11 @@ void handle_enter() {
     }
 }
 
+/**
+ * [handle_backspace Handles the backspace key press]
+ * Inputs: None
+ * Outputs: None
+ */
 void handle_backspace() {
     if(num_chars_in_buf[active_terminal] > 0) {
         del_last_char();
@@ -207,12 +280,12 @@ void handle_backspace() {
 /**
  * Wait for a keyboard ACK
  */
-void kbd_ack(void){ 
+void kbd_ack(void){
     while(!(inb(KEYBOARD_D_PORT) == KEYBOARD_D_ACK));
 }
 
 /**
- * Set the keyboard LED status 
+ * Set the keyboard LED status
  * @param caps   0 or 1 If caps lock is enabled
  * @param num    0 or 1 If num lock is enabled
  * @param scroll 0 or 1 If scroll lock is enabled
@@ -243,7 +316,7 @@ void kbd_led_handling(int caps, int num, int scroll) {
 
 /**
  * handle_keypress()
- * 
+ *
  * Description: Prints the key pressed by the keyboard to the screen
  *
  * Inputs: None (keycode is read from the keyboard port)
@@ -295,14 +368,14 @@ void handle_keypress() {
             } else if (caps_on && !(shift_l_on || shift_r_on)) {
                 // print caps version
                 key_ascii = caps_ascii[key_code];
-                add_char_to_buffer(key_ascii);
+                add_char_to_active(key_ascii, active_terminal);
             } else if (!caps_on && (shift_l_on || shift_r_on)) {
                 // print shift version
                 key_ascii = shift_ascii[key_code];
-                add_char_to_buffer(key_ascii);
+                add_char_to_active(key_ascii, active_terminal);
             } else {
                 // print char normally
-                add_char_to_buffer(key_ascii);
+                add_char_to_active(key_ascii, active_terminal);
             }
         } else if(special_key_enabled) {
             special_key_enabled = 0;
@@ -333,49 +406,43 @@ void handle_keypress() {
                 case KEY_MAKE_F1:
                     // if(alt_l_on || alt_r_on && active_terminal != 0) {
                         // switch to the video memory of the first terminal
-                        switch_term(0);
                         update_screen(0, active_terminal);
+                        prev_terminal = active_terminal;
                         active_terminal = 0;
+
+                        // // send eoi and restore prev flags
+                        // send_eoi(IRQ_KEYBOARD_CTRL);
+                        // restore_flags(flags);
+
+                        // context_switch(prev_terminal, active_terminal);
                     // }
                     break;
                 case KEY_MAKE_F2:
                     // if(alt_l_on || alt_r_on && active_terminal != 1) {
                         // switch to the video memory of the second terminal
-                        switch_term(1);
                         update_screen(1, active_terminal);
+                        prev_terminal = active_terminal;
                         active_terminal = 1;
 
-                        // send eoi and restore prev flags
-                        send_eoi(IRQ_KEYBOARD_CTRL);
-                        restore_flags(flags);
+                        // // send eoi and restore prev flags
+                        // send_eoi(IRQ_KEYBOARD_CTRL);
+                        // restore_flags(flags);
 
-                        if(!second_term_start) {
-                            // set the flag correctly
-                            second_term_start = 1;
-
-                            // start up second terminal
-                            execute((uint8_t*) "shell");
-                        }
+                        // context_switch(prev_terminal, active_terminal);
                     // }
                     break;
                 case KEY_MAKE_F3:
                     // if(alt_l_on || alt_r_on && active_terminal != 2) {
                         // switch to the video memory of the third terminal
-                        switch_term(2);
                         update_screen(2, active_terminal);
+                        prev_terminal = active_terminal;
                         active_terminal = 2;
 
-                        // send eoi and restore prev flags
-                        send_eoi(IRQ_KEYBOARD_CTRL);
-                        restore_flags(flags);
+                        // // send eoi and restore prev flags
+                        // send_eoi(IRQ_KEYBOARD_CTRL);
+                        // restore_flags(flags);
 
-                        if(!third_term_start) {
-                            // set the flag correctly
-                            third_term_start = 1;
-
-                            // start up third terminal
-                            execute((uint8_t*) "shell");
-                        }
+                        // context_switch(prev_terminal, active_terminal);
                     // }
                     break;
                 default:
@@ -389,7 +456,7 @@ void handle_keypress() {
 
             // get next code
             key_code = inb(KEYBOARD_D_PORT);
-            
+
             switch(key_code) {
                 case KEY_MAKE_R_CTRL:
                     cntrl_r_on = 1;
@@ -442,18 +509,72 @@ void handle_keypress() {
     restore_flags(flags);
 }
 
+/**
+ * [get_active_terminal Retrieves the current active terminal]
+ * @return  [current active terminal]
+ */
 uint8_t get_active_terminal(void) {
     return active_terminal;
 }
+/**
+ * [set_active_terminal Sets the current terminal to input]
+ * @param term [New active terminal]
+ */
+void set_active_terminal(uint8_t term) {
+    active_terminal = term;
+}
 
+/**
+ * [get_second_term_start returns whether or not the second terminal has been started]
+ * @return [second_term_start]
+ */
+uint8_t get_second_term_start() {
+    return second_term_start;
+}
+
+/**
+ * [set_second_term_start Sets the second terminal to started]
+ * Inputs: None
+ * Outputs: None
+ */
+void set_second_term_start() {
+    second_term_start = 1;
+}
+
+/**
+ * [set_third_term_start Sets third terminal to started]
+ * Inputs: None
+ * Outputs: None
+ */
+void set_third_term_start() {
+    third_term_start = 1;
+}
+
+/**
+ * [get_third_term_start returns whether or not the third terminal has been started]
+ * @return [third_term_start]
+ */
+uint8_t get_third_term_start() {
+    return third_term_start;
+}
+
+/**
+ * [test_open tests terminal_open]
+ */
 void test_open(void) {
     terminal_open(NULL);
 }
 
+/**
+ * [test_close Tests terminal_close]
+ */
 void test_close(void) {
     terminal_close(NULL);
 }
 
+/**
+ * [test_write Tests terminal_write]
+ */
 void test_write(void) {
     int i = 0;
     uint8_t buf[10];

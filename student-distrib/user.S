@@ -3,6 +3,10 @@
 
 .global jmp_usr_exec
 
+ # [jmp_usr_exec jumps to user space to begin execution of a program]
+ # Inputs: None
+ # Outputs: None
+
 jmp_usr_exec:
     # clear interrupts
     cli
