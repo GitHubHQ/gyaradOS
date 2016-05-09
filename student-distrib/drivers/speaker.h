@@ -4,8 +4,8 @@
 #ifndef _SPEAKER_H
 #define _SPEAKER_H
 
-#include <lib/lib.h>
-#include <lib/types.h>
+#include "../libs/lib.h"
+#include "../libs/types.h"
 
 /* Speaker Ports */
 #define SPKR_INIT_PORT 0x43

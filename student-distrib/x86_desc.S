@@ -2,7 +2,7 @@
 # vim:ts=4 noexpandtab
 
 #define ASM     1
-#include <boot/x86_desc.h>
+#include "x86_desc.h"
 
 .text
 

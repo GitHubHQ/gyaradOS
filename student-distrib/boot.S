@@ -3,8 +3,8 @@
 
 #define ASM     1
 
-#include <boot/multiboot.h>
-#include <boot/x86_desc.h>
+#include "multiboot.h"
+#include "x86_desc.h"
 
 .text
 

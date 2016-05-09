@@ -1,5 +1,4 @@
-#include <kernel/syscall.h>
-
+#include "syscall.h"
 /*curr_proc and prev_proc for all three terminals*/
 pcb_t * curr_proc[] = {NULL, NULL, NULL};
 pcb_t * prev_proc[] = {NULL, NULL, NULL};
@@ -419,24 +418,8 @@ int32_t vidmap (uint8_t ** screen_start) {
         return -1;
     }
 
-    if(get_curr_running_term_proc() == get_active_terminal()) {
-        //map screen_start to vidoe memory
-        *screen_start = (uint8_t *) VIDEO;
-    } else {
-        switch(get_curr_running_term_proc()) {
-            case 0:
-                *screen_start = (uint8_t *) VIDEO_PHYS_ADDR0;
-                break;
-            case 1:
-                *screen_start = (uint8_t *) VIDEO_PHYS_ADDR1;
-                break;
-            case 2:
-                *screen_start = (uint8_t *) VIDEO_PHYS_ADDR2;
-                break;
-        }
-    }
-
-    
+    //map screen_start to vidoe memory
+    *screen_start = (uint8_t *) VIDEO;
 
     restore_flags(flags);
     return 0;

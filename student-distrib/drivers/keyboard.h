@@ -1,9 +1,9 @@
 #ifndef _KEYBOARD_H
 #define _KEYBOARD_H
 
-#include <drivers/i8259.h>
-#include <lib/lib.h>
-#include <kernel/syscall.h>
+#include "i8259.h"
+#include "../libs/lib.h"
+#include "../syscall.h"
 
 // Keyboard port
 #define KEYBOARD_D_PORT          0x60
@@ -133,12 +133,17 @@ int32_t terminal_read (int32_t fd, uint8_t * buf, int32_t nbytes);
 
 void reset_term();
 uint32_t add_char_to_buffer(uint8_t new_char, uint8_t term);
-uint32_t add_char_to_active(uint8_t new_char, uint8_t term);
 void handle_enter();
 void handle_backspace();
 void handle_keypress(void);
-void set_active_terminal(uint8_t term);
 uint8_t get_active_terminal(void);
+
+uint8_t get_active_terminal(void);
+void set_active_terminal(uint8_t term);
+uint8_t get_second_term_start();
+void set_second_term_start();
+void set_third_term_start();
+uint8_t get_third_term_start();
 
 /* Tester functions */
 void test_open(void);

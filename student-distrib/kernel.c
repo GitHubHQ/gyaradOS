@@ -2,17 +2,17 @@
  * vim:ts=4 noexpandtab
  */
 
-#include <drivers/i8259.h>
-#include <drivers/pit.h>
-#include <drivers/rtc.h>
-#include <drivers/speaker.h>
-#include <lib/lib.h>
-#include <boot/multiboot.h>
-#include <boot/x86_desc.h>
-#include <lib/debug.h>
-#include <mm/paging.h>
-#include <fs/files.h>
-#include <kernel/syscall.h>
+#include "drivers/i8259.h"
+#include "drivers/pit.h"
+#include "drivers/rtc.h"
+#include "drivers/speaker.h"
+#include "libs/lib.h"
+#include "multiboot.h"
+#include "x86_desc.h"
+#include "debug.h"
+#include "paging.h"
+#include "fs/files.h"
+#include "syscall.h"
 
 /* Macros. */
 /* Check if the bit BIT in FLAGS is set. */

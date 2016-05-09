@@ -1,7 +1,7 @@
 /* i8259.c - Functions to interact with the 8259 interrupt controller
  */
 
-#include <drivers/i8259.h>
+#include "i8259.h"
 
 /* Interrupt masks to determine which interrupts
  * are enabled and disabled */

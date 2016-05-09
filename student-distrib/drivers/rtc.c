@@ -1,6 +1,6 @@
 /* rtc.c - Functions to interact with the real time clock
  */
-#include <drivers/rtc.h>
+#include "rtc.h"
 
 int32_t init_mode;
 

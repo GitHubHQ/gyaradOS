@@ -25,9 +25,9 @@
 #ifndef _MOUSE_H
 #define _MOUSE_H
 
-#include <lib/types.h>
-#include <lib/lib.h>
-#include <drivers/i8259.h>
+#include "../libs/types.h"
+#include "../libs/lib.h"
+#include "i8259.h"
 
 /* Mouse I/O ports */
 #define MOUSE_COMM_PORT	0x64

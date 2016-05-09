@@ -1,4 +1,4 @@
-#include <lib/lib.h>
+#include "lib.h"
 
 /* External Functions */
 float logBase2 (float x);
