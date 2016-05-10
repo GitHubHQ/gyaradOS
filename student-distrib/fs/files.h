@@ -24,10 +24,8 @@ int32_t fs_write(int32_t fd, const uint8_t * buf, int32_t nbytes);
 int32_t fs_read(file_array* fd, uint8_t * buf, int32_t nbytes);
 int32_t fs_open(const uint8_t* filename);
 int32_t fs_close(void);
-void test_fs();
 
 /* directory functions */
-void test_dir_read();
 int32_t dir_write(file_array* fd, const int8_t* buf, int32_t nbytes);
 int32_t dir_read(file_array* fd, int8_t * buf, int32_t length);
 int32_t dir_open(const uint8_t* filename);

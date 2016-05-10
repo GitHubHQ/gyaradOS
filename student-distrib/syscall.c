@@ -261,7 +261,6 @@ int32_t execute (const uint8_t * command) {
     jmp_usr_exec(entrypoint);
 
     asm volatile("EXECUTE_EXIT:");
-
     return g_status;
 }
 
@@ -491,7 +490,6 @@ uint8_t get_next_running_term_proc() {
             return TERM_0;
             break;
         default:
-            printf("rip");
             return -1;
             break;
     }

@@ -15,7 +15,7 @@ void divide_by_zero_except() {
 
     // print the interrupt type
     printf("\nEXCEPTION: Divide by zero!\n");
-    halt(0);
+    halt(-2);
 
     // unblock interrupts (to be used when loop is removed)
     // Restore flags
@@ -37,7 +37,7 @@ void debug_except() {
 
     // print the interrupt type
     printf("\nEXCEPTION: Debug!\n");
-    halt(0);
+    halt(-2);
 
     // unblock interrupts (to be used when loop is removed)
     // Restore flags
@@ -59,7 +59,7 @@ void nmi_except() {
 
     // print the interrupt type
     printf("\nEXCEPTION: Non-maskable interrupt!\n");
-    halt(0);
+    halt(-2);
 
     // unblock interrupts (to be used when loop is removed)
     // Restore flags
@@ -81,7 +81,7 @@ void breakpoint_except() {
 
     // print the interrupt type
     printf("\nEXCEPTION: Breakpoint!\n");
-    halt(0);
+    halt(-2);
 
     // unblock interrupts (to be used when loop is removed)
     // Restore flags
@@ -103,7 +103,7 @@ void overflow_except() {
 
     // print the interrupt type
     printf("\nEXCEPTION: Into detected overflow!\n");
-    halt(0);
+    halt(-2);
 
     // unblock interrupts (to be used when loop is removed)
     // Restore flags
@@ -125,7 +125,7 @@ void oob_except() {
 
     // print the interrupt type
     printf("\nEXCEPTION: Out of bounds!\n");
-    halt(0);
+    halt(-2);
 
     // unblock interrupts (to be used when loop is removed)
     // Restore flags
@@ -147,7 +147,7 @@ void opcode_except() {
 
     // print the interrupt type
     printf("\nEXCEPTION: Invalid opcode!\n");
-    halt(0);
+    halt(-2);
 
     // unblock interrupts (to be used when loop is removed)
     // Restore flags
@@ -169,7 +169,7 @@ void no_coproc_except() {
 
     // print the interrupt type
     printf("\nEXCEPTION: No coprocessor!\n");
-    halt(0);
+    halt(-2);
 
     // unblock interrupts (to be used when loop is removed)
     // Restore flags
@@ -192,7 +192,7 @@ void double_fault_except() {
 
     // print the interrupt type
     printf("\nEXCEPTION: Double fault!\n");
-    halt(0);
+    halt(-2);
 
     // unblock interrupts (to be used when loop is removed)
     // Restore flags
@@ -215,7 +215,7 @@ void coproc_seg_overrun_except() {
 
     // print the interrupt type
     printf("\nEXCEPTION: Coprocessor segment overrun!\n");
-    halt(0);
+    halt(-2);
 
     // unblock interrupts (to be used when loop is removed)
     // Restore flags
@@ -238,7 +238,7 @@ void tss_except() {
 
     // print the interrupt type
     printf("\nEXCEPTION: Bad TSS!\n");
-    halt(0);
+    halt(-2);
 
     // unblock interrupts (to be used when loop is removed)
     // Restore flags
@@ -261,7 +261,7 @@ void segment_except() {
 
     // print the interrupt type
     printf("\nEXCEPTION: Segment not present!\n");
-    halt(0);
+    halt(-2);
 
     // unblock interrupts (to be used when loop is removed)
     // Restore flags
@@ -284,7 +284,7 @@ void stack_except() {
 
     // print the interrupt type
     printf("\nEXCEPTION: Stack fault!\n");
-    halt(0);
+    halt(-2);
 
     // unblock interrupts (to be used when loop is removed)
     // Restore flags
@@ -307,7 +307,7 @@ void general_protec_except() {
 
     // print the interrupt type
     printf("\nEXCEPTION: General protection fault!\n");
-    halt(0);
+    halt(-2);
 
     // unblock interrupts (to be used when loop is removed)
     // Restore flags
@@ -336,7 +336,7 @@ void page_fault_except() {
     asm volatile("movl %%cr2, %0": "=r" (fault_addr));
     printf("Tried to access memory at 0x%#x\n", fault_addr);
 
-    halt(0);
+    halt(-2);
 
     // unblock interrupts (to be used when loop is removed)
     // Restore flags
@@ -358,7 +358,7 @@ void unknown_interr_except() {
 
     // print the interrupt type
     printf("\nEXCEPTION: Unknown interrupt!\n");
-    halt(0);
+    halt(-2);
 
     // unblock interrupts (to be used when loop is removed)
     // Restore flags
@@ -380,7 +380,7 @@ void coproc_except() {
 
     // print the interrupt type
     printf("\nEXCEPTION: Coprocessor fault!\n");
-    halt(0);
+    halt(-2);
 
     // unblock interrupts (to be used when loop is removed)
     // Restore flags
@@ -402,7 +402,7 @@ void align_except() {
 
     // print the interrupt type
     printf("\nEXCEPTION: Alignment check!\n");
-    halt(0);
+    halt(-2);
 
     // unblock interrupts (to be used when loop is removed)
     // Restore flags
@@ -424,7 +424,7 @@ void machine_chk_except() {
 
     // print the interrupt type
     printf("\nEXCEPTION: Machine check!\n");
-    halt(0);
+    halt(-2);
 
     // unblock interrupts (to be used when loop is removed)
     // Restore flags

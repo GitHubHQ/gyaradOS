@@ -6,7 +6,6 @@ uint32_t b_block_addrs;
 dentry_t * dentries;
 inode_t * inodes;
 uint32_t data_blocks;
-//file_t files_opened[MAX_FILES];
 
 /**
  * Initializing the Boot block by getting the data from address
@@ -202,63 +201,6 @@ inode_t* get_inode(uint32_t inode_num) {
     return inodes + inode_num * BLOCK_SIZE;
 }
 
-/* test_fs()
- * description: tests the filesystem functions
- * input: none
- * output:none
- */
-void test_fs() {
-    //reading a non txt file
-    // char * fname = "cat";
-    // printf("Reading cat... \n");
-    // dentry_t temp;
-    // read_dentry_by_name((uint8_t*)fname, &temp);
-    // printf("Size of flie: %d\n", inodes[temp.inode_num].file_size);
-
-    // uint8_t buf[10];
-    // fs_read(fname, buf, 10);
-    // int i = 0;
-    // while(0 != fs_read(fname, buf, 10))
-    // {
-    //     for(i = 0 ; i < 10; i++){
-    //         printf("%x", buf[i]);
-    //     }
-    //     //printf("\n");
-    // }
-
-    //reading a txt file
-    // char * fname = "frame1.txt";
-    // printf("Reading frame1.txt... \n");
-    //     dentry_t temp;
-    // read_dentry_by_name((uint8_t*)fname, &temp);
-    // printf("Size of flie: %d\n", inodes[temp.inode_num].file_size);
-    // int i;
-    // uint8_t buf[10];
-    // while(0 !=  fs_read(fname, buf, 10))
-    // {
-    //     for(i = 0 ; i < 10; i++){
-    //         printf("%c", buf[i]);
-    //     }
-    //     //printf("\n");
-    // }
-
-    // reading a large file
-    // char * fname = "verylargetxtwithverylongname.txt";
-    // printf("Reading verylargetxtwithverylongname.txt... \n");
-    // dentry_t temp;
-    // read_dentry_by_name((uint8_t*)fname, &temp);
-    // printf("Size of flie: %d\n", inodes[temp.inode_num].file_size);
-    // int i;
-    // uint8_t buf[10];
-    // while(0 !=  fs_read(fname, buf, 10))
-    // {
-    //     for(i = 0 ; i < 10; i++){
-    //         printf("%c", buf[i]);
-    //     }
-    //     //printf("\n");
-    // }
- }
-
 /* dir_open()
  * inputs: none
  * ouputs: none return 0
@@ -303,21 +245,4 @@ int32_t dir_read(file_array* fd, int8_t * buf, int32_t length){
     fd->file_position++;
 
     return bytesCopied;
-}
-
-/* test_dir_read()
- * description: this function tests printing out all files in the directory
- * inputs: none
- * outputs: none
- */
-void test_dir_read() {
-    // int32_t fd = 0, cnt = 0;
-    // int8_t buf[33];
-
-    // printf("Testing dir_read...\n");
-
-    // //print out all files in directory
-    // while(0 != (cnt = dir_read(fd,buf,32))){
-    //     printf("%s\n",buf);
-    // }
 }

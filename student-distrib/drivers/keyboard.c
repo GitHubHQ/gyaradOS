@@ -63,11 +63,6 @@ uint8_t caps_ascii[] = {
     ASCII_PLACEHOLDER, ASCII_PLACEHOLDER
 };
 
-#define TERM_TEST_OPEN 0
-#define TERM_TEST_CLOSE 0
-#define TERM_TEST_WRITE 0
-#define TERM_TEST_READ 0
-
 uint8_t active_terminal = 0;
 uint8_t prev_terminal = 0;
 
@@ -225,16 +220,6 @@ void handle_enter() {
     }
 
     read_buf_ready[active_terminal] = 1;
-
-    if(TERM_TEST_READ) {
-        uint8_t buf[MAX_CHARS_IN_BUF + 1];
-        int32_t nbytes = MAX_CHARS_IN_BUF + 1;
-
-        for(i = 0; i < nbytes; i++) {
-            printf("%c", buf[i]);
-        }
-        printf("\n");
-    }
 }
 
 /**
@@ -316,24 +301,13 @@ void handle_keypress() {
                     case KEY_MAKE_L:
                         reset_term();
                         break;
-                    case KEY_MAKE_T:
-                        if(TERM_TEST_OPEN) {
-                            test_open();
-                        }
-                        if(TERM_TEST_CLOSE) {
-                            test_close();
-                        }
-                        if(TERM_TEST_WRITE) {
-                            test_write();
-                        }
-                        break;
                     case KEY_MAKE_C:
                         // send eoi and restore prev flags
                         send_eoi(IRQ_KEYBOARD_CTRL);
                         restore_flags(flags);
 
                         // call halt to terminate the current process
-                        halt(0);
+                        halt(-2);
                         break;
                     default:
                         break;
@@ -529,33 +503,4 @@ void set_third_term_start() {
  */
 uint8_t get_third_term_start() {
     return third_term_start;
-}
-
-/**
- * [test_open tests terminal_open]
- */
-void test_open(void) {
-    terminal_open(NULL);
-}
-
-/**
- * [test_close Tests terminal_close]
- */
-void test_close(void) {
-    terminal_close(NULL);
-}
-
-/**
- * [test_write Tests terminal_write]
- */
-void test_write(void) {
-    int i = 0;
-    uint8_t buf[10];
-    int32_t nbytes = 10;
-
-    for(i = 0; i < nbytes; i++) {
-        buf[i] = 'A';
-    }
-
-    terminal_write(NULL, buf, nbytes);
 }

@@ -190,7 +190,7 @@ void entry (unsigned long magic, unsigned long addr) {
 	printf("[ OK ]\n");
 
 	/* Display the splash screen */
-	// splash_screen();
+	splash_screen();
 
 	/* Enable interrupts */
 	/* Do not enable the following until after you have set up your
@@ -206,16 +206,6 @@ void entry (unsigned long magic, unsigned long addr) {
 
 	// Clear the screen for use
 	clear_screen();
-
-	/* TESTS */
-	//Test RTC driver
-	//rtc_test();
-
-	// File system testing
-	// test_fs();
-    
-    //dir_read testing
-    //test_dir_read(); 
 
 	/* Execute the first program (`shell') ... */
 	execute((uint8_t*) "shell");

@@ -29,6 +29,16 @@ void clear(void) {
 }
 
 /**
+ * method used to fix the attribute bit for multiple terminals
+ */
+void fix_attrs(void) {
+    int32_t i;
+    for(i = 0; i < NUM_ROWS * NUM_COLS; i++) {
+        *(uint8_t *)(VIDEO + (i << 1) + 1) = ATTRIB;
+    }
+}
+
+/**
  * Draw A cursor block at position (non functioning)
  * @param x     x location to draw at
  * @param y     y location to draw at
