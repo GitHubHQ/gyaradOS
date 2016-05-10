@@ -149,6 +149,13 @@ int32_t execute (const uint8_t * command) {
     // get the file name to execute
     uint8_t * f_name = strtok(command);
 
+    // clear screen if clear is typed
+    if (0 == strncmp((int8_t*) f_name, (int8_t*) "clear", strlen((int8_t *) "clear"))) {
+        clear_screen();
+        restore_flags(flags);
+        return 0;
+    }
+
     // Grab the first 32 bytes of the file to see if it is runnable
     // and find where it starts
     file_array exec_read;
@@ -254,7 +261,6 @@ int32_t execute (const uint8_t * command) {
     jmp_usr_exec(entrypoint);
 
     asm volatile("EXECUTE_EXIT:");
-
     return g_status;
 }
 
@@ -484,7 +490,6 @@ uint8_t get_next_running_term_proc() {
             return TERM_0;
             break;
         default:
-            printf("rip");
             return -1;
             break;
     }

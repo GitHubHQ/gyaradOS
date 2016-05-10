@@ -126,29 +126,25 @@
 #define ASCII_NULL_CHAR       0x00
 #define ASCII_PLACEHOLDER     0xFE
 
+// system calls
 int32_t terminal_open (const uint8_t * filename);
 int32_t terminal_close (int32_t fd);
 int32_t terminal_write (int32_t fd, const uint8_t * buf, int32_t nbytes);
 int32_t terminal_read (int32_t fd, uint8_t * buf, int32_t nbytes);
 
+// key handler methods
 void reset_term();
 uint32_t add_char_to_buffer(uint8_t new_char, uint8_t term);
 void handle_enter();
 void handle_backspace();
 void handle_keypress(void);
-uint8_t get_active_terminal(void);
 
+// getters and setters for the active terminal stuff
 uint8_t get_active_terminal(void);
 void set_active_terminal(uint8_t term);
 uint8_t get_second_term_start();
 void set_second_term_start();
 void set_third_term_start();
 uint8_t get_third_term_start();
-
-/* Tester functions */
-void test_open(void);
-void test_close(void);
-void test_write(void);
-void test_read(void);
 
 #endif  /* _KEYBOARD_H */

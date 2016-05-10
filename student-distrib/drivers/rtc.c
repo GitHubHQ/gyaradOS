@@ -17,25 +17,22 @@ int32_t rtc_set_frequency(int32_t frequency) {
 	int32_t rate;
 
 	// Error checking
-	if (frequency < 2 || frequency > 1024)
-	{
+	if (frequency < 2 || frequency > 1024) {
 		return -1;
 	}
 
 	// Check if power of 2 (malloc.c implementation)
-	if(!((frequency != 0) && !(frequency & (frequency - 1)))) {
+	if (!((frequency != 0) && !(frequency & (frequency - 1)))) {
 		return -1;
 	}
 
 	// Be nice to the user, round up for down for them if they don't give a power of 2
 	// NOTE: This is not used if a power of 2 check is enabled
-	if( ((int)((int)(rateVal * 10) % 10)) > 5) {
+	if (((int)((int)(rateVal * 10) % 10)) > 5) {
 		rate = ceil(rateVal);
 	} else {
 		rate = floor(rateVal);
 	}
-
-
 
 	// Get the actual divider
 	rate = 16 - rate;
@@ -69,7 +66,7 @@ void rtc_init(int mode) {
 
 	// Disable interrupts
 	cli_and_save(flags);
-	
+
 	init_mode = mode;
 	// Select register B
 	outb(RTC_NMI_INIT_VAL, RTC_REG_NUM_PORT);
@@ -103,14 +100,14 @@ void rtc_special_eoi() {
  * Handle a rtc interrupt based on how the RTC was initalized
  */
 void rtc_handle_interrupt(void) {
-    unsigned long flags;
+	unsigned long flags;
 
-    // Disable interrupts
-    cli_and_save(flags);
-    
+	// Disable interrupts
+	cli_and_save(flags);
+
 	intr_occ = 1;
 	// Print based on mode
-	if(init_mode == RTC_SILENT) {
+	if (init_mode == RTC_SILENT) {
 		/* Do nothing */
 	} else if (init_mode == RTC_VERBOSE) {
 		printf("RTC Interrupt!\n");
@@ -120,9 +117,9 @@ void rtc_handle_interrupt(void) {
 	// Send PIC EOI
 	send_eoi(IRQ_RTC);
 	// Send RTC EOI
-    rtc_special_eoi();
-    // Restore flags
-    restore_flags(flags);
+	rtc_special_eoi();
+	// Restore flags
+	restore_flags(flags);
 }
 
 /**
@@ -152,7 +149,7 @@ int32_t rtc_close(void) {
  * @return        0 on interrupt
  */
 int32_t rtc_read(int32_t fd, uint8_t* buf, int32_t nbytes) {
-	while(!intr_occ) {
+	while (!intr_occ) {
 		/* Do nothing */
 	}
 
@@ -172,93 +169,11 @@ int32_t rtc_write(int32_t fd, const int32_t* buf, int32_t nbytes) {
 	if (nbytes != 4) {
 		return -1;
 	}
-	if (buf == NULL)
-	{
+
+	if (buf == NULL) {
 		return -1;
 	}
+	
 	int32_t frequency = *buf;
 	return rtc_set_frequency(frequency);
-}
-
-/**
- * Tets the RTC functions
- */
-void rtc_test(void) {
-	// RTC Testing
-	int freq = 4;
-	int i;
-	if(rtc_write(NULL, &freq, 4)){
-		printf("Fail! Attempted to set frequency to %d !", freq);
-	} else {
-		printf("Success! Freq set to %d. Reading...\n", freq);
-	}
-	for(i = 0; i < 15; i++){
-		if(!rtc_read(NULL, NULL, NULL)) {
-			printf("Interrupted by RTC!\n");
-		}
-	}
-
-	for(i = 0; i < 1000; i++){
-		int j;
-			for(j = 0; j < 500000; j++){
-		/* Spin for a second so you can read output */
-		}
-	}
-
-	clear_screen();
-	freq = 2;
-	if(rtc_write(NULL, &freq, 4)){
-		printf("Fail! Attempted to set frequency to %d !", freq);
-	} else {
-		printf("Success! Freq set to %d. Reading...\n", freq);
-	}
-	for(i = 0; i < 15; i++){
-		if(!rtc_read(NULL, NULL, NULL)) {
-			printf("Interrupted by RTC!\n");
-		}
-	}
-
-	for(i = 0; i < 1000; i++){
-		int j;
-			for(j = 0; j < 500000; j++){
-		/* Spin for a second so you can read output */
-		}
-	}
-
-	clear_screen();
-	freq = 7;
-	if(rtc_write(NULL, &freq, 4)){
-		printf("Fail! Attempted to set frequency to %d !", freq);
-	} else {
-		printf("Success! Freq set to %d. Reading...\n", freq);
-	}
-
-	for(i = 0; i < 1000; i++){
-		int j;
-			for(j = 0; j < 500000; j++){
-		/* Spin for a second so you can read output */
-		}
-	}
-
-	clear_screen();
-	freq = 512;
-	if(rtc_write(NULL, &freq, 4)){
-		printf("Fail! Attempted to set frequency to %d !", freq);
-	} else {
-		printf("Success! Freq set to %d. Reading...\n", freq);
-	}
-	for(i = 0; i < 15; i++){
-		if(!rtc_read(NULL, NULL, NULL)) {
-			printf("Interrupted by RTC!\n");
-		}
-	}
-
-	for(i = 0; i < 1000; i++){
-		int j;
-			for(j = 0; j < 500000; j++){
-		/* Spin for a second so you can read output */
-		}
-	}
-
-	clear_screen();
 }
