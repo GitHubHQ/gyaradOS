@@ -6,6 +6,7 @@
 #include "drivers/pit.h"
 #include "drivers/rtc.h"
 #include "drivers/speaker.h"
+#include "drivers/mouse.h"
 #include "libs/lib.h"
 #include "multiboot.h"
 #include "x86_desc.h"
@@ -181,11 +182,15 @@ void entry (unsigned long magic, unsigned long addr) {
 	enable_irq(IRQ_KEYBOARD_CTRL);
 	printf("[ OK ]\n");
 
+	printf("Enabling mouse interrupts     ... ");
+	enable_irq(IRQ_MOUSE_PS2);
+	printf("[ OK ]\n");
+
 	printf("Enabling RTC interrupts       ... ");
 	enable_irq(IRQ_RTC);
 	printf("[ OK ]\n");
 
-	printf("Enabling PIT interrupts  ... ");
+	printf("Enabling PIT interrupts       ... ");
 	enable_irq(IRQ_PIT);
 	printf("[ OK ]\n");
 
@@ -200,6 +205,9 @@ void entry (unsigned long magic, unsigned long addr) {
 
 	/* Enable paging */
 	init_paging();
+
+	/* Enable mouse */
+	mouse_init();
 
 	/* Initialize filesystem */
 	fs_init(fs_start);
