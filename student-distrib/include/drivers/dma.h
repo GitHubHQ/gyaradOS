@@ -27,6 +27,8 @@
 #define DMA_CHAN_6	0x89
 #define DMA_CHAN_7	0x8A
 
+#define DMA_CHUNK	(32*1024)
+
 
 uint32_t init_dma(uint8_t channel, uint32_t addr, uint32_t size, int8_t mode);
 void set_dma_rate(uint32_t d_data, uint32_t rate);
