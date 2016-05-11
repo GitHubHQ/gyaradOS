@@ -3,6 +3,7 @@
  */
 
 #include <drivers/i8259.h>
+#include <drivers/mouse.h>
 #include <drivers/pit.h>
 #include <drivers/rtc.h>
 #include <drivers/speaker.h>
@@ -181,16 +182,20 @@ void entry (unsigned long magic, unsigned long addr) {
 	enable_irq(IRQ_KEYBOARD_CTRL);
 	printf("[ OK ]\n");
 
+	printf("Enabling mouse interrupts     ... ");
+	enable_irq(IRQ_MOUSE_PS2);
+	printf("[ OK ]\n");
+
 	printf("Enabling RTC interrupts       ... ");
 	enable_irq(IRQ_RTC);
 	printf("[ OK ]\n");
 
-	printf("Enabling PIT interrupts  ... ");
+	printf("Enabling PIT interrupts       ... ");
 	enable_irq(IRQ_PIT);
 	printf("[ OK ]\n");
 
 	/* Display the splash screen */
-	splash_screen();
+	// splash_screen();
 
 	/* Enable interrupts */
 	/* Do not enable the following until after you have set up your
@@ -200,6 +205,9 @@ void entry (unsigned long magic, unsigned long addr) {
 
 	/* Enable paging */
 	init_paging();
+
+	/* Enable mouse */
+	mouse_init();
 
 	/* Initialize filesystem */
 	fs_init(fs_start);

@@ -2,8 +2,10 @@
 
 // Current mouse position
 // Initalized to (0,0)
-uint32_t mouse_x;
-uint32_t mouse_y;
+int32_t mouse_x;
+int32_t mouse_y;
+
+uint8_t prev_char = ' ';
 
 // Set any flags related to mouse
 // 	1 - Mouse read successfully
@@ -33,8 +35,8 @@ uint8_t mouse_ack() {
  */
 void mouse_init() {
 	// Reset mouse coord to (0,0)
-	mouse_x = 0;
-	mouse_y = 0;
+	mouse_x = 40;
+	mouse_y = 12;
 
 	uint8_t currStatus = inb(MOUSE_DATA_PORT);
 	currStatus |= 0x2;
@@ -50,7 +52,6 @@ void mouse_init() {
 
 	outb(MOUSE_CMND_BIT, MOUSE_COMM_PORT);
 	outb(MOUSE_ENAB_BIT, MOUSE_DATA_PORT);
-	//printf("Before check X, Y: %d, %d\n", mouse_x, mouse_y);
 }
 
 /**
@@ -66,58 +67,43 @@ void mouse_handle_interrupt() {
 		// Check for overflow (don't attempt to handle it)
 		if (!(mouse_byte_1 & MOUSE_YOF_BITM) && !(mouse_byte_1 & MOUSE_XOF_BITM)) {
 			// Grab the other parts of the mouse packet
-			uint8_t mouse_byte_2 = inb(MOUSE_DATA_PORT);
-			uint8_t mouse_byte_3 = inb(MOUSE_DATA_PORT);
-			// Quick and dirty sign extension
-			int32_t deltaX = (int8_t)mouse_byte_2;
-			int32_t deltaY = (int8_t)mouse_byte_3;
+			int32_t mouse_byte_2 = inb(MOUSE_DATA_PORT);
+			int32_t mouse_byte_3 = inb(MOUSE_DATA_PORT);
 
-			// Since we sign extended to 32 bits, we should also do this if
-			// negative to retain signedness
+			//Since we sign extended to 32 bits, we should also do this if
+			//negative to retain signedness
 			if (mouse_byte_1 & MOUSE_XS_BITM) {
-				deltaX |= MOUSE_SGN_BITM;
+				mouse_byte_2 |= MOUSE_SGN_BITM;
 			}
 			if (mouse_byte_1 & MOUSE_YS_BITM) {
-				deltaY |= MOUSE_SGN_BITM;
+				mouse_byte_3 |= MOUSE_SGN_BITM;
 			}
 
-			//deltaX = deltaX%3;
-			//deltaY = deltaY%2;
-
-			// Actually move the mouse now:
-			// This draw ensures that if the movement was minimal (0)
-			// the mouse block is still drawn
-			//draw_full_block(mouse_x, mouse_y, 0x00);
+			// Restore Previous Character
+			draw_full_block(mouse_x, mouse_y, prev_char);
 
 			// Change values
-			mouse_x += deltaX;
-
-			if(mouse_byte_1 && MOUSE_YS_BITM){
-				mouse_y += deltaY;
-			} else {
-				mouse_y -= deltaY;
-			}
-
-			//printf("Before check X, Y: %d, %d\n", mouse_x, mouse_y);
+			mouse_x += (mouse_byte_2/4);
 
 			// Check for bounds
 			if(mouse_x < 0) {
 				mouse_x = 0;
-			}
-			if(mouse_x > 79) {
+			} else if(mouse_x > 79) {
 				mouse_x = 79;
 			}
+
+			mouse_y -= (mouse_byte_3/8);
+
 			if(mouse_y < 0) {
 				mouse_y = 0;
-			}
-			if(mouse_y > 24) {
+			} else if(mouse_y > 24) {
 				mouse_y = 24;
 			}
 
-			//printf("After check X, Y: %d, %d\n", mouse_x, mouse_y);
+			prev_char = get_full_block(mouse_x, mouse_y);
 
 			// New position is set, redraw the cursor
-			//draw_full_block(mouse_x, mouse_y, 0x00);
+			draw_full_block(mouse_x, mouse_y, 219);
 		}
 	}
 	send_eoi(IRQ_MOUSE_PS2);

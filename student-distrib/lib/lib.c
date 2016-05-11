@@ -43,10 +43,18 @@ void fix_attrs(void) {
  * @param x     x location to draw at
  * @param y     y location to draw at
  * @param color color of the cursor
+ *
+ * NOTE: Code Page 737
  */
-void draw_full_block(int32_t x, int32_t y, int8_t color) {
+void draw_full_block(int32_t x, int32_t y, uint8_t p_char) {
 	int32_t offset = y*NUM_COLS + x;
-  	*(uint8_t *)(video_mem + (offset<<1) + 1) = 0x01;
+	*(uint8_t *)(video_mem + (offset<<1)) = p_char;
+  	*(uint8_t *)(video_mem + (offset<<1) + 1) = ATTRIB;
+}
+
+uint8_t get_full_block(int32_t x, int32_t y) {
+	int32_t offset = y * NUM_COLS + x;
+	return *(uint8_t *)(video_mem + (offset<<1));
 }
 
 /* Standard printf().
