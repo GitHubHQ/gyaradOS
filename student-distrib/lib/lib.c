@@ -9,6 +9,7 @@ static int screen_y[NUM_TERMINALS] = {0, 0, 0};
 static int active_terminal = 0;
 
 static char* video_mem = (char *)VIDEO;
+int text_color = 0x04;
 
 uint8_t * args;
 uint32_t index = 0;
@@ -24,17 +25,7 @@ void clear(void) {
     int32_t i;
     for(i=0; i < NUM_ROWS * NUM_COLS; i++) {
         *(uint8_t *)(video_mem + (i << 1)) = ' ';
-        *(uint8_t *)(video_mem + (i << 1) + 1) = ATTRIB;
-    }
-}
-
-/**
- * method used to fix the attribute bit for multiple terminals
- */
-void fix_attrs(void) {
-    int32_t i;
-    for(i = 0; i < NUM_ROWS * NUM_COLS; i++) {
-        *(uint8_t *)(VIDEO + (i << 1) + 1) = ATTRIB;
+        *(uint8_t *)(video_mem + (i << 1) + 1) = text_color;
     }
 }
 
@@ -49,7 +40,7 @@ void fix_attrs(void) {
 void draw_full_block(int32_t x, int32_t y, uint8_t p_char) {
 	int32_t offset = y*NUM_COLS + x;
 	*(uint8_t *)(video_mem + (offset<<1)) = p_char;
-  	*(uint8_t *)(video_mem + (offset<<1) + 1) = ATTRIB;
+  	*(uint8_t *)(video_mem + (offset<<1) + 1) = text_color;
 }
 
 uint8_t get_full_block(int32_t x, int32_t y) {
@@ -215,7 +206,7 @@ void putc(uint8_t c) {
         new_line();
     } else {
         *(uint8_t *)(video_mem + ((NUM_COLS*screen_y[active_terminal] + screen_x[active_terminal]) << 1)) = c;
-        *(uint8_t *)(video_mem + ((NUM_COLS*screen_y[active_terminal] + screen_x[active_terminal]) << 1) + 1) = ATTRIB;
+        *(uint8_t *)(video_mem + ((NUM_COLS*screen_y[active_terminal] + screen_x[active_terminal]) << 1) + 1) = text_color;
         screen_x[active_terminal]++;
 
         if(screen_x[active_terminal] == NUM_COLS) {
@@ -252,14 +243,14 @@ void new_line() {
 	    for(i = 0; i < (NUM_ROWS - 1); i++) {
 	    	for(j = 0; j < NUM_COLS; j++) {
 	    		*(uint8_t *)(video_mem + ((NUM_COLS * i + j) << 1)) = *(uint8_t *)(video_mem + (((NUM_COLS * (i + 1)) + j) << 1));
-	    		*(uint8_t *)(video_mem + ((NUM_COLS * i + j) << 1) + 1) = ATTRIB;
+	    		*(uint8_t *)(video_mem + ((NUM_COLS * i + j) << 1) + 1) = text_color;
 	    	}
 	    }
 
 	    for(i = (NUM_ROWS - 1); i < NUM_ROWS; i++) {
 	    	for(j = 0; j < NUM_COLS; j++) {
 			    *(uint8_t *)(video_mem + ((NUM_COLS * i + j) << 1)) = ' ';
-			    *(uint8_t *)(video_mem + ((NUM_COLS * i + j) << 1) + 1) = ATTRIB;
+			    *(uint8_t *)(video_mem + ((NUM_COLS * i + j) << 1) + 1) = text_color;
 	    	}
 	    }
 
@@ -284,7 +275,7 @@ void del_last_char() {
 	}
 
     *(uint8_t *)(video_mem + ((NUM_COLS*screen_y[active_terminal] + screen_x[active_terminal]) << 1)) = ' ';
-    *(uint8_t *)(video_mem + ((NUM_COLS*screen_y[active_terminal] + screen_x[active_terminal]) << 1) + 1) = ATTRIB;
+    *(uint8_t *)(video_mem + ((NUM_COLS*screen_y[active_terminal] + screen_x[active_terminal]) << 1) + 1) = text_color;
 
     update_cursor(screen_y[active_terminal], screen_x[active_terminal]);
 }
@@ -293,7 +284,7 @@ void clear_screen (void) {
     int32_t i;
     for(i=0; i<NUM_ROWS*NUM_COLS; i++) {
         *(uint8_t *)(video_mem + (i << 1)) = ' ';
-        *(uint8_t *)(video_mem + (i << 1) + 1) = ATTRIB;
+        *(uint8_t *)(video_mem + (i << 1) + 1) = text_color;
     }
 
     screen_x[active_terminal] = 0;
@@ -354,10 +345,34 @@ uint8_t* strtok(const uint8_t* input) {
     return output;
 }
 
+/**
+ * method used to fix the attribute bit for multiple terminals
+ */
+void set_color(int color) {
+    int32_t i;
+    for(i = 0; i < NUM_ROWS * NUM_COLS; i++) {
+        *(uint8_t *)(video_mem + (i << 1) + 1) = color;
+    }
+}
+
 void update_screen(uint8_t dest, uint8_t src) {
 	memcpy(term_vid_mem[src], video_mem, _4KB);
 	memcpy(video_mem, term_vid_mem[dest], _4KB);
-	fix_attrs();
+	
+	switch(dest) {
+		case 0:
+			text_color = RED;
+			set_color(RED);
+			break;
+		case 1:
+			text_color = GREEN;
+			set_color(GREEN);
+			break;
+		case 2:
+			text_color = YELLOW;
+			set_color(YELLOW);
+			break;
+	}
 	
 	update_cursor(screen_y[dest], screen_x[dest]);
 	return;

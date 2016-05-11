@@ -351,7 +351,7 @@ void handle_keypress() {
                     alt_l_on = 1;
                     break;
                 case KEY_MAKE_F1:
-                    if((alt_l_on || alt_r_on) && active_terminal != 0) {
+                    // if((alt_l_on || alt_r_on) && active_terminal != 0) {
                         // switch to the video memory of the first terminal
                         update_screen(0, active_terminal);
                         prev_terminal = active_terminal;
@@ -362,10 +362,10 @@ void handle_keypress() {
                         restore_flags(flags);
 
                         context_switch(prev_terminal, active_terminal);
-                    }
+                    // }
                     break;
                 case KEY_MAKE_F2:
-                    if((alt_l_on || alt_r_on) && active_terminal != 1) {
+                    // if((alt_l_on || alt_r_on) && active_terminal != 1) {
                         // switch to the video memory of the second terminal
                         update_screen(1, active_terminal);
                         prev_terminal = active_terminal;
@@ -376,10 +376,10 @@ void handle_keypress() {
                         restore_flags(flags);
 
                         context_switch(prev_terminal, active_terminal);
-                    }
+                    // }
                     break;
                 case KEY_MAKE_F3:
-                    if((alt_l_on || alt_r_on) && active_terminal != 2) {
+                    // if((alt_l_on || alt_r_on) && active_terminal != 2) {
                         // switch to the video memory of the third terminal
                         update_screen(2, active_terminal);
                         prev_terminal = active_terminal;
@@ -390,7 +390,7 @@ void handle_keypress() {
                         restore_flags(flags);
 
                         context_switch(prev_terminal, active_terminal);
-                    }
+                    // }
                     break;
                 default:
                     break;

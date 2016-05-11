@@ -14,7 +14,6 @@
 #define VIDEO 0xB8000
 #define NUM_COLS 80
 #define NUM_ROWS 25
-#define ATTRIB 0x04
 
 /* The VGA cursor ports/commands */
 #define FB_POSITION_MASK        0xFF
@@ -34,7 +33,9 @@
 
 #define SCHED_ENABLED           0
 
-//uint8_t term_vid_mem[NUM_TERMINALS][NUM_COLS * NUM_ROWS * VID_MEM_ATTR];
+#define RED                  0x04
+#define GREEN                0x0A
+#define YELLOW               0x0E
 
 int32_t printf(int8_t *format, ...);
 void putc(uint8_t c);
