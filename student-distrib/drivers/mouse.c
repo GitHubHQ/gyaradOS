@@ -83,7 +83,7 @@ void mouse_handle_interrupt() {
 			draw_full_block(mouse_x, mouse_y, prev_char);
 
 			// Change values
-			mouse_x += (mouse_byte_2/4);
+			mouse_x += (mouse_byte_2/6);
 
 			// Check for bounds
 			if(mouse_x < 0) {
@@ -92,7 +92,7 @@ void mouse_handle_interrupt() {
 				mouse_x = 79;
 			}
 
-			mouse_y -= (mouse_byte_3/8);
+			mouse_y -= (mouse_byte_3/6);
 
 			if(mouse_y < 0) {
 				mouse_y = 0;
