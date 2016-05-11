@@ -1,1 +1,9 @@
-See the INSTALL file in the student-distrib/ directory.
+ECE391 MP3 - Operating System Project
+=====================================
+
+To get this skeleton OS running on QEMU, you must do the following steps:
+
+"make dep"
+"sudo make"
+
+to build the OS (it is called bootimg) and the QEMU disk image (mp3.img)
