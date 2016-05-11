@@ -11,6 +11,9 @@ static int active_terminal = 0;
 static char* video_mem = (char *)VIDEO;
 int text_color = 0x04;
 
+unsigned short lfsr = 0xACE1u;
+unsigned bit;
+
 uint8_t * args;
 uint32_t index = 0;
 char* term_vid_mem[NUM_TERMINALS] = {(char*)VIDEO_PHYS_ADDR0, (char*)VIDEO_PHYS_ADDR1, (char*)VIDEO_PHYS_ADDR2};
@@ -46,6 +49,11 @@ void draw_full_block(int32_t x, int32_t y, uint8_t p_char) {
 uint8_t get_full_block(int32_t x, int32_t y) {
 	int32_t offset = y * NUM_COLS + x;
 	return *(uint8_t *)(video_mem + (offset<<1));
+}
+
+unsigned rand() {
+	bit  = ((lfsr >> 0) ^ (lfsr >> 2) ^ (lfsr >> 3) ^ (lfsr >> 5) ) & 1;
+	return lfsr =  (lfsr >> 1) | (bit << 15);
 }
 
 /* Standard printf().

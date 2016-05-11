@@ -46,6 +46,7 @@ uint32_t strlen(const int8_t* s);
 void clear(void);
 void draw_full_block(int32_t x, int32_t y, uint8_t p_char);
 uint8_t get_full_block(int32_t x, int32_t y);
+unsigned rand();
 
 void* memset(void* s, int32_t c, uint32_t n);
 void* memset_word(void* s, int32_t c, uint32_t n);
