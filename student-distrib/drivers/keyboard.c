@@ -161,6 +161,23 @@ int32_t terminal_write (int32_t fd, const uint8_t * buf, int32_t nbytes) {
     return num_printed;
 }
 
+void reset_curr_command() {
+    while(num_chars_in_buf[active_terminal] > 0) {
+        del_last_char();
+        num_chars_in_buf[active_terminal]--;
+        keyboard_buf[active_terminal][num_chars_in_buf[active_terminal]] = NULL;
+    }
+}
+
+void fill_curr_command(char * command) {
+    int i = 0;
+    int length = strlen(command);
+
+    for(i = 0; i < length; i++) {
+        add_char_to_buffer(command[i], active_terminal);
+    }
+}
+
 /**
  * [reset_term reinitializes the current active terminal]
  * Inputs: None
@@ -270,6 +287,17 @@ void kbd_led_handling(int caps, int num, int scroll) {
     }
 
     outb(ledstatus, KEYBOARD_D_PORT);
+}
+
+void handle_tab() {
+    char * complete_name = autocomplete_command((char *) keyboard_buf[active_terminal]);
+
+    if(complete_name == (char *) -1) {
+        return;
+    }
+
+    reset_curr_command();
+    fill_curr_command(complete_name);
 }
 
 /**
@@ -391,6 +419,9 @@ void handle_keypress() {
 
                         context_switch(prev_terminal, active_terminal);
                     // }
+                    break;
+                case KEY_MAKE_TAB:
+                    handle_tab();
                     break;
                 default:
                     break;

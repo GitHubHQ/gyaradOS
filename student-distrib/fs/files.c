@@ -192,6 +192,19 @@ int32_t copy_file_to_addr(uint8_t* fname, uint32_t addr) {
     return 0;
 }
 
+char * autocomplete_command(char * curr_text) {
+    int i = 0;
+    int str_length = strlen(curr_text);
+
+    for(i = 0; i < b.n_dentries; i++) {
+        if(0 == strncmp((int8_t *) dentries[i].file_name, (int8_t *) curr_text, str_length)) {
+            return dentries[i].file_name;
+        }
+    }
+
+    return (char *) -1;
+}
+
 /**
  * Returns the inodes from given inode_num
  * @param  inode_num inode number

@@ -24,6 +24,7 @@ int32_t fs_write(int32_t fd, const uint8_t * buf, int32_t nbytes);
 int32_t fs_read(file_array* fd, uint8_t * buf, int32_t nbytes);
 int32_t fs_open(const uint8_t* filename);
 int32_t fs_close(void);
+char * autocomplete_command(char * curr_text);
 
 /* directory functions */
 int32_t dir_write(file_array* fd, const int8_t* buf, int32_t nbytes);
